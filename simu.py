@@ -25,19 +25,19 @@ ra = 0
 is_program_done = False
 i = 0
 
-#Removing all comments and unnecessary white spaces
-while i<len(lines):
+# Removing all comments and unnecessary white spaces
+while i < len(lines):
     lines[i] = lines[i].strip().lower()
     # print(i, line)
 
-    if re.findall(r"# *", lines[i]) or (re.findall(r"^\n", lines[i]) and len(lines[i]=='\n'.length())):
+    if re.findall(r"# *", lines[i]) or (re.findall(r"^\n", lines[i]) and len(lines[i] == '\n'.length())):
         # print("it is a comment")  # comment can be added in middle also
         # print (lines[i])
         lines.remove(lines[i])
-        i-=1
-    i+=1
+        i -= 1
+    i += 1
 
-i=0
+i = 0
 while i < len(lines):
 
     # .data
@@ -48,14 +48,26 @@ while i < len(lines):
             lines[i] = lines[i].strip().lower()
             i += 1
             print(lines[i])
+
             if re.findall(r"^\.text", lines[i]):
                 i -= 1;
                 break
-            line = lines[i][6:]
-            line = re.sub(r',','',line)
-            line = line.split(sep=' ')
-            if len(line)>0:
-                RAM.append(list(map(int,line)))
-                print(RAM)
-            ram_iter +=1
+
+            if re.findall(r"^\.word", lines[i]):
+                line = lines[i][6:]
+                line = re.sub(r',', '', line)
+                line = line.split(sep=' ')
+                if len(line) > 0:
+                    RAM.append(list(map(int, line)))
+                    print(RAM)
+                ram_iter += 1
+
+            elif re.findall(r"^\.asciiz", lines[i]):
+                line = lines[i][9:len(lines[i])-1]
+                # line = re.sub(r',', '', line)
+                # line = line.split(sep=' ')
+                if len(line) > 0:
+                    RAM.append(line)
+                    print(RAM)
+                ram_iter += 1
     i += 1
