@@ -32,9 +32,12 @@ while i < len(lines):
 
     if re.findall(r"# *", lines[i]) or (re.findall(r"^\n", lines[i]) and len(lines[i] == '\n'.length())):
         # print("it is a comment")  # comment can be added in middle also
-        # print (lines[i])
         lines.remove(lines[i])
         i -= 1
+    if len(lines[i]) == 0:
+        lines.remove(lines[i])
+        i -= 1
+
     i += 1
 
 i = 0
@@ -63,9 +66,7 @@ while i < len(lines):
                 ram_iter += 1
 
             elif re.findall(r"^\.asciiz", lines[i]):
-                line = lines[i][9:len(lines[i])-1]
-                # line = re.sub(r',', '', line)
-                # line = line.split(sep=' ')
+                line = lines[i][9:len(lines[i]) - 1]
                 if len(line) > 0:
                     RAM.append(line)
                     print(RAM)
