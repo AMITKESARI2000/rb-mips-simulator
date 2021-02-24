@@ -5,7 +5,10 @@ lines = file.readlines()
 file.close()
 
 # Global Storages
-RAM = [];
+RAM = []
+ram_iter = 0
+ram_label = {}
+
 PC = 0
 
 r = [0]
@@ -22,15 +25,20 @@ ra = 0
 is_program_done = False
 i = 0
 
-while i < len(lines):
+#Removing all comments and unnecessary white spaces
+while i<len(lines):
     lines[i] = lines[i].strip().lower()
     # print(i, line)
 
-    # COMMENTS
-    if re.findall(r"# *", lines[i]):
-        print("it is a comment")  # comment can be added in middle also
-        i += 1
-        continue
+    if re.findall(r"# *", lines[i]) or (re.findall(r"^\n", lines[i]) and len(lines[i]=='\n'.length())):
+        # print("it is a comment")  # comment can be added in middle also
+        # print (lines[i])
+        lines.remove(lines[i])
+        i-=1
+    i+=1
+
+i=0
+while i < len(lines):
 
     # .data
     if re.search(r"^\.data", lines[i]):
@@ -43,4 +51,11 @@ while i < len(lines):
             if re.findall(r"^\.text", lines[i]):
                 i -= 1;
                 break
+            line = lines[i][6:]
+            line = re.sub(r',','',line)
+            line = line.split(sep=' ')
+            if len(line)>0:
+                RAM.append(list(map(int,line)))
+                print(RAM)
+            ram_iter +=1
     i += 1

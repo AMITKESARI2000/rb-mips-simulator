@@ -3,7 +3,7 @@
     .data
     .word 7
     .word 3
-
+    .word 3, 10, 22
     .text
     .globl main
 
@@ -26,4 +26,3 @@ main:
     #store contents of s1 into memory address 0x10010004]
 
     jr $ra
-
