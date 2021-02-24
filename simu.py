@@ -13,8 +13,9 @@ PC = 0
 
 REGISTERS = {'r': 0, 'at': 0, 'v0': 0, 'v1': 0, 'a0': 0, 'a1': 0, 'a2': 0, 'a3': 0,
              's0': 0, 's1': 0, 's2': 0, 's3': 0, 's4': 0, 's5': 0, 's6': 0, 's7': 0, 's8': 0,
-             't0': 0, 't1': 0, 't2': 0, 't3': 0, 't4': 0, 't5': 0, 't6': 0, 't7': 0, 't8': 0, 't9': 0}
-k = [0] * 2
+             't0': 0, 't1': 0, 't2': 0, 't3': 0, 't4': 0, 't5': 0, 't6': 0, 't7': 0, 't8': 0, 't9': 0,
+             'k0': 0, 'k1': 0}  # 29
+
 p = 0x10008000
 sp = 0x7ffff8bc
 ra = 0
@@ -88,6 +89,16 @@ def add_instr(instr_line):
     return PC + 1
 
 
+def sub_instr(instr_line):
+    instr_line = instr_line.split(",")
+    for l in range(len(instr_line)):
+        instr_line[l] = str(instr_line[l].strip()[1:])
+    print(instr_line)
+    REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) - int(REGISTERS[instr_line[2]])
+    print(REGISTERS)
+    return PC + 1
+
+
 # Finding the type of current instruction to be parsed
 def find_instr_type(line):
     instr_word = line.split(sep=" ", maxsplit=1)
@@ -96,8 +107,8 @@ def find_instr_type(line):
     add, sub, bne, beq, jump, lw, sw, lui, sll = 0, 1, 2, 3, 4, 5, 6, 7, 8
     if instr_word == 'add':
         return add_instr(instr_line)
-    # elif instr_word == 'sub':
-    #     return sub
+    elif instr_word == 'sub':
+        return sub_instr(instr_line)
     # elif instr_word == 'bne':
     #     return bne
     # elif instr_word == 'beq':
@@ -113,10 +124,11 @@ def find_instr_type(line):
     # elif instr_word == 'sll':
     #     return sll
     else:
-        print("Unvalid Instruction. Abort")
+        print("Invalid Instruction Set. Abort")
         return len(lines)
 
 
+# Find main label
 while PC < len(lines):
     if re.findall(r"^main:", lines[PC]):
         instr_label["main"] = PC
@@ -124,5 +136,6 @@ while PC < len(lines):
         break
     PC += 1
 
+# Process instructions
 while PC < len(lines):
     PC = find_instr_type(lines[PC])
