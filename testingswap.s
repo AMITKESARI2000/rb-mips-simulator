@@ -4,9 +4,9 @@
     .word 7
     .word 3
     .word 3, 10, 22
-    # line: .asciiz " \n and \n "
-    # Newline: .asciiz " groups of 0s \n and \n groups of 1s: "
-    # arr: .word 10, 60, 40, 70 , 20, 30, 90, 100, 0, 80, 50
+    line: .asciiz " \n and \n "
+    Newline: .asciiz " groups of 0s \n and \n groups of 1s: "
+    arr: .word 10, 60, 40, 70, 20, 30, 90, 100, 0, 80, 50
     .asciiz "jksxjsbxj"
     .text
     .globl main
