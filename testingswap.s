@@ -5,13 +5,14 @@
     .word 3
     .word 3, 10, 22
     line: .asciiz " \n and \n "
-    Newline: .asciiz " groups of 0s \n and \n groups of 1s: "
+    Newline: .asciiz " groups of 0s \t and \n groups of 1s: "
     arr: .word 10, 60, 40, 70, 20, 30, 90, 100, 0, 80, 50
-    .asciiz "jksxjsbxj"
+    .asciiz "hello world value: no"
     .text
     .globl main
 
 main:
+    add $s0 , $s1 , $s2
     lui $s0, 0x1001
   	#load upper part of register s0(16) with 0x1001  s0 = 0x10010000
 
