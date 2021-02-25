@@ -12,7 +12,7 @@ instr_label = {}
 PC = 0
 
 REGISTERS = {'r': 0, 'at': 0, 'v0': 0, 'v1': 0, 'a0': 0, 'a1': 0, 'a2': 0, 'a3': 0,
-             's0': 0, 's1': 0, 's2': 0, 's3': 0, 's4': 0, 's5': 0, 's6': 0, 's7': 0, 's8': 0,
+             's0': 0, 's1': 1, 's2': 0, 's3': 0, 's4': 0, 's5': 0, 's6': 0, 's7': 0, 's8': 0,
              't0': 0, 't1': 0, 't2': 0, 't3': 0, 't4': 0, 't5': 0, 't6': 0, 't7': 0, 't8': 0, 't9': 0,
              'k0': 0, 'k1': 0}  # 29
 
@@ -98,6 +98,27 @@ def sub_instr(instr_line):
     print(REGISTERS)
     return PC + 1
 
+def lw_instr(instr_line):
+    instr_line = instr_line.split(",")
+    instr_line[0] = str(instr_line[0].strip()[1:])
+    adv = (int(instr_line[1].strip()[0])//4) + (int(instr_line[1].strip()[4:5]))
+    instr_line[1] = str(instr_line[1].strip()[3:4]) + str(adv)
+    print(instr_line)
+    REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]])    #To change register into memory
+    print(REGISTERS)
+    return PC + 1
+
+
+def sw_instr(instr_line):
+    instr_line = instr_line.split(",")
+    instr_line[0] = str(instr_line[0].strip()[1:])
+    adv = (int(instr_line[1].strip()[0])//4) + (int(instr_line[1].strip()[4:5]))
+    instr_line[1] = str(instr_line[1].strip()[3:4]) + str(adv)
+    print(instr_line)
+    REGISTERS[instr_line[1]] = int(REGISTERS[instr_line[0]])    #To change register into memory
+    print(REGISTERS)
+    return PC + 1
+
 
 # Finding the type of current instruction to be parsed
 def find_instr_type(line):
@@ -115,10 +136,10 @@ def find_instr_type(line):
     #     return beq
     # elif instr_word == 'jump':
     #     return jump
-    # elif instr_word == 'lw':
-    #     return lw
-    # elif instr_word == 'sw':
-    #     return sw
+    elif instr_word == 'lw':
+         return lw_instr(instr_line)
+    elif instr_word == 'sw':
+         return sw_instr(instr_line)
     # elif instr_word == 'lui':
     #     return lui
     # elif instr_word == 'sll':

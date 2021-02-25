@@ -13,7 +13,7 @@
 
 main:
     add $s0 , $s1 , $s2
-    lui $s0, 0x1001
+    #lui $s0, 0x1001
   	#load upper part of register s0(16) with 0x1001  s0 = 0x10010000
 
     lw $s1, 0($s0)
