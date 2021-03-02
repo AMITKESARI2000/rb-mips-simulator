@@ -163,6 +163,16 @@ def lui_instr(instr_line):
     return PC + 1
 
 
+def addi_instr(instr_line):
+    instr_line = instr_line.split(",")
+    for l in range(len(instr_line) - 1):
+        instr_line[l] = str(instr_line[l].strip()[1:])
+
+    REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) + int(instr_line[2].strip())
+
+    return PC + 1
+
+
 def sll_instr(instr_line):
     instr_line = instr_line.split(",")
     for l in range(len(instr_line) - 1):
@@ -201,6 +211,8 @@ def find_instr_type(line):
         return sw_instr(instr_line)
     elif instr_word == 'lui':
         return lui_instr(instr_line)
+    elif instr_word == 'addi':
+        return addi_instr(instr_line)
     elif instr_word == 'sll':
         return sll_instr(instr_line)
     elif instr_word == 'jr':
