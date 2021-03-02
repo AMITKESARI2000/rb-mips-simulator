@@ -12,11 +12,14 @@
     .globl main
 
 main:
-    add $s0 , $s1 , $s2
-    #lui $s0, 0x1001
+    test: add $s0 , $s1 , $s2
+    #sll $s0, $s0, 2
+    bne $s0, $s2, test
+    lui $s0, 0x1001
   	#load upper part of register s0(16) with 0x1001  s0 = 0x10010000
 
     lw $s1, 0($s0)
+
     #load s1 with the contents of memory address 0x10010000 = 7,
   	#since we loaded the data there.
 
