@@ -1,10 +1,10 @@
 # rb_mips_simulator
 
-###Developers:
+### Developers:
 * Amit Kesari (CS19B003)
 * Anu Anand Annu (CS19B044)
 
-###Simulate MIPS Architecture instruction sets
+### Simulate MIPS Architecture instruction sets
 * The simulator supports the following MIPS instructions: 
   * add/sub
   * bne/beq
