@@ -12,9 +12,9 @@
     .globl main
 
 main:
-    test: add $s0 , $s1 , $s2
+    #test: add $s0 , $s1 , $s2
     #sll $s0, $s0, 2
-    bne $s0, $s2, test
+    #bne $s0, $s1, test
     lui $s0, 0x1001
   	#load upper part of register s0(16) with 0x1001  s0 = 0x10010000
 

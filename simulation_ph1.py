@@ -27,7 +27,7 @@ i = 0
 while i < len(lines):
     lines[i] = lines[i].strip().lower()
 
-    if re.findall(r"# *", lines[i]) or (re.findall(r"^\n", lines[i]) and len(lines[i] == '\n'.length())):
+    if re.findall(r"^# *", lines[i]) or (re.findall(r"^\n", lines[i]) and len(lines[i] == '\n'.length())):
         # print("it is a comment")  # comment can be added in middle also
         lines.remove(lines[i])
         i -= 1
@@ -79,6 +79,17 @@ while i < len(lines):
 print(RAM)
 PC = i
 
+# Removing all comments from inside instruction lines
+while i < len(lines):
+    pos = lines[i].find('#')
+    if pos >= 0:
+        j = pos
+        while lines[i][j - 1] == ' ':
+            j -= 1;
+        lines[i] = lines[i][: j]
+
+    i += 1
+
 
 def add_instr(instr_line):
     instr_line = instr_line.split(",")
@@ -123,9 +134,9 @@ def sw_instr(instr_line):
 
 def bne_instr(instr_line):
     instr_line = instr_line.split(",")
-    for l in range(len(instr_line)-1):
+    for l in range(len(instr_line) - 1):
         instr_line[l] = str(instr_line[l].strip()[1:])
-
+    instr_line[2] = instr_line[2][1:]
     if REGISTERS[instr_line[0]] == REGISTERS[instr_line[1]]:
         return PC + 1
 
@@ -134,9 +145,9 @@ def bne_instr(instr_line):
 
 def beq_instr(instr_line):
     instr_line = instr_line.split(",")
-    for l in range(len(instr_line)-1):
+    for l in range(len(instr_line) - 1):
         instr_line[l] = str(instr_line[l].strip()[1:])
-
+    instr_line[2] = instr_line[2][1:]
     if REGISTERS[instr_line[0]] != REGISTERS[instr_line[1]]:
         return PC + 1
 
@@ -173,7 +184,6 @@ def find_instr_type(line):
     instr_word = line.split(sep=" ", maxsplit=1)
     instr_line = instr_word[1]
     instr_word = instr_word[0]
-    add, sub, bne, beq, jump, lw, sw, lui, sll = 0, 1, 2, 3, 4, 5, 6, 7, 8
 
     if instr_word == 'add':
         return add_instr(instr_line)
@@ -194,7 +204,7 @@ def find_instr_type(line):
     elif instr_word == 'sll':
         return sll_instr(instr_line)
     elif instr_word == 'jr':
-        return len(lines)
+        return REGISTERS[ra]
     else:
         print("Invalid Instruction Set. Abort")
         return len(lines)
@@ -207,6 +217,7 @@ while PC < len(lines):
         PC += 1
         break
     PC += 1
+REGISTERS[ra] = len(lines)
 
 # Process instructions
 while PC < len(lines):
