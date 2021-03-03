@@ -1,6 +1,6 @@
 import re
 
-file = open("testingswap.asm", "r")
+file = open("testingloop.asm", "r")
 lines = file.readlines()
 file.close()
 
@@ -14,7 +14,7 @@ PC = 0
 REGISTERS = {'r': 0, 'at': 0, 'v0': 0, 'v1': 0, 'a0': 0, 'a1': 0, 'a2': 0, 'a3': 0,
              's0': 0, 's1': 1, 's2': 0, 's3': 0, 's4': 0, 's5': 0, 's6': 0, 's7': 0, 's8': 0,
              't0': 0, 't1': 0, 't2': 0, 't3': 0, 't4': 0, 't5': 0, 't6': 0, 't7': 0, 't8': 0, 't9': 0,
-             'k0': 0, 'k1': 0}  # 29
+             'k0': 0, 'k1': 0, 'zero': 0}  # 30
 
 p = 0x10008000
 sp = 0x7ffff8bc
@@ -122,6 +122,16 @@ def lw_instr(instr_line):
     return PC + 1
 
 
+def la_instr(instr_line):
+    instr_line = instr_line.split(",")
+    instr_line[0] = str(instr_line[0].strip()[1:])
+    instr_line[1] = str(instr_line[1].strip())
+
+    REGISTERS[instr_line[0]] = ram_label[instr_line[1]]  # To change register into memory
+
+    return PC + 1
+
+
 def sw_instr(instr_line):
     instr_line = instr_line.split(",")
     instr_line[0] = str(instr_line[0].strip()[1:])
@@ -173,12 +183,41 @@ def addi_instr(instr_line):
     return PC + 1
 
 
+def li_instr(instr_line):
+    instr_line = instr_line.split(",")
+    for l in range(len(instr_line) - 1):
+        instr_line[l] = str(instr_line[l].strip()[1:])
+    instr_line[1] = instr_line[1].strip()
+    REGISTERS[instr_line[0]] = int(instr_line[1])
+
+    return PC + 1
+
+
 def sll_instr(instr_line):
     instr_line = instr_line.split(",")
     for l in range(len(instr_line) - 1):
         instr_line[l] = str(instr_line[l].strip()[1:])
 
     REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) * pow(2, int(instr_line[2]))
+
+    return PC + 1
+
+
+def syscall_instr():
+    ltype = lines[PC - 2]
+    lprint = lines[PC - 1]
+
+    ltype = ltype.split(" ")
+    lprint = lprint.split(" ")
+
+    ltype[0] = ltype[1][1:-1]
+    ltype[1] = ltype[2].strip()
+
+    lprint[0] = lprint[1][1:-1]
+    lprint[1] = lprint[2].strip()
+
+    if int(ltype[1]) == 4:
+        print(RAM[ram_label[lprint[1]]])
 
     return PC + 1
 
@@ -192,8 +231,12 @@ def find_instr_type(line):
         instr_label[label] = PC
 
     instr_word = line.split(sep=" ", maxsplit=1)
-    instr_line = instr_word[1]
+    try:
+        instr_line = instr_word[1]
+    except:
+        pass
     instr_word = instr_word[0]
+
 
     if instr_word == 'add':
         return add_instr(instr_line)
@@ -217,6 +260,12 @@ def find_instr_type(line):
         return sll_instr(instr_line)
     elif instr_word == 'jr':
         return REGISTERS[ra]
+    elif instr_word == 'li':
+        return li_instr(instr_line)
+    elif instr_word == 'la':
+        return la_instr(instr_line)
+    elif instr_word == 'syscall':
+        return syscall_instr()
     else:
         print("Invalid Instruction Set. Abort")
         return len(lines)
