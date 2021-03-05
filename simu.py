@@ -58,6 +58,7 @@ while i < len(lines):
                 s = s[0]
                 ram_label[s] = ram_iter
 
+            # Process int values
             if re.findall(r"^\.word", lines[i]):
                 line = lines[i][6:]
                 # line = re.sub(r',', '', line)
@@ -67,9 +68,11 @@ while i < len(lines):
                     RAM.append(int(l))
                     ram_iter += 1
 
+            # Process strings
             elif re.findall(r"^\.asciiz", lines[i]):
                 line = lines[i][9:len(lines[i]) - 1]
                 line = re.sub(r"\\n", "", line)
+                line = re.sub(r"\\t", "    ", line)
                 RAM.append(line)
                 ram_iter += 1
     if re.findall(r"^\.globl", lines[i]):
@@ -77,10 +80,11 @@ while i < len(lines):
         break
     i += 1
 
-print(RAM)
+print("Initial Memory:\n", RAM)
 PC = i
+REGISTERS[ra] = len(lines)
 
-# Removing all comments from inside instruction lines
+# Removing all comments from instruction lines
 while i < len(lines):
     pos = lines[i].find('#')
     if pos >= 0:
@@ -92,6 +96,7 @@ while i < len(lines):
     i += 1
 
 
+# Define the functions for simulating
 def add_instr(instr_line):
     instr_line = instr_line.split(",")
     for l in range(len(instr_line)):
@@ -205,6 +210,17 @@ def sll_instr(instr_line):
     return PC + 1
 
 
+# slt $t4, $s3, $s4               #set $t4 = 1 if $s3 < $s4
+def slt_instr(instr_line):
+    instr_line = instr_line.split(",")
+    for l in range(len(instr_line)):
+        instr_line[l] = str(instr_line[l].strip()[1:])
+
+    REGISTERS[instr_line[0]] = int(int(REGISTERS[instr_line[1]]) < int(REGISTERS[instr_line[2]]))
+
+    return PC + 1
+
+
 def syscall_instr():
     ltype = lines[PC - 2]
     lprint = lines[PC - 1]
@@ -226,6 +242,7 @@ def syscall_instr():
 
 # Finding the type of current instruction to be parsed
 def find_instr_type(line):
+    # Checking for labels beforehand
     if re.findall(r"^\w*:", line):
         label = line.split(sep=":", maxsplit=1)
         line = label[1][1:]
@@ -241,6 +258,7 @@ def find_instr_type(line):
         pass
     instr_word = instr_word[0]
 
+    # Switching:
     if instr_word == 'add':
         return add_instr(instr_line)
     elif instr_word == 'sub':
@@ -267,30 +285,29 @@ def find_instr_type(line):
         return li_instr(instr_line)
     elif instr_word == 'la':
         return la_instr(instr_line)
+    elif instr_word == 'slt':
+        return slt_instr(instr_line)
+
     elif instr_word == 'syscall':
         return syscall_instr()
     else:
-        print("Invalid Instruction Set. Abort")
+        print("Invalid Instruction Set!!! Aborting...")
         return len(lines)
 
 
-# Find labels
+# Preprocess all labels
 i = PC
 while i < len(lines):
     if re.findall(r"^\w*:", lines[i]):
         label_name = lines[i].split(sep=":", maxsplit=1)[0]
         instr_label[label_name] = i
-        # if label_name == "main":
-        #     PC = i + 1
 
     i += 1
 
-REGISTERS[ra] = len(lines)
-
-# Process instructions
+# Process instructions line by line
 while PC < len(lines):
     PC = find_instr_type(lines[PC])
 
-print(RAM)
-print("=" * 100)
-print(REGISTERS)
+print("Final Memory state: \n", RAM)
+print("=" * 150)
+print("Register values: \n", REGISTERS)
