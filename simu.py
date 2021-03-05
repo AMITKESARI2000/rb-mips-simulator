@@ -65,10 +65,11 @@ while i < len(lines):
                 for l in line:
                     l = l.strip()
                     RAM.append(int(l))
-                ram_iter += 1
+                    ram_iter += 1
 
             elif re.findall(r"^\.asciiz", lines[i]):
                 line = lines[i][9:len(lines[i]) - 1]
+                line = re.sub(r"\\n", "", line)
                 RAM.append(line)
                 ram_iter += 1
     if re.findall(r"^\.globl", lines[i]):

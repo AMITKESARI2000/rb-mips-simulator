@@ -7,9 +7,6 @@
   .globl main
 
 main:
-  li $v0, 4
-  la $a0, Tir
-  syscall
   li $t0, 3            #k = 3
   li $t1, 0            #i = 0
 
@@ -27,7 +24,8 @@ loop:
 
   lw $s1, 0($s2)                #load particluar index value in register
 
-  cond: bne $s1, $t0, loop      #save[i] != 4
+  cond:
+    bne $s1, $t0, loop      #save[i] != 4
 
 print:
   li $v0, 4
