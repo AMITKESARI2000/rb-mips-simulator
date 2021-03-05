@@ -1,6 +1,6 @@
 import re
 
-file = open("testingloop.asm", "r")
+file = open("testingbubblesort.asm", "r")
 lines = file.readlines()
 file.close()
 
@@ -28,7 +28,6 @@ while i < len(lines):
     lines[i] = lines[i].strip().lower()
 
     if re.findall(r"^# *", lines[i]) or (re.findall(r"^\n", lines[i]) and len(lines[i] == '\n'.length())):
-        # print("it is a comment")  # comment can be added in middle also
         lines.remove(lines[i])
         i -= 1
     if len(lines[i]) == 0:
@@ -61,9 +60,10 @@ while i < len(lines):
 
             if re.findall(r"^\.word", lines[i]):
                 line = lines[i][6:]
-                line = re.sub(r',', '', line)
-                line = line.split(sep=' ')  # rm spaces for array
+                # line = re.sub(r',', '', line)
+                line = line.split(sep=',')  # rm spaces for array
                 for l in line:
+                    l = l.strip()
                     RAM.append(int(l))
                 ram_iter += 1
 
@@ -72,7 +72,7 @@ while i < len(lines):
                 RAM.append(line)
                 ram_iter += 1
     if re.findall(r"^\.globl", lines[i]):
-        i -= 1
+        i += 1
         break
     i += 1
 
@@ -85,7 +85,7 @@ while i < len(lines):
     if pos >= 0:
         j = pos
         while lines[i][j - 1] == ' ':
-            j -= 1;
+            j -= 1
         lines[i] = lines[i][: j]
 
     i += 1
@@ -114,6 +114,7 @@ def sub_instr(instr_line):
 def lw_instr(instr_line):
     instr_line = instr_line.split(",")
     instr_line[0] = str(instr_line[0].strip()[1:])
+    # divide by 4 has to be taken care off
     adv = (int(instr_line[1].strip()[0]) // 4) + (int(instr_line[1].strip()[4:5]))
     instr_line[1] = str(instr_line[1].strip()[3:5])
 
@@ -224,11 +225,13 @@ def syscall_instr():
 
 # Finding the type of current instruction to be parsed
 def find_instr_type(line):
-    if re.findall(r"\w?\w: ", line):
+    if re.findall(r"^\w*:", line):
         label = line.split(sep=":", maxsplit=1)
         line = label[1][1:]
         label = label[0]
         instr_label[label] = PC
+        if line == '':
+            return PC + 1
 
     instr_word = line.split(sep=" ", maxsplit=1)
     try:
@@ -236,7 +239,6 @@ def find_instr_type(line):
     except:
         pass
     instr_word = instr_word[0]
-
 
     if instr_word == 'add':
         return add_instr(instr_line)
@@ -271,13 +273,17 @@ def find_instr_type(line):
         return len(lines)
 
 
-# Find main label
-while PC < len(lines):
-    if re.findall(r"^main:", lines[PC]):
-        instr_label["main"] = PC
-        PC += 1
-        break
-    PC += 1
+# Find labels
+i = PC
+while i < len(lines):
+    if re.findall(r"^\w*:", lines[i]):
+        label_name = lines[i].split(sep=":", maxsplit=1)[0]
+        instr_label[label_name] = i
+        # if label_name == "main":
+        #     PC = i + 1
+
+    i += 1
+
 REGISTERS[ra] = len(lines)
 
 # Process instructions

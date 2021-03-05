@@ -1,3 +1,6 @@
-1) new line after label for .word
-2) If comments are after a code line
+1) new line after label for .word(eg: .word:
+                                        10, 20,20)
+
 3) if there is space between comma and int in .word
+4)  addi s0, 4
+    lw s0 (divide by 4 has to be taken care off)
