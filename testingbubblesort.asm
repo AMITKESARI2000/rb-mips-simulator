@@ -1,5 +1,5 @@
   .data
-arr: .word 10, 60, 40, 70 , 20, 30, 90, 100, 0, 80, 50
+arr: .word 10, 60, 40, 70, 20, 30, 90, 100, 0, 80, 50
   space: .asciiz " "
   .text
   .globl main

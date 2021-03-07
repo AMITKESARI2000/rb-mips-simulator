@@ -212,11 +212,14 @@ def sll_instr(instr_line):
 
 # slt $t4, $s3, $s4               #set $t4 = 1 if $s3 < $s4
 def slt_instr(instr_line):
+    print(1, instr_line)
     instr_line = instr_line.split(",")
+    print(2, instr_line)
     for l in range(len(instr_line)):
         instr_line[l] = str(instr_line[l].strip()[1:])
-
+    print(3, instr_line)
     REGISTERS[instr_line[0]] = int(int(REGISTERS[instr_line[1]]) < int(REGISTERS[instr_line[2]]))
+    print(1, REGISTERS[instr_line[0]])
 
     return PC + 1
 
@@ -286,6 +289,7 @@ def find_instr_type(line):
     elif instr_word == 'la':
         return la_instr(instr_line)
     elif instr_word == 'slt':
+        print('slt')
         return slt_instr(instr_line)
 
     elif instr_word == 'syscall':
