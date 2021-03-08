@@ -67,41 +67,47 @@ memHead = Label(mem_head, text="MEMORY").grid(row = 0, column = 0)
 userHead = Label(user_head, text="USER TEXT").grid(row = 0, column = 0)
 
 # Body Panel of Register and Memory and User
-reg_body = PanedWindow(reg_panel)
-mem_body = PanedWindow(mem_panel)
-user_body = PanedWindow(user_panel)
-
-# scrollBar = Scrollbar(user_body)
-# scrollBar.pack(side=RIGHT, fill=Y)
+reg_body = PanedWindow(reg_panel, bg = "white")
+mem_body = PanedWindow(mem_panel, bg = "white")
+user_body = PanedWindow(user_panel, bg = "white")
 
 reg_panel.add(reg_body)
 mem_panel.add(mem_body)
 user_panel.add(user_body)
 
-# Data in Register Panel
-pc = Label(reg_body, text="PC").grid(row = 3, column = 0)
-equal = Label(reg_body, text="=").grid(row = 3, column = 1)
-zero = Label(reg_body, text="0").grid(row = 3, column = 2)
+scroll_reg = Scrollbar(reg_body ,orient="vertical")
+scroll_mem = Scrollbar(mem_body ,orient="vertical")
+scroll_user = Scrollbar(user_body ,orient="vertical")
+scroll_reg.pack(side=RIGHT, fill=Y)
+scroll_mem.pack(side=RIGHT, fill=Y)
+scroll_user.pack(side=RIGHT, fill=Y)
 
+t_reg = Text(reg_body, width = 10, wrap = NONE, yscrollcommand = scroll_reg.set)
+t_mem = Text(mem_body, width = 30, wrap = NONE, yscrollcommand = scroll_mem.set)
+t_user = Text(user_body, width = 70, wrap = NONE, yscrollcommand = scroll_user.set)
+
+# Data in Register Panel
+t_reg.insert(END, "PC = 0\n")
 k=4
 for i in REGISTERS:
-    Label(reg_body, text=str(i)).grid(row = k, column = 0)
-    Label(reg_body, text="=").grid(row = k, column = 1)
-    Label(reg_body, text=REGISTERS[i]).grid(row = k, column = 2)
+    t_reg.insert(END, str(i) + " = " + str(REGISTERS[i])+"\n")
     k+=1
+t_reg.pack(side=TOP, fill=X)
+scroll_reg.config(command=t_reg.yview)
 
 # Data in Memory Panel
 k=4
 for i in MEMORY:
-    Label(mem_body, text=str(k-4)+" : ").grid(row=k, column=0)
-    Label(mem_body, text=str(i), justify=LEFT, anchor="w").grid(row=k, column=1, sticky=W)
+    t_mem.insert(END, str(k-4) + " : " + str(i)+"\n")
     k+=1
+t_mem.pack(side=TOP, fill=X)
+scroll_mem.config(command=t_mem.yview)
 
 # Data in User Text Panel
 k=4
 for i in lines:
-    Label(user_body, text=str(k-3)+" : ").grid(row=k, column=0)
-    s = Label(user_body, text=str(i), justify=LEFT, anchor="w").grid(row=k, column=1, sticky=W)
+    t_user.insert(END, str(k-3)+" : " + str(i) + "\n")
     k+=1
-
+t_user.pack(side=TOP, fill=X)
+scroll_user.config(command=t_user.yview)
 root.mainloop()
