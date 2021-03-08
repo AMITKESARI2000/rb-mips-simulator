@@ -11,7 +11,7 @@ ram_label = {}
 instr_label = {}
 PC = 0
 
-REGISTERS = {'r': 0, 'at': 0, 'v0': 0, 'v1': 0, 'a0': 0, 'a1': 0, 'a2': 0, 'a3': 0,
+REGISTERS = {'r': 0, 'ra': 0, 'at': 0, 'v0': 0, 'v1': 0, 'a0': 0, 'a1': 0, 'a2': 0, 'a3': 0,
              's0': 0, 's1': 1, 's2': 0, 's3': 0, 's4': 0, 's5': 0, 's6': 0, 's7': 0, 's8': 0,
              't0': 0, 't1': 0, 't2': 0, 't3': 0, 't4': 0, 't5': 0, 't6': 0, 't7': 0, 't8': 0, 't9': 0,
              'k0': 0, 'k1': 0, 'zero': 0}  # 30
@@ -82,7 +82,7 @@ while i < len(lines):
 
 print("Initial Memory:\n", RAM)
 PC = i
-REGISTERS[ra] = len(lines)
+REGISTERS["ra"] = len(lines)
 
 # Removing all comments from instruction lines
 while i < len(lines):
@@ -269,20 +269,37 @@ def slt_instr(instr_line):
 
 
 def syscall_instr():
-    l_type = lines[PC - 2]
-    l_print = lines[PC - 1]
 
-    l_type = l_type.split(" ")
-    l_print = l_print.split(" ")
+    l_type = lines[PC - 1]
+    l_type = l_type.split(sep=" ")
+    l_type[0] = l_type[0].strip()
+    l_type[1] = l_type[1].strip()[1:-1]
+    l_type[2] = l_type[2].strip()
+    if l_type[0] == "li" and l_type[1][0] == 'v':
+        # For exit
+        #   li $v0, 10
+        #   syscall
 
-    l_type[0] = l_type[1][1:-1]
-    l_type[1] = l_type[2].strip()
+        if int(l_type[2]) == 10:
+            return REGISTERS["ra"]
 
-    l_print[0] = l_print[1][1:-1]
-    l_print[1] = l_print[2].strip()
+    else:
+        # Others
+        # li $v0, 4
+        # la $a0, space
+        # syscall
 
-    if int(l_type[1]) == 4:
-        print(RAM[ram_label[l_print[1]]])
+        l_print = l_type
+        l_type = lines[PC - 2]
+
+        l_type = l_type.split(sep=" ")
+        l_type[0] = l_type[0].strip()
+        l_type[1] = l_type[1].strip()[1:-1]
+        l_type[2] = l_type[2].strip()
+
+        if int(l_type[2]) == 4:
+            # Print asciiz text
+            print(RAM[ram_label[l_print[2]]])
 
     return PC + 1
 
