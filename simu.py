@@ -18,7 +18,6 @@ REGISTERS = {'r': 0, 'ra': 0, 'at': 0, 'v0': 0, 'v1': 0, 'a0': 0, 'a1': 0, 'a2':
 
 BaseAdr = "0x1000"
 sp = 0x7ffff8bc
-ra = 0
 
 is_program_done = False
 i = 0
@@ -81,6 +80,7 @@ while i < len(lines):
     i += 1
 
 print("Initial Memory:\n", RAM)
+print("=" * 100)
 PC = i
 REGISTERS["ra"] = len(lines)
 
@@ -246,6 +246,16 @@ def sll_instr(instr_line):
     return PC + 1
 
 
+def srl_instr(instr_line):
+    instr_line = instr_line.split(",")
+    for l in range(len(instr_line) - 1):
+        instr_line[l] = str(instr_line[l].strip()[1:])
+
+    REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) // pow(2, int(instr_line[2]))
+
+    return PC + 1
+
+
 def la_instr(instr_line):
     # la $a0, space
     instr_line = instr_line.split(",")
@@ -253,7 +263,8 @@ def la_instr(instr_line):
     instr_line[1] = str(instr_line[1].strip())
 
     # Getting adr of label
-    REGISTERS[instr_line[0]] = ram_label[instr_line[1]]
+    REGISTERS[instr_line[0]] = int(BaseAdr[2:]) + ram_label[instr_line[1]]
+    REGISTERS[instr_line[0]] = "0x" + str(REGISTERS[instr_line[0]])
 
     return PC + 1
 
@@ -269,7 +280,6 @@ def slt_instr(instr_line):
 
 
 def syscall_instr():
-
     l_type = lines[PC - 1]
     l_type = l_type.split(sep=" ")
     l_type[0] = l_type[0].strip()
@@ -297,7 +307,11 @@ def syscall_instr():
         l_type[1] = l_type[1].strip()[1:-1]
         l_type[2] = l_type[2].strip()
 
-        if int(l_type[2]) == 4:
+        if int(l_type[2]) == 1:
+            # Print register value
+            print(REGISTERS[l_print[1]])
+
+        elif int(l_type[2]) == 4:
             # Print asciiz text
             print(RAM[ram_label[l_print[2]]])
 
@@ -343,6 +357,8 @@ def find_instr_type(line):
         return addi_instr(instr_line)
     elif instr_word == 'sll':
         return sll_instr(instr_line)
+    elif instr_word == 'srl':
+        return srl_instr(instr_line)
     elif instr_word == 'jr':
         return REGISTERS[ra]
     elif instr_word == 'li':
@@ -373,5 +389,5 @@ while PC < len(lines):
     PC = find_instr_type(lines[PC])
 
 print("Final Memory state: \n", RAM)
-print("=" * 150)
+print("=" * 100)
 print("Register values: \n", REGISTERS)

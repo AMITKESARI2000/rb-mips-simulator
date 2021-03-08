@@ -10,9 +10,9 @@ main:
   li $t0, 3            #k = 3
   li $t1, 0            #i = 0
 
-  la $s0, Tir                     #load addr of N array
+  la $s0, N                     #load addr of N array
   lw $s1, 0($s0)                #store element in register
-  # j cond
+  j cond
 
 loop:
   add $s2, $s0, $zero           #addr stored for looping is init with start addr

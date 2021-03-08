@@ -5,9 +5,6 @@ arr: .word 10, 60, 40, 70, 20, 30, 90, 100, 0, 80, 50
   .globl main
 
 main:
- li $v0, 4
-     la $a0, space
-     syscall
   lui $s0, 0x1001                   #arr[0]
   li $t0, 0                         #i = 0
   li $t1, 0                         #j = 0
