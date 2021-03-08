@@ -91,7 +91,7 @@ while i < len(lines):
         j = pos
         while lines[i][j - 1] == ' ':
             j -= 1
-        lines[i] = lines[i][: j]
+        lines[i] = lines[i][:j]
 
     i += 1
 
