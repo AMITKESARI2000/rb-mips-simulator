@@ -16,7 +16,7 @@ REGISTERS = {'r': 0, 'at': 0, 'v0': 0, 'v1': 0, 'a0': 0, 'a1': 0, 'a2': 0, 'a3':
              't0': 0, 't1': 0, 't2': 0, 't3': 0, 't4': 0, 't5': 0, 't6': 0, 't7': 0, 't8': 0, 't9': 0,
              'k0': 0, 'k1': 0, 'zero': 0}  # 30
 
-BaseAdr = 0x10008000
+BaseAdr = "0x1000"
 sp = 0x7ffff8bc
 ra = 0
 
@@ -102,13 +102,17 @@ def add_instr(instr_line):
     for l in range(len(instr_line)):
         instr_line[l] = str(instr_line[l].strip()[1:])
 
+    # If address is stored add subtract only val/4 because of indexing
+    # add $t2, $zero, $s0
     if isinstance(REGISTERS[instr_line[1]], str) and isinstance(REGISTERS[instr_line[2]], int):
-        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]][2:]) + int(REGISTERS[instr_line[2]])
+        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]][2:]) + int(REGISTERS[instr_line[2]]) // 4
         REGISTERS[instr_line[0]] = "0x" + str(REGISTERS[instr_line[0]])
     elif isinstance(REGISTERS[instr_line[1]], int) and isinstance(REGISTERS[instr_line[2]], str):
-        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) + int(REGISTERS[instr_line[2]][2:])
+        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) // 4 + int(REGISTERS[instr_line[2]][2:])
         REGISTERS[instr_line[0]] = "0x" + str(REGISTERS[instr_line[0]])
 
+    # Normal add instruction of register having two ints
+    # add $t2, $t1, $t0
     elif isinstance(REGISTERS[instr_line[1]], int) and isinstance(REGISTERS[instr_line[2]], int):
         REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) + int(REGISTERS[instr_line[2]])
 
@@ -121,47 +125,54 @@ def sub_instr(instr_line):
     instr_line = instr_line.split(",")
     for l in range(len(instr_line)):
         instr_line[l] = str(instr_line[l].strip()[1:])
+    if isinstance(REGISTERS[instr_line[1]], str) and isinstance(REGISTERS[instr_line[2]], int):
+        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]][2:]) - int(REGISTERS[instr_line[2]]) // 4
+        REGISTERS[instr_line[0]] = "0x" + str(REGISTERS[instr_line[0]])
+    elif isinstance(REGISTERS[instr_line[1]], int) and isinstance(REGISTERS[instr_line[2]], str):
+        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) // 4 - int(REGISTERS[instr_line[2]][2:])
+        REGISTERS[instr_line[0]] = "0x" + str(REGISTERS[instr_line[0]])
 
-    REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) - int(REGISTERS[instr_line[2]])
+    elif isinstance(REGISTERS[instr_line[1]], int) and isinstance(REGISTERS[instr_line[2]], int):
+        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) - int(REGISTERS[instr_line[2]])
 
+    else:
+        print("Invalid instruction format.")
     return PC + 1
 
 
 def lw_instr(instr_line):
-    #lw $s3, 0($t3)
+    # lw $s3, 0($t3)
     instr_line = instr_line.split(",")
     instr_line[0] = str(instr_line[0].strip()[1:])
-    # divide by 4 has to be taken care off
-    # what if its 12 or 200 instead of 0(ask)
-    adv = (int(instr_line[1].strip()[0]) // 4) + (int(instr_line[1].strip()[4:5]))
-    instr_line[1] = str(instr_line[1].strip()[3:5])
 
-    REGISTERS[instr_line[0]] = RAM[REGISTERS[instr_line[1]] - BaseAdr + adv]  # To change register into memory
+    instr_line[1] = instr_line[1].strip()
+    adv = int(instr_line[1].split(sep="(", maxsplit=1)[0]) // 4
 
-    return PC + 1
+    instr_line[1] = instr_line[1].split(sep="$", maxsplit=1)[1][:-1]
 
-
-def la_instr(instr_line):
-    instr_line = instr_line.split(",")
-    instr_line[0] = str(instr_line[0].strip()[1:])
-    instr_line[1] = str(instr_line[1].strip())
-
-    REGISTERS[instr_line[0]] = ram_label[instr_line[1]]  # To change register into memory
+    # To load register from memory
+    REGISTERS[instr_line[0]] = RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv]
 
     return PC + 1
 
 
 def sw_instr(instr_line):
+    # sw $s3, 0($t3)
     instr_line = instr_line.split(",")
     instr_line[0] = str(instr_line[0].strip()[1:])
-    adv = (int(instr_line[1].strip()[0]) // 4) + (int(instr_line[1].strip()[4:5]))
-    instr_line[1] = str(instr_line[1].strip()[3:5])
 
-    RAM[REGISTERS[instr_line[1]] + adv] = int(REGISTERS[instr_line[0]])  # To change register into memory
+    instr_line[1] = instr_line[1].strip()
+    adv = int(instr_line[1].split(sep="(", maxsplit=1)[0]) // 4
+
+    instr_line[1] = instr_line[1].split(sep="$", maxsplit=1)[1][:-1]
+
+    # To store register into memory
+    RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv] = int(REGISTERS[instr_line[0]])
     return PC + 1
 
 
 def bne_instr(instr_line):
+    #  bne $t1, $s2, loop
     instr_line = instr_line.split(",")
     for l in range(len(instr_line) - 1):
         instr_line[l] = str(instr_line[l].strip()[1:])
@@ -173,6 +184,7 @@ def bne_instr(instr_line):
 
 
 def beq_instr(instr_line):
+    #  beq $t1, $s2, loop
     instr_line = instr_line.split(",")
     for l in range(len(instr_line) - 1):
         instr_line[l] = str(instr_line[l].strip()[1:])
@@ -193,16 +205,23 @@ def lui_instr(instr_line):
     instr_line[0] = instr_line[0].strip()[1:]
     instr_line[1] = instr_line[1].strip()
     REGISTERS[instr_line[0]] = instr_line[1]
-    BaseAdr = instr_line[1]
+    global BaseAdr
+    BaseAdr = str(instr_line[1])
     return PC + 1
 
 
 def addi_instr(instr_line):
+    # addi $s2, $s2, -1
     instr_line = instr_line.split(",")
     for l in range(len(instr_line) - 1):
         instr_line[l] = str(instr_line[l].strip()[1:])
+    instr_line[2] = instr_line[2].strip()
 
-    REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) + int(instr_line[2].strip())
+    if isinstance(REGISTERS[instr_line[1]], str):
+        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]][2:]) + int(instr_line[2]) // 4
+        REGISTERS[instr_line[0]] = "0x" + str(REGISTERS[instr_line[0]])
+    else:
+        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) + int(instr_line[2])
 
     return PC + 1
 
@@ -227,35 +246,43 @@ def sll_instr(instr_line):
     return PC + 1
 
 
-# slt $t4, $s3, $s4               #set $t4 = 1 if $s3 < $s4
-def slt_instr(instr_line):
-    print(1, instr_line)
+def la_instr(instr_line):
+    # la $a0, space
     instr_line = instr_line.split(",")
-    print(2, instr_line)
+    instr_line[0] = str(instr_line[0].strip()[1:])
+    instr_line[1] = str(instr_line[1].strip())
+
+    # Getting adr of label
+    REGISTERS[instr_line[0]] = ram_label[instr_line[1]]
+
+    return PC + 1
+
+
+def slt_instr(instr_line):
+    # slt $t4, $s3, $s4               #set $t4 = 1 if $s3 < $s4
+    instr_line = instr_line.split(",")
     for l in range(len(instr_line)):
         instr_line[l] = str(instr_line[l].strip()[1:])
-    print(3, instr_line)
     REGISTERS[instr_line[0]] = int(int(REGISTERS[instr_line[1]]) < int(REGISTERS[instr_line[2]]))
-    print(1, REGISTERS[instr_line[0]])
 
     return PC + 1
 
 
 def syscall_instr():
-    ltype = lines[PC - 2]
-    lprint = lines[PC - 1]
+    l_type = lines[PC - 2]
+    l_print = lines[PC - 1]
 
-    ltype = ltype.split(" ")
-    lprint = lprint.split(" ")
+    l_type = l_type.split(" ")
+    l_print = l_print.split(" ")
 
-    ltype[0] = ltype[1][1:-1]
-    ltype[1] = ltype[2].strip()
+    l_type[0] = l_type[1][1:-1]
+    l_type[1] = l_type[2].strip()
 
-    lprint[0] = lprint[1][1:-1]
-    lprint[1] = lprint[2].strip()
+    l_print[0] = l_print[1][1:-1]
+    l_print[1] = l_print[2].strip()
 
-    if int(ltype[1]) == 4:
-        print(RAM[ram_label[lprint[1]]])
+    if int(l_type[1]) == 4:
+        print(RAM[ram_label[l_print[1]]])
 
     return PC + 1
 
@@ -306,7 +333,6 @@ def find_instr_type(line):
     elif instr_word == 'la':
         return la_instr(instr_line)
     elif instr_word == 'slt':
-        print('slt')
         return slt_instr(instr_line)
 
     elif instr_word == 'syscall':
