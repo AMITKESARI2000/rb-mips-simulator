@@ -6,11 +6,11 @@ arr: .word 10, 60, 40, 70, 20, 30, 90, 100, 0, 80, 50
 
 main:
   lui $s0, 0x1001                   #arr[0]
+  add $t2, $zero, $s0               #for iterating addr by i
   li $t0, 0                 #i = 0
   li $t1, 0                 #j = 0
   li $s1, 11                #n = 11
   li $s2, 11                #n-i for inner loop
-  add $t2, $zero, $s0               #for iterating addr by i
   add $t3, $zero, $s0               #for iterating addr by j
 
   addi $s1, $s1, -1

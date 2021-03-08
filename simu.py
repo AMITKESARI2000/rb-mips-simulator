@@ -16,7 +16,7 @@ REGISTERS = {'r': 0, 'at': 0, 'v0': 0, 'v1': 0, 'a0': 0, 'a1': 0, 'a2': 0, 'a3':
              't0': 0, 't1': 0, 't2': 0, 't3': 0, 't4': 0, 't5': 0, 't6': 0, 't7': 0, 't8': 0, 't9': 0,
              'k0': 0, 'k1': 0, 'zero': 0}  # 30
 
-p = 0x10008000
+BaseAdr = 0x10008000
 sp = 0x7ffff8bc
 ra = 0
 
@@ -102,8 +102,18 @@ def add_instr(instr_line):
     for l in range(len(instr_line)):
         instr_line[l] = str(instr_line[l].strip()[1:])
 
-    REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) + int(REGISTERS[instr_line[2]])
+    if isinstance(REGISTERS[instr_line[1]], str) and isinstance(REGISTERS[instr_line[2]], int):
+        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]][2:]) + int(REGISTERS[instr_line[2]])
+        REGISTERS[instr_line[0]] = "0x" + str(REGISTERS[instr_line[0]])
+    elif isinstance(REGISTERS[instr_line[1]], int) and isinstance(REGISTERS[instr_line[2]], str):
+        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) + int(REGISTERS[instr_line[2]][2:])
+        REGISTERS[instr_line[0]] = "0x" + str(REGISTERS[instr_line[0]])
 
+    elif isinstance(REGISTERS[instr_line[1]], int) and isinstance(REGISTERS[instr_line[2]], int):
+        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) + int(REGISTERS[instr_line[2]])
+
+    else:
+        print("Invalid instruction format.")
     return PC + 1
 
 
@@ -118,13 +128,15 @@ def sub_instr(instr_line):
 
 
 def lw_instr(instr_line):
+    #lw $s3, 0($t3)
     instr_line = instr_line.split(",")
     instr_line[0] = str(instr_line[0].strip()[1:])
     # divide by 4 has to be taken care off
+    # what if its 12 or 200 instead of 0(ask)
     adv = (int(instr_line[1].strip()[0]) // 4) + (int(instr_line[1].strip()[4:5]))
     instr_line[1] = str(instr_line[1].strip()[3:5])
 
-    REGISTERS[instr_line[0]] = RAM[REGISTERS[instr_line[1]] + adv]  # To change register into memory
+    REGISTERS[instr_line[0]] = RAM[REGISTERS[instr_line[1]] - BaseAdr + adv]  # To change register into memory
 
     return PC + 1
 
@@ -176,7 +188,12 @@ def j_instr(instr_line):
 
 
 def lui_instr(instr_line):
-    REGISTERS[instr_line[0]] = 0
+    # lui $s0, 0x1001
+    instr_line = instr_line.split(",")
+    instr_line[0] = instr_line[0].strip()[1:]
+    instr_line[1] = instr_line[1].strip()
+    REGISTERS[instr_line[0]] = instr_line[1]
+    BaseAdr = instr_line[1]
     return PC + 1
 
 
