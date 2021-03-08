@@ -27,6 +27,8 @@ MEMORY = [600, 'IIT TIRUPATI', 200, 12, 0, 122]
 
 root = Tk()
 
+root.resizable(width=False, height=False) #Restricting Resizable
+
 # Panel
 simulator_body = PanedWindow(orient=VERTICAL, bg="black")
 simulator_body.pack(fill=BOTH, expand = 1)
@@ -98,7 +100,7 @@ scroll_reg.config(command=t_reg.yview)
 # Data in Memory Panel
 k=4
 for i in MEMORY:
-    t_mem.insert(END, str(k-4) + " : " + str(i)+"\n")
+    t_mem.insert(END, str(k-4) + " : " + str(i) + "\n")
     k+=1
 t_mem.pack(side=TOP, fill=X)
 scroll_mem.config(command=t_mem.yview)
