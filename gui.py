@@ -1,29 +1,32 @@
 from tkinter import *
+import simu
 import re
 
 # Data just for checking
-file = open("testingbubblesort.asm", "r")
-lines = file.readlines()
-file.close()
+# file = open("testingbubblesort.asm", "r")
+# lines = file.readlines()
+# file.close()
 
-i=0
-while i < len(lines):
-    lines[i] = lines[i].strip().lower()
+simu.rm_cmnts()
 
-    if re.findall(r"^# *", lines[i]) or (re.findall(r"^\n", lines[i]) and len(lines[i] == '\n'.length())):
-        lines.remove(lines[i])
-        i -= 1
-    if len(lines[i]) == 0:
-        lines.remove(lines[i])
-        i -= 1
-    i += 1
+# i=0
+# while i < len(lines):
+#     lines[i] = lines[i].strip().lower()
+#
+#     if re.findall(r"^# *", lines[i]) or (re.findall(r"^\n", lines[i]) and len(lines[i] == '\n'.length())):
+#         lines.remove(lines[i])
+#         i -= 1
+#     if len(lines[i]) == 0:
+#         lines.remove(lines[i])
+#         i -= 1
+#     i += 1
 
-REGISTERS = {'r': 0, 'at': 0, 'v0': 0, 'v1': 0, 'a0': 0, 'a1': 0, 'a2': 0, 'a3': 0,
-             's0': 0, 's1': 1, 's2': 0, 's3': 0, 's4': 0, 's5': 0, 's6': 0, 's7': 0, 's8': 0,
-             't0': 0, 't1': 0, 't2': 0, 't3': 0, 't4': 0, 't5': 0, 't6': 0, 't7': 0, 't8': 0, 't9': 0,
-             'k0': 0, 'k1': 0, 'zero': 0}
-
-MEMORY = [600, 'IIT TIRUPATI', 200, 12, 0, 122]
+# REGISTERS = {'r': 0, 'at': 0, 'v0': 0, 'v1': 0, 'a0': 0, 'a1': 0, 'a2': 0, 'a3': 0,
+#              's0': 0, 's1': 1, 's2': 0, 's3': 0, 's4': 0, 's5': 0, 's6': 0, 's7': 0, 's8': 0,
+#              't0': 0, 't1': 0, 't2': 0, 't3': 0, 't4': 0, 't5': 0, 't6': 0, 't7': 0, 't8': 0, 't9': 0,
+#              'k0': 0, 'k1': 0, 'zero': 0}
+#
+# MEMORY = [600, 'IIT TIRUPATI', 200, 12, 0, 122]
 
 root = Tk()
 
@@ -42,7 +45,8 @@ head_panel.add(head)
 
 # Execution Panel
 step_exe = Button(text="Step By Step Execution", bg="red", fg="white").pack(side=LEFT)
-once_exe = Button(text="At Once Execution", bg="blue", fg="white").pack(side=LEFT)
+
+once_exe = Button(text="At Once Execution", bg="blue", fg="white", command=lambda: modify_gui_data()).pack(side=LEFT)
 
 # Body Panel
 body_panel = PanedWindow(simulator_body, orient=HORIZONTAL, relief="raised", bg="black")
@@ -92,28 +96,39 @@ t_reg = Text(reg_body, height = 50, width = 10, wrap = NONE, yscrollcommand = sc
 t_mem = Text(mem_body, height = 50, width = 30, wrap = NONE, yscrollcommand = scroll_mem.set)
 t_user = Text(user_body, height = 50, width = 70, wrap = NONE, yscrollcommand = scroll_user.set)
 
-# Data in Register Panel
-t_reg.insert(END, "PC = 0\n")
-k=4
-for i in REGISTERS:
-    t_reg.insert(END, str(i) + " = " + str(REGISTERS[i])+"\n")
-    k+=1
-t_reg.pack(side=TOP, fill=X)
-scroll_reg.config(command=t_reg.yview)
+def run_gui_data():
+    t_reg.delete("1.0","end")
+    t_mem.delete("1.0", "end")
+    t_user.delete("1.0", "end")
 
-# Data in Memory Panel
-k=4
-for i in MEMORY:
-    t_mem.insert(END, str(k-4) + " : " + str(i) + "\n")
-    k+=1
-t_mem.pack(side=TOP, fill=X)
-scroll_mem.config(command=t_mem.yview)
+    # Data in Register Panel
+    t_reg.insert(END, "PC = 0\n")
+    k=4
+    for i in simu.REGISTERS:
+        t_reg.insert(END, str(i) + " = " + str(simu.REGISTERS[i])+"\n")
+        k+=1
+    t_reg.pack(side=TOP, fill=X)
+    scroll_reg.config(command=t_reg.yview)
 
-# Data in User Text Panel
-k=4
-for i in lines:
-    t_user.insert(END, str(k-3)+" : " + str(i) + "\n")
-    k+=1
-t_user.pack(side=TOP, fill=X)
-scroll_user.config(command=t_user.yview)
+    # Data in Memory Panel
+    k=4
+    for i in simu.RAM:
+        t_mem.insert(END, str(k-4) + " : " + str(i) + "\n")
+        k+=1
+    t_mem.pack(side=TOP, fill=X)
+    scroll_mem.config(command=t_mem.yview)
+
+    # Data in User Text Panel
+    k=4
+    for i in simu.lines:
+        t_user.insert(END, str(k-3)+" : " + str(i) + "\n")
+        k+=1
+    t_user.pack(side=TOP, fill=X)
+    scroll_user.config(command=t_user.yview)
+
+def modify_gui_data():
+    simu.main()
+    run_gui_data()
+
+run_gui_data()
 root.mainloop()

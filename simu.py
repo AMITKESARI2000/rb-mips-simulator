@@ -40,6 +40,7 @@ def rm_cmnts():
 
 def main():
     # Processing all input data
+    RAM.clear()
     i = 0
     while i < len(lines):
         # .data
@@ -395,6 +396,3 @@ def main():
     print("Final Memory state: \n", RAM)
     print("=" * 100)
     print("Register values: \n", REGISTERS)
-
-rm_cmnts()
-main()
