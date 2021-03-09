@@ -40,12 +40,11 @@ simulator_body.pack(fill=BOTH, expand = 1)
 head_panel = PanedWindow(simulator_body, bd=1, relief="raised", bg="black")
 simulator_body.add(head_panel)
 
-head = Label(head_panel, text="SIMULATOR")
+head = Label(head_panel, text="SIMULATOR", font=("Arial", 13))
 head_panel.add(head)
 
 # Execution Panel
 step_exe = Button(text="Step By Step Execution", bg="red", fg="white").pack(side=LEFT)
-
 once_exe = Button(text="At Once Execution", bg="blue", fg="white", command=lambda: modify_gui_data()).pack(side=LEFT)
 
 # Body Panel
@@ -72,9 +71,9 @@ reg_panel.add(reg_head)
 mem_panel.add(mem_head)
 user_panel.add(user_head)
 
-regHead = Label(reg_head, text="REGISTERS").grid(row = 0, column = 0)
-memHead = Label(mem_head, text="MEMORY").grid(row = 0, column = 0)
-userHead = Label(user_head, text="USER TEXT").grid(row = 0, column = 0)
+regHead = Label(reg_head, text="REGISTERS", font=("Arial", 10)).grid(row = 0, column = 0)
+memHead = Label(mem_head, text="MEMORY", font=("Arial", 10)).grid(row = 0, column = 0)
+userHead = Label(user_head, text="USER TEXT", font=("Arial", 10)).grid(row = 0, column = 0)
 
 # Body Panel of Register and Memory and User
 reg_body = PanedWindow(reg_panel, bg = "white")
@@ -92,11 +91,15 @@ scroll_reg.pack(side=RIGHT, fill=Y)
 scroll_mem.pack(side=RIGHT, fill=Y)
 scroll_user.pack(side=RIGHT, fill=Y)
 
-t_reg = Text(reg_body, height = 50, width = 10, wrap = NONE, yscrollcommand = scroll_reg.set)
-t_mem = Text(mem_body, height = 50, width = 30, wrap = NONE, yscrollcommand = scroll_mem.set)
-t_user = Text(user_body, height = 50, width = 70, wrap = NONE, yscrollcommand = scroll_user.set)
+t_reg = Text(reg_body, height = 50, width = 10, wrap = NONE, yscrollcommand = scroll_reg.set, font=("Arial", 9))
+t_mem = Text(mem_body, height = 50, width = 30, wrap = NONE, yscrollcommand = scroll_mem.set, font=("Arial", 9))
+t_user = Text(user_body, height = 50, width = 70, wrap = NONE, yscrollcommand = scroll_user.set, font=("Arial", 9))
 
 def run_gui_data():
+    t_reg.configure(state='normal')
+    t_mem.configure(state='normal')
+    t_user.configure(state='normal')
+
     t_reg.delete("1.0","end")
     t_mem.delete("1.0", "end")
     t_user.delete("1.0", "end")
@@ -125,6 +128,10 @@ def run_gui_data():
         k+=1
     t_user.pack(side=TOP, fill=X)
     scroll_user.config(command=t_user.yview)
+
+    t_reg.configure(state='disabled')
+    t_mem.configure(state='disabled')
+    t_user.configure(state='disabled')
 
 def modify_gui_data():
     simu.main()

@@ -1,7 +1,5 @@
 1) new line after label for .word(eg: .word:
                                         10, 20,20)
-2) gui text edit
-3) font size
 4) console
 5) adding file option in gui
 6) step into
