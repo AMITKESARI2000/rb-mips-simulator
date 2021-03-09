@@ -27,18 +27,22 @@ MEMORY = [600, 'IIT TIRUPATI', 200, 12, 0, 122]
 
 root = Tk()
 
-root.resizable(width=False, height=False) #Restricting Resizable
-
+#root.resizable(width=False, height=False) #Restricting Resizable
+root.title("rb mips simulator 😎")
 # Panel
-simulator_body = PanedWindow(orient=VERTICAL, bg="black")
+simulator_body = PanedWindow(orient=VERTICAL, width=1000, height=500, bg="black")
 simulator_body.pack(fill=BOTH, expand = 1)
 
 # Head Panel
-head_panel = PanedWindow(simulator_body,bd=1, relief="raised", bg="black")
+head_panel = PanedWindow(simulator_body, bd=1, relief="raised", bg="black")
 simulator_body.add(head_panel)
 
 head = Label(head_panel, text="SIMULATOR")
 head_panel.add(head)
+
+# Execution Panel
+step_exe = Button(text="Step By Step Execution", bg="red", fg="white").pack(side=LEFT)
+once_exe = Button(text="At Once Execution", bg="blue", fg="white").pack(side=LEFT)
 
 # Body Panel
 body_panel = PanedWindow(simulator_body, orient=HORIZONTAL, relief="raised", bg="black")
@@ -84,9 +88,9 @@ scroll_reg.pack(side=RIGHT, fill=Y)
 scroll_mem.pack(side=RIGHT, fill=Y)
 scroll_user.pack(side=RIGHT, fill=Y)
 
-t_reg = Text(reg_body, width = 10, wrap = NONE, yscrollcommand = scroll_reg.set)
-t_mem = Text(mem_body, width = 30, wrap = NONE, yscrollcommand = scroll_mem.set)
-t_user = Text(user_body, width = 70, wrap = NONE, yscrollcommand = scroll_user.set)
+t_reg = Text(reg_body, height = 50, width = 10, wrap = NONE, yscrollcommand = scroll_reg.set)
+t_mem = Text(mem_body, height = 50, width = 30, wrap = NONE, yscrollcommand = scroll_mem.set)
+t_user = Text(user_body, height = 50, width = 70, wrap = NONE, yscrollcommand = scroll_user.set)
 
 # Data in Register Panel
 t_reg.insert(END, "PC = 0\n")
