@@ -5,12 +5,13 @@ lines = file.readlines()
 file.close()
 
 # Global Storages
-global RAM, ram_iter, ram_label, instr_label, PC, i
+global RAM, ram_iter, ram_label, instr_label, PC, i, cnsl
 RAM = []
 ram_iter = 0
 ram_label = {}
 instr_label = {}
 PC = 0
+cnsl = []
 
 REGISTERS = {'r': 0, 'ra': 0, 'at': 0, 'v0': 0, 'v1': 0, 'a0': 0, 'a1': 0, 'a2': 0, 'a3': 0,
              's0': 0, 's1': 1, 's2': 0, 's3': 0, 's4': 0, 's5': 0, 's6': 0, 's7': 0, 's8': 0,
@@ -314,10 +315,12 @@ def main():
 
             if int(l_type[2]) == 1:
                 # Print register value
+                cnsl.append(REGISTERS[l_print[1]])
                 print(REGISTERS[l_print[1]])
 
             elif int(l_type[2]) == 4:
                 # Print asciiz text
+                #cnsl.append(REGISTERS[l_print[1]])
                 print(RAM[ram_label[l_print[2]]])
 
         return PC + 1

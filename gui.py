@@ -91,25 +91,32 @@ scroll_reg.pack(side=RIGHT, fill=Y)
 scroll_mem.pack(side=RIGHT, fill=Y)
 scroll_user.pack(side=RIGHT, fill=Y)
 
-t_reg = Text(reg_body, height = 50, width = 10, wrap = NONE, yscrollcommand = scroll_reg.set, font=("Arial", 9))
-t_mem = Text(mem_body, height = 50, width = 30, wrap = NONE, yscrollcommand = scroll_mem.set, font=("Arial", 9))
-t_user = Text(user_body, height = 15, width = 70, wrap = NONE, yscrollcommand = scroll_user.set, font=("Arial", 9))
+t_reg = Text(reg_body, height = 50, width = 15, wrap = NONE, yscrollcommand = scroll_reg.set, font=("Arial", 9))
+t_mem = Text(mem_body, height = 50, width = 35, wrap = NONE, yscrollcommand = scroll_mem.set, font=("Arial", 9))
+t_user = Text(user_body, height = 15, width = 50, wrap = NONE, yscrollcommand = scroll_user.set, font=("Arial", 9))
 
 # Console Panel
-console_panel = PanedWindow(user_panel, height=20, width=70, relief="raised", bg="red")
+console_panel = PanedWindow(user_panel, orient="vertical", relief="raised", bg="white")
 user_panel.add(console_panel)
 
-console = Label(console_panel, text="CONSOLE", font=("Arial", 13))
+console_head = Label(console_panel, text="CONSOLE", relief="raised", bg="white", height=1, font=("Arial", 10))
+console_panel.add(console_head)
+
+console = Label(console_panel, bg="black", font=("Arial", 13), fg="yellow")
 console_panel.add(console)
+
+t_console = Text(console, height = 50, width = 70, bg="black", wrap = NONE, font=("Arial", 9), fg="yellow")
 
 def run_gui_data():
     t_reg.configure(state='normal')
     t_mem.configure(state='normal')
     t_user.configure(state='normal')
+    t_console.configure(state='normal')
 
     t_reg.delete("1.0","end")
     t_mem.delete("1.0", "end")
     t_user.delete("1.0", "end")
+    t_console.delete("1.0", "end")
 
     # Data in Register Panel
     t_reg.insert(END, "PC = 0\n")
@@ -136,9 +143,15 @@ def run_gui_data():
     t_user.pack(side=TOP, fill=X)
     scroll_user.config(command=t_user.yview)
 
+    # Data in console
+    for i in simu.cnsl:
+        t_console.insert(END, str(i)+" ")
+    t_console.pack(side=TOP, fill=X)
+
     t_reg.configure(state='disabled')
     t_mem.configure(state='disabled')
     t_user.configure(state='disabled')
+    t_console.configure(state='disabled')
 
 def modify_gui_data():
     simu.main()
