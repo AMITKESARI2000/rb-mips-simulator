@@ -1,5 +1,4 @@
 import re
-# import console as cns
 
 file = open("testingbubblesort.asm", "r")
 lines = file.readlines()
@@ -315,7 +314,6 @@ def main():
 
             if int(l_type[2]) == 1:
                 # Print register value
-                # cns.console_print(REGISTERS[l_print[1]])
                 print(REGISTERS[l_print[1]])
 
             elif int(l_type[2]) == 4:

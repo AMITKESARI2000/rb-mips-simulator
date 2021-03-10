@@ -71,9 +71,9 @@ reg_panel.add(reg_head)
 mem_panel.add(mem_head)
 user_panel.add(user_head)
 
-regHead = Label(reg_head, text="REGISTERS", font=("Arial", 10)).grid(row = 0, column = 0)
-memHead = Label(mem_head, text="MEMORY", font=("Arial", 10)).grid(row = 0, column = 0)
-userHead = Label(user_head, text="USER TEXT", font=("Arial", 10)).grid(row = 0, column = 0)
+regHead = Label(reg_head, text="REGISTERS", height=1, font=("Arial", 10)).grid(row = 0, column = 0)
+memHead = Label(mem_head, text="MEMORY", height=1, font=("Arial", 10)).grid(row = 0, column = 0)
+userHead = Label(user_head, text="USER TEXT", height=1, font=("Arial", 10)).grid(row = 0, column = 0)
 
 # Body Panel of Register and Memory and User
 reg_body = PanedWindow(reg_panel, bg = "white")
@@ -93,7 +93,14 @@ scroll_user.pack(side=RIGHT, fill=Y)
 
 t_reg = Text(reg_body, height = 50, width = 10, wrap = NONE, yscrollcommand = scroll_reg.set, font=("Arial", 9))
 t_mem = Text(mem_body, height = 50, width = 30, wrap = NONE, yscrollcommand = scroll_mem.set, font=("Arial", 9))
-t_user = Text(user_body, height = 50, width = 70, wrap = NONE, yscrollcommand = scroll_user.set, font=("Arial", 9))
+t_user = Text(user_body, height = 15, width = 70, wrap = NONE, yscrollcommand = scroll_user.set, font=("Arial", 9))
+
+# Console Panel
+console_panel = PanedWindow(user_panel, height=20, width=70, relief="raised", bg="red")
+user_panel.add(console_panel)
+
+console = Label(console_panel, text="CONSOLE", font=("Arial", 13))
+console_panel.add(console)
 
 def run_gui_data():
     t_reg.configure(state='normal')
