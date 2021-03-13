@@ -1,3 +1,4 @@
+import re
 from tkinter import *
 from tkinter.messagebox import showinfo, askyesno
 import simu
@@ -21,7 +22,9 @@ head_panel.add(head)
 
 # Execution Panel
 step_exe = Button(text="Step By Step Execution", bg="#f94b5d", fg="#efefef",
-                  command=lambda: showinfo("Message", "STILL IN PROGRESS!!!")).pack(side=LEFT)
+                  command=lambda: modify_gui_data_once())
+step_exe.pack(side=LEFT)
+# command=lambda: showinfo("Message", "STILL IN PROGRESS!!!")).pack(side=LEFT)
 space1 = Button(text="      ", bg="white", state=DISABLED).pack(side=LEFT)
 once_exe = Button(text="At Once Execution", bg="#2f6fca", fg="#efefef", command=lambda: modify_gui_data()).pack(
     side=LEFT)
@@ -89,6 +92,11 @@ console_panel.add(console)
 
 t_console = Text(console, height=50, width=70, bg="#0e141e", wrap=NONE, font=("Roboto", 9), fg="#00ea64")
 
+# Current Execution line
+current_instr_label = Text(root, height=1, width=10, font=("Roboto", 12), fg="#484767")
+current_instr_label.insert(END, "On Line: " + str(simu.PC + 1))
+current_instr_label.pack()
+
 
 def run_gui_data():
     t_reg.configure(state='normal')
@@ -99,7 +107,6 @@ def run_gui_data():
     t_reg.delete("1.0", "end")
     t_mem.delete("1.0", "end")
     t_user.delete("1.0", "end")
-    t_console.delete("1.0", "end")
 
     # Data in Register Panel
     t_reg.insert(END, "PC = 0\n")
@@ -113,6 +120,7 @@ def run_gui_data():
     # Data in Memory Panel
     k = 4
     for i in simu.RAM:
+        i = re.sub(r"\n", " ", str(i))
         t_mem.insert(END, str(k - 4) + " : " + str(i) + "\n")
         k += 1
     t_mem.pack(side=TOP, fill=X)
@@ -140,6 +148,42 @@ def run_gui_data():
 
 def modify_gui_data():
     simu.main()
+    if simu.Throw_error_instr.is_error_there:
+        response = 0
+
+        def popclick():
+            response = askyesno("Execution Stopped!", "Error found in your assembly code on line " +
+                                str(simu.Throw_error_instr.line_fault + 1) + ".\n\n" + str(
+                simu.lines[simu.Throw_error_instr.line_fault]) +
+                                "\n\nExit?")
+            if response == 1:
+                root.destroy()
+
+        if response == 1:
+            root.quit()
+        popclick()
+
+    else:
+        run_gui_data()
+        current_instr_label.configure(state='normal')
+        current_instr_label.delete("1.0", END)
+        current_instr_label.insert(END, "On Line: " + str(simu.PC))
+        current_instr_label.configure(state='disabled')
+        step_exe.configure(state=DISABLED)
+
+
+simu.pre_data_process()
+
+
+def modify_gui_data_once():
+    simu.main_once()
+    # current_instr_label.grid_forget()
+    current_instr_label.configure(state='normal')
+    current_instr_label.delete("1.0", END)
+    current_instr_label.insert(END, "On Line: " + str(simu.PC))
+    current_instr_label.configure(state='disabled')
+    if simu.PC >= simu.REGISTERS["ra"]:
+        step_exe.configure(state=DISABLED)
     if simu.Throw_error_instr.is_error_there:
         response = 0
 

@@ -55,7 +55,7 @@ def rm_comments():
         i += 1
 
 
-def main():
+def pre_data_process():
     # Processing all input data
     RAM.clear()
     i = 0
@@ -92,8 +92,8 @@ def main():
                 # Process strings
                 elif re.findall(r"^\.asciiz", lines[i]):
                     line = lines[i][9:len(lines[i]) - 1]
-                    line = re.sub(r"\\n", "", line)
-                    line = re.sub(r"\\t", "    ", line)
+                    line = re.sub(r"\\n", "\n", line)
+                    line = re.sub(r"\\t", "\t", line)
                     RAM.append(line)
                     ram_iter += 1
 
@@ -123,273 +123,6 @@ def main():
 
         i += 1
 
-    # Define the functions for simulating
-    def add_instr(instr_line):
-        instr_line = instr_line.split(",")
-        for l in range(len(instr_line)):
-            instr_line[l] = str(instr_line[l].strip()[1:])
-
-        # If address is stored add subtract only val/4 because of indexing
-        # add $t2, $zero, $s0
-        if isinstance(REGISTERS[instr_line[1]], str) and isinstance(REGISTERS[instr_line[2]], int):
-            REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]][2:]) + int(REGISTERS[instr_line[2]]) // 4
-            REGISTERS[instr_line[0]] = "0x" + str(REGISTERS[instr_line[0]])
-        elif isinstance(REGISTERS[instr_line[1]], int) and isinstance(REGISTERS[instr_line[2]], str):
-            REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) // 4 + int(REGISTERS[instr_line[2]][2:])
-            REGISTERS[instr_line[0]] = "0x" + str(REGISTERS[instr_line[0]])
-
-        # Normal add instruction of register having two ints
-        # add $t2, $t1, $t0
-        elif isinstance(REGISTERS[instr_line[1]], int) and isinstance(REGISTERS[instr_line[2]], int):
-            REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) + int(REGISTERS[instr_line[2]])
-
-        else:
-            print("Invalid instruction format.")
-        return PC + 1
-
-    def sub_instr(instr_line):
-        instr_line = instr_line.split(",")
-        for l in range(len(instr_line)):
-            instr_line[l] = str(instr_line[l].strip()[1:])
-        if isinstance(REGISTERS[instr_line[1]], str) and isinstance(REGISTERS[instr_line[2]], int):
-            REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]][2:]) - int(REGISTERS[instr_line[2]]) // 4
-            REGISTERS[instr_line[0]] = "0x" + str(REGISTERS[instr_line[0]])
-        elif isinstance(REGISTERS[instr_line[1]], int) and isinstance(REGISTERS[instr_line[2]], str):
-            REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) // 4 - int(REGISTERS[instr_line[2]][2:])
-            REGISTERS[instr_line[0]] = "0x" + str(REGISTERS[instr_line[0]])
-
-        elif isinstance(REGISTERS[instr_line[1]], int) and isinstance(REGISTERS[instr_line[2]], int):
-            REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) - int(REGISTERS[instr_line[2]])
-
-        else:
-            print("Invalid instruction format.")
-        return PC + 1
-
-    def lw_instr(instr_line):
-        # lw $s3, 0($t3)
-        instr_line = instr_line.split(",")
-        instr_line[0] = str(instr_line[0].strip()[1:])
-
-        instr_line[1] = instr_line[1].strip()
-        adv = int(instr_line[1].split(sep="(", maxsplit=1)[0]) // 4
-
-        instr_line[1] = instr_line[1].split(sep="$", maxsplit=1)[1][:-1]
-
-        # To load register from memory
-        REGISTERS[instr_line[0]] = RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv]
-
-        return PC + 1
-
-    def sw_instr(instr_line):
-        # sw $s3, 0($t3)
-        instr_line = instr_line.split(",")
-        instr_line[0] = str(instr_line[0].strip()[1:])
-
-        instr_line[1] = instr_line[1].strip()
-        adv = int(instr_line[1].split(sep="(", maxsplit=1)[0]) // 4
-
-        instr_line[1] = instr_line[1].split(sep="$", maxsplit=1)[1][:-1]
-
-        # To store register into memory
-        RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv] = int(REGISTERS[instr_line[0]])
-        return PC + 1
-
-    def bne_instr(instr_line):
-        #  bne $t1, $s2, loop
-        instr_line = instr_line.split(",")
-        for l in range(len(instr_line) - 1):
-            instr_line[l] = str(instr_line[l].strip()[1:])
-        instr_line[2] = instr_line[2].strip()
-        if REGISTERS[instr_line[0]] == REGISTERS[instr_line[1]]:
-            return PC + 1
-
-        return int(instr_label[instr_line[2]])
-
-    def beq_instr(instr_line):
-        #  beq $t1, $s2, loop
-        instr_line = instr_line.split(",")
-        for l in range(len(instr_line) - 1):
-            instr_line[l] = str(instr_line[l].strip()[1:])
-        instr_line[2] = instr_line[2].strip()
-        if REGISTERS[instr_line[0]] != REGISTERS[instr_line[1]]:
-            return PC + 1
-
-        return int(instr_label[instr_line[2]])
-
-    def j_instr(instr_line):
-        return instr_label[instr_line]
-
-    def lui_instr(instr_line):
-        # lui $s0, 0x1001
-        instr_line = instr_line.split(",")
-        instr_line[0] = instr_line[0].strip()[1:]
-        instr_line[1] = instr_line[1].strip()
-        REGISTERS[instr_line[0]] = instr_line[1]
-        global BaseAdr
-        BaseAdr = str(instr_line[1])
-        return PC + 1
-
-    def addi_instr(instr_line):
-        # addi $s2, $s2, -1
-        instr_line = instr_line.split(",")
-        for l in range(len(instr_line) - 1):
-            instr_line[l] = str(instr_line[l].strip()[1:])
-        instr_line[2] = instr_line[2].strip()
-
-        if isinstance(REGISTERS[instr_line[1]], str):
-            REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]][2:]) + int(instr_line[2]) // 4
-            REGISTERS[instr_line[0]] = "0x" + str(REGISTERS[instr_line[0]])
-        else:
-            REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) + int(instr_line[2])
-
-        return PC + 1
-
-    def li_instr(instr_line):
-        instr_line = instr_line.split(",")
-        for l in range(len(instr_line) - 1):
-            instr_line[l] = str(instr_line[l].strip()[1:])
-        instr_line[1] = instr_line[1].strip()
-        REGISTERS[instr_line[0]] = int(instr_line[1])
-
-        return PC + 1
-
-    def sll_instr(instr_line):
-        instr_line = instr_line.split(",")
-        for l in range(len(instr_line) - 1):
-            instr_line[l] = str(instr_line[l].strip()[1:])
-
-        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) * pow(2, int(instr_line[2]))
-
-        return PC + 1
-
-    def srl_instr(instr_line):
-        instr_line = instr_line.split(",")
-        for l in range(len(instr_line) - 1):
-            instr_line[l] = str(instr_line[l].strip()[1:])
-
-        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) // pow(2, int(instr_line[2]))
-
-        return PC + 1
-
-    def la_instr(instr_line):
-        # la $a0, space
-        instr_line = instr_line.split(",")
-        instr_line[0] = str(instr_line[0].strip()[1:])
-        instr_line[1] = str(instr_line[1].strip())
-
-        # Getting adr of label
-        REGISTERS[instr_line[0]] = int(BaseAdr[2:]) + ram_label[instr_line[1]]
-        REGISTERS[instr_line[0]] = "0x" + str(REGISTERS[instr_line[0]])
-
-        return PC + 1
-
-    def slt_instr(instr_line):
-        # slt $t4, $s3, $s4               #set $t4 = 1 if $s3 < $s4
-        instr_line = instr_line.split(",")
-        for l in range(len(instr_line)):
-            instr_line[l] = str(instr_line[l].strip()[1:])
-        REGISTERS[instr_line[0]] = int(int(REGISTERS[instr_line[1]]) < int(REGISTERS[instr_line[2]]))
-
-        return PC + 1
-
-    def syscall_instr():
-        l_type = lines[PC - 1]
-        l_type = l_type.split(sep=" ")
-        l_type[0] = l_type[0].strip()
-        l_type[1] = l_type[1].strip()[1:-1]
-        l_type[2] = l_type[2].strip()
-        if l_type[0] == "li" and l_type[1][0] == 'v':
-            # For exit
-            #   li $v0, 10
-            #   syscall
-
-            if int(l_type[2]) == 10:
-                return REGISTERS["ra"]
-
-        else:
-            # Others
-            # li $v0, 4
-            # la $a0, space
-            # syscall
-
-            l_print = l_type
-            l_type = lines[PC - 2]
-
-            l_type = l_type.split(sep=" ")
-            l_type[0] = l_type[0].strip()
-            l_type[1] = l_type[1].strip()[1:-1]
-            l_type[2] = l_type[2].strip()
-
-            if int(l_type[2]) == 1:
-                # Print register value
-                cnsl.append(REGISTERS[l_print[1]])
-                print(REGISTERS[l_print[1]])
-
-            elif int(l_type[2]) == 4:
-                # Print asciiz text
-                cnsl.append(RAM[ram_label[l_print[2]]])
-                print(RAM[ram_label[l_print[2]]])
-
-        return PC + 1
-
-    # Finding the type of current instruction to be parsed
-    def find_instr_type(line):
-        # Checking for labels beforehand
-        if re.findall(r"^\w*\s*:", line):
-            label = line.split(sep=":", maxsplit=1)
-            line = label[1].strip()
-            label = label[0].strip()
-            instr_label[label] = PC
-            if line == '':
-                return PC + 1
-
-        instr_word = line.split(sep=" ", maxsplit=1)
-        try:
-            instr_line = instr_word[1]
-        except:
-            pass
-        instr_word = instr_word[0]
-
-        # Switching:
-        if instr_word == 'add':
-            return add_instr(instr_line)
-        elif instr_word == 'sub':
-            return sub_instr(instr_line)
-        elif instr_word == 'bne':
-            return bne_instr(instr_line)
-        elif instr_word == 'beq':
-            return beq_instr(instr_line)
-        elif instr_word == 'j':
-            return j_instr(instr_line)
-        elif instr_word == 'lw':
-            return lw_instr(instr_line)
-        elif instr_word == 'sw':
-            return sw_instr(instr_line)
-        elif instr_word == 'lui':
-            return lui_instr(instr_line)
-        elif instr_word == 'addi':
-            return addi_instr(instr_line)
-        elif instr_word == 'sll':
-            return sll_instr(instr_line)
-        elif instr_word == 'srl':
-            return srl_instr(instr_line)
-        elif instr_word == 'jr':
-            return REGISTERS["ra"]
-        elif instr_word == 'li':
-            return li_instr(instr_line)
-        elif instr_word == 'la':
-            return la_instr(instr_line)
-        elif instr_word == 'slt':
-            return slt_instr(instr_line)
-
-        elif instr_word == 'syscall':
-            return syscall_instr()
-        else:
-            print("Invalid Instruction Set ",instr_word," !!! Aborting...")
-            Throw_error_instr.error_occurred(PC)
-
-            return len(lines)
-
     # Preprocess all labels
     i = PC
     while i < len(lines):
@@ -399,10 +132,303 @@ def main():
 
         i += 1
 
-    # Process instructions line by line
+
+def main():
+    pre_data_process()
+
     while PC < len(lines):
-        PC = find_instr_type(lines[PC])
+        main_once()
 
     print("Final Memory state: \n", RAM)
     print("=" * 100)
     print("Register values: \n", REGISTERS)
+
+
+def main_once():
+    # Process instructions line by line
+    global PC
+
+    PC = find_instr_type(lines[PC])
+
+
+# Define the functions for simulating
+def add_instr(instr_line):
+    instr_line = instr_line.split(",")
+    for l in range(len(instr_line)):
+        instr_line[l] = str(instr_line[l].strip()[1:])
+
+    # If address is stored add subtract only val/4 because of indexing
+    # add $t2, $zero, $s0
+    if isinstance(REGISTERS[instr_line[1]], str) and isinstance(REGISTERS[instr_line[2]], int):
+        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]][2:]) + int(REGISTERS[instr_line[2]]) // 4
+        REGISTERS[instr_line[0]] = "0x" + str(REGISTERS[instr_line[0]])
+    elif isinstance(REGISTERS[instr_line[1]], int) and isinstance(REGISTERS[instr_line[2]], str):
+        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) // 4 + int(REGISTERS[instr_line[2]][2:])
+        REGISTERS[instr_line[0]] = "0x" + str(REGISTERS[instr_line[0]])
+
+    # Normal add instruction of register having two ints
+    # add $t2, $t1, $t0
+    elif isinstance(REGISTERS[instr_line[1]], int) and isinstance(REGISTERS[instr_line[2]], int):
+        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) + int(REGISTERS[instr_line[2]])
+
+    else:
+        print("Invalid instruction format.")
+    return PC + 1
+
+
+def sub_instr(instr_line):
+    instr_line = instr_line.split(",")
+    for l in range(len(instr_line)):
+        instr_line[l] = str(instr_line[l].strip()[1:])
+    if isinstance(REGISTERS[instr_line[1]], str) and isinstance(REGISTERS[instr_line[2]], int):
+        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]][2:]) - int(REGISTERS[instr_line[2]]) // 4
+        REGISTERS[instr_line[0]] = "0x" + str(REGISTERS[instr_line[0]])
+    elif isinstance(REGISTERS[instr_line[1]], int) and isinstance(REGISTERS[instr_line[2]], str):
+        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) // 4 - int(REGISTERS[instr_line[2]][2:])
+        REGISTERS[instr_line[0]] = "0x" + str(REGISTERS[instr_line[0]])
+
+    elif isinstance(REGISTERS[instr_line[1]], int) and isinstance(REGISTERS[instr_line[2]], int):
+        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) - int(REGISTERS[instr_line[2]])
+
+    else:
+        print("Invalid instruction format.")
+    return PC + 1
+
+
+def lw_instr(instr_line):
+    # lw $s3, 0($t3)
+    instr_line = instr_line.split(",")
+    instr_line[0] = str(instr_line[0].strip()[1:])
+
+    instr_line[1] = instr_line[1].strip()
+    adv = int(instr_line[1].split(sep="(", maxsplit=1)[0]) // 4
+
+    instr_line[1] = instr_line[1].split(sep="$", maxsplit=1)[1][:-1]
+
+    # To load register from memory
+    REGISTERS[instr_line[0]] = RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv]
+
+    return PC + 1
+
+
+def sw_instr(instr_line):
+    # sw $s3, 0($t3)
+    instr_line = instr_line.split(",")
+    instr_line[0] = str(instr_line[0].strip()[1:])
+
+    instr_line[1] = instr_line[1].strip()
+    adv = int(instr_line[1].split(sep="(", maxsplit=1)[0]) // 4
+
+    instr_line[1] = instr_line[1].split(sep="$", maxsplit=1)[1][:-1]
+
+    # To store register into memory
+    RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv] = int(REGISTERS[instr_line[0]])
+    return PC + 1
+
+
+def bne_instr(instr_line):
+    #  bne $t1, $s2, loop
+    instr_line = instr_line.split(",")
+    for l in range(len(instr_line) - 1):
+        instr_line[l] = str(instr_line[l].strip()[1:])
+    instr_line[2] = instr_line[2].strip()
+    if REGISTERS[instr_line[0]] == REGISTERS[instr_line[1]]:
+        return PC + 1
+
+    return int(instr_label[instr_line[2]])
+
+
+def beq_instr(instr_line):
+    #  beq $t1, $s2, loop
+    instr_line = instr_line.split(",")
+    for l in range(len(instr_line) - 1):
+        instr_line[l] = str(instr_line[l].strip()[1:])
+    instr_line[2] = instr_line[2].strip()
+    if REGISTERS[instr_line[0]] != REGISTERS[instr_line[1]]:
+        return PC + 1
+
+    return int(instr_label[instr_line[2]])
+
+
+def j_instr(instr_line):
+    return instr_label[instr_line]
+
+
+def lui_instr(instr_line):
+    # lui $s0, 0x1001
+    instr_line = instr_line.split(",")
+    instr_line[0] = instr_line[0].strip()[1:]
+    instr_line[1] = instr_line[1].strip()
+    REGISTERS[instr_line[0]] = instr_line[1]
+    global BaseAdr
+    BaseAdr = str(instr_line[1])
+    return PC + 1
+
+
+def addi_instr(instr_line):
+    # addi $s2, $s2, -1
+    instr_line = instr_line.split(",")
+    for l in range(len(instr_line) - 1):
+        instr_line[l] = str(instr_line[l].strip()[1:])
+    instr_line[2] = instr_line[2].strip()
+
+    if isinstance(REGISTERS[instr_line[1]], str):
+        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]][2:]) + int(instr_line[2]) // 4
+        REGISTERS[instr_line[0]] = "0x" + str(REGISTERS[instr_line[0]])
+    else:
+        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) + int(instr_line[2])
+
+    return PC + 1
+
+
+def li_instr(instr_line):
+    instr_line = instr_line.split(",")
+    for l in range(len(instr_line) - 1):
+        instr_line[l] = str(instr_line[l].strip()[1:])
+    instr_line[1] = instr_line[1].strip()
+    REGISTERS[instr_line[0]] = int(instr_line[1])
+
+    return PC + 1
+
+
+def sll_instr(instr_line):
+    instr_line = instr_line.split(",")
+    for l in range(len(instr_line) - 1):
+        instr_line[l] = str(instr_line[l].strip()[1:])
+
+    REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) * pow(2, int(instr_line[2]))
+
+    return PC + 1
+
+
+def srl_instr(instr_line):
+    instr_line = instr_line.split(",")
+    for l in range(len(instr_line) - 1):
+        instr_line[l] = str(instr_line[l].strip()[1:])
+
+    REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) // pow(2, int(instr_line[2]))
+
+    return PC + 1
+
+
+def la_instr(instr_line):
+    # la $a0, space
+    instr_line = instr_line.split(",")
+    instr_line[0] = str(instr_line[0].strip()[1:])
+    instr_line[1] = str(instr_line[1].strip())
+
+    # Getting adr of label
+    REGISTERS[instr_line[0]] = int(BaseAdr[2:]) + ram_label[instr_line[1]]
+    REGISTERS[instr_line[0]] = "0x" + str(REGISTERS[instr_line[0]])
+
+    return PC + 1
+
+
+def slt_instr(instr_line):
+    # slt $t4, $s3, $s4               #set $t4 = 1 if $s3 < $s4
+    instr_line = instr_line.split(",")
+    for l in range(len(instr_line)):
+        instr_line[l] = str(instr_line[l].strip()[1:])
+    REGISTERS[instr_line[0]] = int(int(REGISTERS[instr_line[1]]) < int(REGISTERS[instr_line[2]]))
+
+    return PC + 1
+
+
+def syscall_instr():
+    l_type = lines[PC - 1]
+    l_type = l_type.split(sep=" ")
+    l_type[0] = l_type[0].strip()
+    l_type[1] = l_type[1].strip()[1:-1]
+    l_type[2] = l_type[2].strip()
+    if l_type[0] == "li" and l_type[1][0] == 'v':
+        # For exit
+        #   li $v0, 10
+        #   syscall
+
+        if int(l_type[2]) == 10:
+            return REGISTERS["ra"]
+
+    else:
+        # Others
+        # li $v0, 4
+        # la $a0, space
+        # syscall
+
+        l_print = l_type
+        l_type = lines[PC - 2]
+
+        l_type = l_type.split(sep=" ")
+        l_type[0] = l_type[0].strip()
+        l_type[1] = l_type[1].strip()[1:-1]
+        l_type[2] = l_type[2].strip()
+
+        if int(l_type[2]) == 1:
+            # Print register value
+            cnsl.append(REGISTERS[l_print[1]])
+            print(REGISTERS[l_print[1]])
+
+        elif int(l_type[2]) == 4:
+            # Print asciiz text
+            cnsl.append(RAM[ram_label[l_print[2]]])
+            print(RAM[ram_label[l_print[2]]])
+
+    return PC + 1
+
+
+# Finding the type of current instruction to be parsed
+def find_instr_type(line):
+    # Checking for labels beforehand
+    if re.findall(r"^\w*\s*:", line):
+        label = line.split(sep=":", maxsplit=1)
+        line = label[1].strip()
+        label = label[0].strip()
+        instr_label[label] = PC
+        if line == '':
+            return PC + 1
+
+    instr_word = line.split(sep=" ", maxsplit=1)
+    try:
+        instr_line = instr_word[1]
+    except:
+        pass
+    instr_word = instr_word[0]
+
+    # Switching:
+    if instr_word == 'add':
+        return add_instr(instr_line)
+    elif instr_word == 'sub':
+        return sub_instr(instr_line)
+    elif instr_word == 'bne':
+        return bne_instr(instr_line)
+    elif instr_word == 'beq':
+        return beq_instr(instr_line)
+    elif instr_word == 'j':
+        return j_instr(instr_line)
+    elif instr_word == 'lw':
+        return lw_instr(instr_line)
+    elif instr_word == 'sw':
+        return sw_instr(instr_line)
+    elif instr_word == 'lui':
+        return lui_instr(instr_line)
+    elif instr_word == 'addi':
+        return addi_instr(instr_line)
+    elif instr_word == 'sll':
+        return sll_instr(instr_line)
+    elif instr_word == 'srl':
+        return srl_instr(instr_line)
+    elif instr_word == 'jr':
+        return REGISTERS["ra"]
+    elif instr_word == 'li':
+        return li_instr(instr_line)
+    elif instr_word == 'la':
+        return la_instr(instr_line)
+    elif instr_word == 'slt':
+        return slt_instr(instr_line)
+
+    elif instr_word == 'syscall':
+        return syscall_instr()
+    else:
+        print("Invalid Instruction Set ", instr_word, " !!! Aborting...")
+        Throw_error_instr.error_occurred(PC)
+
+        return len(lines)

@@ -5,6 +5,7 @@
 * Anu Anand Annu (CS19B044)
 
 ### Simulate MIPS Architecture instruction sets
+* Main starting file is **gui.py**
 * The simulator supports the following MIPS instructions: 
   * add/sub
   * bne/beq
