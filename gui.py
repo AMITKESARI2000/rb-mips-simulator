@@ -1,34 +1,11 @@
 from tkinter import *
+from tkinter.messagebox import showinfo
 import simu
-import re
-
-# Data just for checking
-# file = open("testingbubblesort.asm", "r")
-# lines = file.readlines()
-# file.close()
 
 simu.rm_cmnts()
 
-# i=0
-# while i < len(lines):
-#     lines[i] = lines[i].strip().lower()
-#
-#     if re.findall(r"^# *", lines[i]) or (re.findall(r"^\n", lines[i]) and len(lines[i] == '\n'.length())):
-#         lines.remove(lines[i])
-#         i -= 1
-#     if len(lines[i]) == 0:
-#         lines.remove(lines[i])
-#         i -= 1
-#     i += 1
-
-# REGISTERS = {'r': 0, 'at': 0, 'v0': 0, 'v1': 0, 'a0': 0, 'a1': 0, 'a2': 0, 'a3': 0,
-#              's0': 0, 's1': 1, 's2': 0, 's3': 0, 's4': 0, 's5': 0, 's6': 0, 's7': 0, 's8': 0,
-#              't0': 0, 't1': 0, 't2': 0, 't3': 0, 't4': 0, 't5': 0, 't6': 0, 't7': 0, 't8': 0, 't9': 0,
-#              'k0': 0, 'k1': 0, 'zero': 0}
-#
-# MEMORY = [600, 'IIT TIRUPATI', 200, 12, 0, 122]
-
 root = Tk()
+
 
 #root.resizable(width=False, height=False) #Restricting Resizable
 root.title("rb mips simulator 😎")
@@ -44,8 +21,11 @@ head = Label(head_panel, text="SIMULATOR", font=("Arial", 13))
 head_panel.add(head)
 
 # Execution Panel
-step_exe = Button(text="Step By Step Execution", bg="red", fg="white").pack(side=LEFT)
+step_exe = Button(text="Step By Step Execution", bg="red", fg="white", command=lambda: showinfo("Message", "STILL IN PROGRESS!!!")).pack(side=LEFT)
+space1 = Button(text="      ", bg="white").pack(side=LEFT)
 once_exe = Button(text="At Once Execution", bg="blue", fg="white", command=lambda: modify_gui_data()).pack(side=LEFT)
+space2 = Button(text="      ", bg="white").pack(side=LEFT)
+console_button = Button(text="Upload a file", bg="green", fg="white", command=lambda: showinfo("Message", "STILL IN PROGRESS!!!")).pack(side=LEFT)
 
 # Body Panel
 body_panel = PanedWindow(simulator_body, orient=HORIZONTAL, relief="raised", bg="black")
@@ -99,7 +79,7 @@ t_user = Text(user_body, height = 15, width = 50, wrap = NONE, yscrollcommand = 
 console_panel = PanedWindow(user_panel, orient="vertical", relief="raised", bg="white")
 user_panel.add(console_panel)
 
-console_head = Label(console_panel, text="CONSOLE", relief="raised", bg="white", height=1, font=("Arial", 10))
+console_head = Label(console_panel, text="CONSOLE", relief="raised", height=1, font=("Arial", 10))
 console_panel.add(console_head)
 
 console = Label(console_panel, bg="black", font=("Arial", 13), fg="yellow")
@@ -147,6 +127,7 @@ def run_gui_data():
     for i in simu.cnsl:
         t_console.insert(END, str(i)+" ")
     t_console.pack(side=TOP, fill=X)
+    simu.cnsl = []
 
     t_reg.configure(state='disabled')
     t_mem.configure(state='disabled')

@@ -320,7 +320,7 @@ def main():
 
             elif int(l_type[2]) == 4:
                 # Print asciiz text
-                #cnsl.append(REGISTERS[l_print[1]])
+                cnsl.append(RAM[ram_label[l_print[2]]])
                 print(RAM[ram_label[l_print[2]]])
 
         return PC + 1

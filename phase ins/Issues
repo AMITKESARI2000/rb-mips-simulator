@@ -1,5 +1,5 @@
 1) new line after label for .word(eg: .word:
                                         10, 20,20)
-4) console
-5) adding file option in gui
-6) step into
+2) console: Bug in printing in console
+3) adding file option in gui
+4) step into
