@@ -13,21 +13,37 @@ instr_label = {}
 PC = 0
 cnsl = []
 
-REGISTERS = {'r': 0, 'ra': 0, 'at': 0, 'v0': 0, 'v1': 0, 'a0': 0, 'a1': 0, 'a2': 0, 'a3': 0,
+
+class InstrSyntaxError:
+    def __init__(self, is_error_there, line_fault):
+        self.is_error_there = is_error_there
+        self.line_fault = line_fault
+
+    def error_occurred(self, index):
+        print("Syntax Error occurred on line '", lines[index], "'. Please fix it.")
+        self.is_error_there = True
+        self.line_fault = index
+        global PC
+        PC = REGISTERS["ra"]
+
+
+Throw_error_instr = InstrSyntaxError(is_error_there=False, line_fault=0)
+
+REGISTERS = {'zero': 0, 'ra': 0, 'at': 0, 'v0': 0, 'v1': 0, 'a0': 0, 'a1': 0, 'a2': 0, 'a3': 0,
              's0': 0, 's1': 1, 's2': 0, 's3': 0, 's4': 0, 's5': 0, 's6': 0, 's7': 0, 's8': 0,
              't0': 0, 't1': 0, 't2': 0, 't3': 0, 't4': 0, 't5': 0, 't6': 0, 't7': 0, 't8': 0, 't9': 0,
-             'k0': 0, 'k1': 0, 'zero': 0}  # 30
+             'r': 0, 'k0': 0, 'k1': 0, 'sp': '0x20000'}  # 32
 
 BaseAdr = "0x1000"
-sp = 0x7ffff8bc
 
 is_program_done = False
 
+
 # Removing all comments and unnecessary white spaces
-def rm_cmnts():
+def rm_comments():
     i = 0
     while i < len(lines):
-        lines[i] = lines[i].strip().lower()
+        lines[i] = lines[i].strip()
 
         if re.findall(r"^# *", lines[i]) or (re.findall(r"^\n", lines[i]) and len(lines[i] == '\n'.length())):
             lines.remove(lines[i])
@@ -58,8 +74,8 @@ def main():
                 # Process labels
                 if lines[i][0] != '.':
                     s = lines[i].split(sep=':', maxsplit=1)  # new line after label for .word
-                    lines[i] = s[1][1:]
-                    s = s[0]
+                    lines[i] = s[1].strip()
+                    s = s[0].strip()
                     global ram_iter
                     ram_label[s] = ram_iter
 
@@ -80,13 +96,19 @@ def main():
                     line = re.sub(r"\\t", "    ", line)
                     RAM.append(line)
                     ram_iter += 1
+
+                else:
+                    Throw_error_instr.error_occurred(i)
+                    return
         if re.findall(r"^\.globl", lines[i]):
             i += 1
             break
+
         i += 1
 
     print("Initial Memory:\n", RAM)
     print("=" * 100)
+    global PC
     PC = i
     REGISTERS["ra"] = len(lines)
 
@@ -100,7 +122,6 @@ def main():
             lines[i] = lines[i][:j]
 
         i += 1
-
 
     # Define the functions for simulating
     def add_instr(instr_line):
@@ -126,7 +147,6 @@ def main():
             print("Invalid instruction format.")
         return PC + 1
 
-
     def sub_instr(instr_line):
         instr_line = instr_line.split(",")
         for l in range(len(instr_line)):
@@ -145,7 +165,6 @@ def main():
             print("Invalid instruction format.")
         return PC + 1
 
-
     def lw_instr(instr_line):
         # lw $s3, 0($t3)
         instr_line = instr_line.split(",")
@@ -161,7 +180,6 @@ def main():
 
         return PC + 1
 
-
     def sw_instr(instr_line):
         # sw $s3, 0($t3)
         instr_line = instr_line.split(",")
@@ -176,34 +194,30 @@ def main():
         RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv] = int(REGISTERS[instr_line[0]])
         return PC + 1
 
-
     def bne_instr(instr_line):
         #  bne $t1, $s2, loop
         instr_line = instr_line.split(",")
         for l in range(len(instr_line) - 1):
             instr_line[l] = str(instr_line[l].strip()[1:])
-        instr_line[2] = instr_line[2][1:]
+        instr_line[2] = instr_line[2].strip()
         if REGISTERS[instr_line[0]] == REGISTERS[instr_line[1]]:
             return PC + 1
 
         return int(instr_label[instr_line[2]])
-
 
     def beq_instr(instr_line):
         #  beq $t1, $s2, loop
         instr_line = instr_line.split(",")
         for l in range(len(instr_line) - 1):
             instr_line[l] = str(instr_line[l].strip()[1:])
-        instr_line[2] = instr_line[2][1:]
+        instr_line[2] = instr_line[2].strip()
         if REGISTERS[instr_line[0]] != REGISTERS[instr_line[1]]:
             return PC + 1
 
         return int(instr_label[instr_line[2]])
 
-
     def j_instr(instr_line):
         return instr_label[instr_line]
-
 
     def lui_instr(instr_line):
         # lui $s0, 0x1001
@@ -214,7 +228,6 @@ def main():
         global BaseAdr
         BaseAdr = str(instr_line[1])
         return PC + 1
-
 
     def addi_instr(instr_line):
         # addi $s2, $s2, -1
@@ -231,7 +244,6 @@ def main():
 
         return PC + 1
 
-
     def li_instr(instr_line):
         instr_line = instr_line.split(",")
         for l in range(len(instr_line) - 1):
@@ -240,7 +252,6 @@ def main():
         REGISTERS[instr_line[0]] = int(instr_line[1])
 
         return PC + 1
-
 
     def sll_instr(instr_line):
         instr_line = instr_line.split(",")
@@ -251,7 +262,6 @@ def main():
 
         return PC + 1
 
-
     def srl_instr(instr_line):
         instr_line = instr_line.split(",")
         for l in range(len(instr_line) - 1):
@@ -260,7 +270,6 @@ def main():
         REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) // pow(2, int(instr_line[2]))
 
         return PC + 1
-
 
     def la_instr(instr_line):
         # la $a0, space
@@ -274,7 +283,6 @@ def main():
 
         return PC + 1
 
-
     def slt_instr(instr_line):
         # slt $t4, $s3, $s4               #set $t4 = 1 if $s3 < $s4
         instr_line = instr_line.split(",")
@@ -283,7 +291,6 @@ def main():
         REGISTERS[instr_line[0]] = int(int(REGISTERS[instr_line[1]]) < int(REGISTERS[instr_line[2]]))
 
         return PC + 1
-
 
     def syscall_instr():
         l_type = lines[PC - 1]
@@ -325,14 +332,13 @@ def main():
 
         return PC + 1
 
-
     # Finding the type of current instruction to be parsed
     def find_instr_type(line):
         # Checking for labels beforehand
-        if re.findall(r"^\w*:", line):
+        if re.findall(r"^\w*\s*:", line):
             label = line.split(sep=":", maxsplit=1)
-            line = label[1][1:]
-            label = label[0]
+            line = label[1].strip()
+            label = label[0].strip()
             instr_label[label] = PC
             if line == '':
                 return PC + 1
@@ -379,15 +385,16 @@ def main():
         elif instr_word == 'syscall':
             return syscall_instr()
         else:
-            print("Invalid Instruction Set!!! Aborting...")
-            return len(lines)
+            print("Invalid Instruction Set ",instr_word," !!! Aborting...")
+            Throw_error_instr.error_occurred(PC)
 
+            return len(lines)
 
     # Preprocess all labels
     i = PC
     while i < len(lines):
         if re.findall(r"^\w*:", lines[i]):
-            label_name = lines[i].split(sep=":", maxsplit=1)[0]
+            label_name = lines[i].split(sep=":", maxsplit=1)[0].strip()
             instr_label[label_name] = i
 
         i += 1
