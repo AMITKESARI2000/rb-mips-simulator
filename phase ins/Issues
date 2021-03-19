@@ -1,3 +1,6 @@
-1) new line after label for .word(eg: .word:
-                                        10, 20,20)
-3) adding file option in gui
+
+
+2) error not detected for $s kind
+
+
+

@@ -10,7 +10,7 @@ root = Tk()
 # root.resizable(width=False, height=False) #Restricting Resizable
 root.title("RB Mips Simulator 😎")
 # Panel
-simulator_body = PanedWindow(orient=VERTICAL, width=1400, height=700, bg="black")
+simulator_body = PanedWindow(orient=VERTICAL, width=1300, height=600, bg="black")
 simulator_body.pack(fill=BOTH, expand=1)
 
 # Head Panel
