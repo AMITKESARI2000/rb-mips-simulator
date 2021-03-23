@@ -26,3 +26,6 @@ the contents of the registers, and the memory.
 
   
 ---
+
+### Phase 2
+In phase 2 we are implementing pipeline so that the throughput can be increased.
