@@ -138,7 +138,6 @@ def pre_data_process():
 
 def main():
     pre_data_process()
-
     while PC < len(lines):
         main_once()
 
