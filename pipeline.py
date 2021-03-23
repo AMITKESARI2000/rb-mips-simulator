@@ -5,22 +5,34 @@ CLOCK_OF_GOD = 0
 
 
 class HWUnits:
-    def __init__(self, current_instr_line, stalls_left):
+    def __init__(self, current_instr_line, stalls_left, dissambled_instr):
         self.current_instr_line = 0
         self.stalls_left = 0
+        self.dissambled_instr = []
 
     def instr_breakdown(self, current_instr_line):
         line = simu.lines[current_instr_line].strip()
         line = line.split(sep=" ", maxsplit=1)
 
-        dissambled_instr = []
-        dissambled_instr.append(line[0].strip())  # as sw functionality is different
+        self.dissambled_instr.append(line[0].strip())  # as sw functionality is different
         line[1] = re.findall(r"\$\w?\w\w?\w", line[1])
         for l in line[1]:
             l = l.strip()[1:]
-            dissambled_instr.append(l)
-        print(dissambled_instr)
-        return dissambled_instr
+            self.dissambled_instr.append(l)
+        print(self.dissambled_instr)
+        return self.dissambled_instr
+
+    def check_for_stall(self, current_instr_line):
+        print(1, Pipeline_units[0].disammbled_instr)
+        print(2, Pipeline_units[1].disammbled_instr)
+        print(3, Pipeline_units[2].disammbled_instr)
+        print(4, Pipeline_units[3].disammbled_instr)
+        print(5, Pipeline_units[4].disammbled_instr)
+
+        # Check current instr dependency on prev instr
+        if len(Pipeline_units[0].dissambled_instr == 4):
+            if (Pipeline_units[0].dissambled_instr[2] == Pipeline_units[1].dissambled_instr[1]) or (Pipeline_units[0].dissambled_instr[3] == Pipeline_units[1].dissambled_instr[1]):
+                Pipeline_units[0].is_stall(simu.PC)
 
     def is_stall(self, current_instr_line):
         stall = 0
@@ -42,7 +54,7 @@ Pipeline_units = [HWUnits(current_instr_line=0, stalls_left=0),  # IF
                   HWUnits(current_instr_line=0, stalls_left=0),  # MEM
                   HWUnits(current_instr_line=0, stalls_left=0)]  # WB
 
-Pipeline_units[1].instr_breakdown(12)
+# Pipeline_units[1].instr_breakdown(12)
 
 is_Program_Done = False
 
