@@ -43,3 +43,11 @@ Pipeline_units = [HWUnits(current_instr_line=0, stalls_left=0),  # IF
                   HWUnits(current_instr_line=0, stalls_left=0)]  # WB
 
 Pipeline_units[1].instr_breakdown(12)
+
+is_Program_Done = False
+
+simu.rm_comments()
+simu.pre_data_process()
+
+while not is_Program_Done :
+
