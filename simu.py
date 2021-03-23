@@ -127,7 +127,10 @@ def pre_data_process():
     i = PC
     while i < len(lines):
         if re.findall(r"^\w*:", lines[i]):
-            label_name = lines[i].split(sep=":", maxsplit=1)[0].strip()
+            label_name_array = lines[i].split(sep=":", maxsplit=1)
+            label_name = label_name_array[0].strip()
+            if len(label_name_array[1]) == 0 :
+                lines.remove(lines[i])
             instr_label[label_name] = i
 
         i += 1
@@ -432,3 +435,7 @@ def find_instr_type(line):
         Throw_error_instr.error_occurred(PC)
 
         return len(lines)
+
+
+rm_comments()
+main()

@@ -49,5 +49,33 @@ is_Program_Done = False
 simu.rm_comments()
 simu.pre_data_process()
 
-while not is_Program_Done :
 
+def instruction_fetch():
+    fetch_line = simu.lines[simu.PC]
+    simu.PC = simu.PC + 1
+    return fetch_line
+
+
+while not is_Program_Done:
+    CLOCK_OF_GOD += 1
+
+    Pipeline_units[0].current_instr_line = simu.PC
+    Pipeline_units[1].current_instr_line = simu.PC - 1
+    Pipeline_units[2].current_instr_line = simu.PC - 2
+    Pipeline_units[3].current_instr_line = simu.PC - 3
+    Pipeline_units[4].current_instr_line = simu.PC - 4
+
+    fetch_line = instruction_fetch()
+
+    simu.find_instr_type(fetch_line)
+
+    if Pipeline_units[4].current_instr_line == simu.REGISTERS["ra"]:
+        is_Program_Done = True
+
+# Console Prints
+print("Final Memory state: \n", simu.RAM)
+print("=" * 100)
+print("Register values: \n", simu.REGISTERS)
+print("=" * 100)
+print("Total Clock Cycles: ", CLOCK_OF_GOD)
+print("IPC: ", CLOCK_OF_GOD / simu.REGISTERS['ra'])
