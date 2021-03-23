@@ -381,6 +381,7 @@ def syscall_instr():
 # Finding the type of current instruction to be parsed
 def find_instr_type(line):
     # Checking for labels beforehand
+    '''Since labels have been removed, check is not req
     if re.findall(r"^\w*\s*:", line):
         label = line.split(sep=":", maxsplit=1)
         line = label[1].strip()
@@ -388,6 +389,7 @@ def find_instr_type(line):
         instr_label[label] = PC
         if line == '':
             return PC + 1
+    '''
 
     instr_word = line.split(sep=" ", maxsplit=1)
     try:
@@ -396,6 +398,10 @@ def find_instr_type(line):
         pass
     instr_word = instr_word[0]
 
+    return instr_word,instr_line
+
+
+def execute_ALU(instr_word, instr_line):
     # Switching:
     if instr_word == 'add':
         return add_instr(instr_line)
@@ -435,6 +441,9 @@ def find_instr_type(line):
         Throw_error_instr.error_occurred(PC)
 
         return len(lines)
+
+
+
 
 
 rm_comments()

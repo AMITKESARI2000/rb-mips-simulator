@@ -40,7 +40,7 @@ class HWUnits:
         # sw
         if (len(dissambled_instr == 3)) and (dissambled_instr[0] == "sw"):
             stall = 2
-        #     add
+        # add
         elif len(dissambled_instr == 4):
             prev = self.instr_breakdown(current_instr_line - 1)
             if (dissambled_instr[2] == prev[1]) or (dissambled_instr[3] == prev[1]):
@@ -48,11 +48,11 @@ class HWUnits:
         self.stalls_left += stall
 
 
-Pipeline_units = [HWUnits(current_instr_line=0, stalls_left=0),  # IF
-                  HWUnits(current_instr_line=0, stalls_left=0),  # ID
-                  HWUnits(current_instr_line=0, stalls_left=0),  # EX
-                  HWUnits(current_instr_line=0, stalls_left=0),  # MEM
-                  HWUnits(current_instr_line=0, stalls_left=0)]  # WB
+Pipeline_units = [HWUnits(current_instr_line=simu.PC, stalls_left=0),  # IF
+                  HWUnits(current_instr_line=simu.PC, stalls_left=0),  # ID
+                  HWUnits(current_instr_line=simu.PC, stalls_left=0),  # EX
+                  HWUnits(current_instr_line=simu.PC, stalls_left=0),  # MEM
+                  HWUnits(current_instr_line=simu.PC, stalls_left=0)]  # WB
 
 # Pipeline_units[1].instr_breakdown(12)
 
@@ -62,24 +62,60 @@ simu.rm_comments()
 simu.pre_data_process()
 
 
+def pass_to_nextHW(index):
+    # If stage is not being used no stalls are there and data is forwarded to next stage
+    Pipeline_units[index].current_instr_line = Pipeline_units[index].current_instr_line + 1
+
+
 def instruction_fetch():
-    fetch_line = simu.lines[simu.PC]
-    simu.PC = simu.PC + 1
+    fetch_line = simu.lines[Pipeline_units[0].current_instr_line]
+    Pipeline_units[0].current_instr_line = Pipeline_units[0].current_instr_line + 1
     return fetch_line
 
 
 while not is_Program_Done:
     CLOCK_OF_GOD += 1
 
-    Pipeline_units[0].current_instr_line = simu.PC
-    Pipeline_units[1].current_instr_line = simu.PC - 1
-    Pipeline_units[2].current_instr_line = simu.PC - 2
-    Pipeline_units[3].current_instr_line = simu.PC - 3
-    Pipeline_units[4].current_instr_line = simu.PC - 4
+    # If Stall came, percolate it downwards.
+    # IF
+    if Pipeline_units[0].stalls_left:
+        CLOCK_OF_GOD += 1
+    else:
+        fetch_line = instruction_fetch()
 
-    fetch_line = instruction_fetch()
+    # ID/RF
+    if Pipeline_units[1].stalls_left:
+        CLOCK_OF_GOD += 1
+        for i in range(1):
+            Pipeline_units[i].stalls_left += 1
+    else:
+        instr_word, instr_line = simu.find_instr_type(fetch_line)
+        Pipeline_units[1].current_instr_line = Pipeline_units[1].current_instr_line + 1
 
-    simu.find_instr_type(fetch_line)
+    # EX
+    if Pipeline_units[2].stalls_left:
+        CLOCK_OF_GOD += 1
+        for i in range(2):
+            Pipeline_units[i].stalls_left += 1
+    else:
+        simu.execute_ALU(instr_word, instr_line)
+        Pipeline_units[2].current_instr_line = Pipeline_units[2].current_instr_line + 1
+
+    # MEM
+    if Pipeline_units[3].stalls_left:
+        CLOCK_OF_GOD += 1
+        for i in range(3):
+            Pipeline_units[i].stalls_left += 1
+    else:
+        Pipeline_units[3].current_instr_line = simu.PC - 3
+
+    # WB
+    if Pipeline_units[4].stalls_left:
+        CLOCK_OF_GOD += 1
+        for i in range(4):
+            Pipeline_units[i].stalls_left += 1
+    else:
+        Pipeline_units[4].current_instr_line = simu.PC - 4
 
     if Pipeline_units[4].current_instr_line == simu.REGISTERS["ra"]:
         is_Program_Done = True
