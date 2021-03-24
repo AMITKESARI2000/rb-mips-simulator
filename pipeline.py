@@ -77,23 +77,18 @@ class HWUnits:
 
     def is_stall(self, current_instr_line, dep_instr):
         stall = 0
-        dissambled_instr = self.instr_breakdown(current_instr_line)
-        # sw
-        if (len(dissambled_instr == 3)) and (dissambled_instr[0] == "sw"):
-            stall = 2
-        # add
-        elif len(dissambled_instr == 4):
-            prev = self.instr_breakdown(current_instr_line - 1)
-            if (dissambled_instr[2] == prev[1]) or (dissambled_instr[3] == prev[1]):
-                stall = 2
+        if dep_instr == 0:
+            stall += 2
+        elif dep_instr == 1:
+            stall +=1
         self.stalls_left += stall
 
 
-Pipeline_units = [HWUnits(current_instr_line=simu.PC, stalls_left=0),  # IF
-                  HWUnits(current_instr_line=simu.PC, stalls_left=0),  # ID
-                  HWUnits(current_instr_line=simu.PC, stalls_left=0),  # EX
-                  HWUnits(current_instr_line=simu.PC, stalls_left=0),  # MEM
-                  HWUnits(current_instr_line=simu.PC, stalls_left=0)]  # WB
+Pipeline_units = [HWUnits(current_instr_line=simu.PC, stalls_left=0, dissambled_instr=HWUnits.instr_breakdown(simu.PC)),  # IF
+                  HWUnits(current_instr_line=simu.PC, stalls_left=0, dissambled_instr=HWUnits.instr_breakdown(simu.PC)),  # ID
+                  HWUnits(current_instr_line=simu.PC, stalls_left=0, dissambled_instr=HWUnits.instr_breakdown(simu.PC)),  # EX
+                  HWUnits(current_instr_line=simu.PC, stalls_left=0, dissambled_instr=HWUnits.instr_breakdown(simu.PC)),  # MEM
+                  HWUnits(current_instr_line=simu.PC, stalls_left=0, dissambled_instr=HWUnits.instr_breakdown(simu.PC))]  # WB
 
 # Pipeline_units[1].instr_breakdown(12)
 
