@@ -30,7 +30,7 @@ class InstrSyntaxError:
 Throw_error_instr = InstrSyntaxError(is_error_there=False, line_fault=0)
 
 REGISTERS = {'zero': 0, 'ra': 0, 'at': 0, 'v0': 0, 'v1': 0, 'a0': 0, 'a1': 0, 'a2': 0, 'a3': 0,
-             's0': 0, 's1': 0, 's2': 2, 's3': 0, 's4': 0, 's5': 0, 's6': 0, 's7': 0, 's8': 0,
+             's0': 5, 's1': 0, 's2': 0, 's3': 0, 's4': 0, 's5': 0, 's6': 0, 's7': 0, 's8': 0,
              't0': 0, 't1': 0, 't2': 0, 't3': 0, 't4': 0, 't5': 0, 't6': 0, 't7': 0, 't8': 0, 't9': 0,
              'r': 0, 'k0': 0, 'k1': 0, 'sp': '0x20000'}  # 32
 
@@ -170,7 +170,7 @@ def write_back_op(instr_line, result_MEM_ALU):
         REGISTERS[instr_line[0]] = result_MEM_ALU
         return 1
     except:
-        return 0
+        return -1
 
 
 # Define the functions for simulating
@@ -182,20 +182,23 @@ def add_instr(instr_line):
     # If address is stored add subtract only val/4 because of indexing
     # add $t2, $zero, $s0
     if isinstance(REGISTERS[instr_line[1]], str) and isinstance(REGISTERS[instr_line[2]], int):
-        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]][2:]) + int(REGISTERS[instr_line[2]]) // 4
-        REGISTERS[instr_line[0]] = "0x" + str(REGISTERS[instr_line[0]])
+        result_ALU = int(REGISTERS[instr_line[1]][2:]) + int(REGISTERS[instr_line[2]]) // 4
+        result_ALU = "0x" + str(result_ALU)
+        return result_ALU, instr_line
     elif isinstance(REGISTERS[instr_line[1]], int) and isinstance(REGISTERS[instr_line[2]], str):
-        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) // 4 + int(REGISTERS[instr_line[2]][2:])
-        REGISTERS[instr_line[0]] = "0x" + str(REGISTERS[instr_line[0]])
+        result_ALU = int(REGISTERS[instr_line[1]]) // 4 + int(REGISTERS[instr_line[2]][2:])
+        result_ALU = "0x" + str(result_ALU)
+        return result_ALU, instr_line
 
     # Normal add instruction of register having two ints
     # add $t2, $t1, $t0
     elif isinstance(REGISTERS[instr_line[1]], int) and isinstance(REGISTERS[instr_line[2]], int):
-        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) + int(REGISTERS[instr_line[2]])
+        result_ALU = int(REGISTERS[instr_line[1]]) + int(REGISTERS[instr_line[2]])
+        return result_ALU, instr_line
 
     else:
         print("Invalid instruction format for add.")
-    return PC + 1
+    return -1, instr_line
 
 
 def sub_instr(instr_line):
@@ -203,18 +206,21 @@ def sub_instr(instr_line):
     for l in range(len(instr_line)):
         instr_line[l] = str(instr_line[l].strip()[1:])
     if isinstance(REGISTERS[instr_line[1]], str) and isinstance(REGISTERS[instr_line[2]], int):
-        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]][2:]) - int(REGISTERS[instr_line[2]]) // 4
-        REGISTERS[instr_line[0]] = "0x" + str(REGISTERS[instr_line[0]])
+        result_ALU = int(REGISTERS[instr_line[1]][2:]) - int(REGISTERS[instr_line[2]]) // 4
+        result_ALU = "0x" + str(result_ALU)
+        return result_ALU, instr_line
     elif isinstance(REGISTERS[instr_line[1]], int) and isinstance(REGISTERS[instr_line[2]], str):
-        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) // 4 - int(REGISTERS[instr_line[2]][2:])
-        REGISTERS[instr_line[0]] = "0x" + str(REGISTERS[instr_line[0]])
+        result_ALU = int(REGISTERS[instr_line[1]]) // 4 - int(REGISTERS[instr_line[2]][2:])
+        result_ALU = "0x" + str(result_ALU)
+        return result_ALU, instr_line
 
     elif isinstance(REGISTERS[instr_line[1]], int) and isinstance(REGISTERS[instr_line[2]], int):
-        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) - int(REGISTERS[instr_line[2]])
+        result_ALU = int(REGISTERS[instr_line[1]]) - int(REGISTERS[instr_line[2]])
+        return result_ALU, instr_line
 
     else:
         print("Invalid instruction format for sub.")
-    return PC + 1
+    return -1, instr_line
 
 
 def lw_instr(instr_line):
@@ -228,7 +234,7 @@ def lw_instr(instr_line):
     instr_line[1] = instr_line[1].split(sep="$", maxsplit=1)[1][:-1]
 
     result_ALU = adv
-    return result_ALU
+    return result_ALU, instr_line
 
 
 def sw_instr(instr_line):
@@ -242,7 +248,7 @@ def sw_instr(instr_line):
     instr_line[1] = instr_line[1].split(sep="$", maxsplit=1)[1][:-1]
 
     result_ALU = adv
-    return result_ALU
+    return result_ALU, instr_line
 
 
 def bne_instr(instr_line):
@@ -254,7 +260,7 @@ def bne_instr(instr_line):
     if REGISTERS[instr_line[0]] == REGISTERS[instr_line[1]]:
         return PC + 1
 
-    return int(instr_label[instr_line[2]])
+    return int(instr_label[instr_line[2]]), instr_line
 
 
 def beq_instr(instr_line):
@@ -266,11 +272,11 @@ def beq_instr(instr_line):
     if REGISTERS[instr_line[0]] != REGISTERS[instr_line[1]]:
         return PC + 1
 
-    return int(instr_label[instr_line[2]])
+    return int(instr_label[instr_line[2]]), instr_line
 
 
 def j_instr(instr_line):
-    return instr_label[instr_line]
+    return instr_label[instr_line], instr_line
 
 
 def lui_instr(instr_line):
@@ -278,10 +284,10 @@ def lui_instr(instr_line):
     instr_line = instr_line.split(",")
     instr_line[0] = instr_line[0].strip()[1:]
     instr_line[1] = instr_line[1].strip()
-    REGISTERS[instr_line[0]] = instr_line[1]
+    result_ALU = instr_line[1]
     global BaseAdr
     BaseAdr = str(instr_line[1])
-    return PC + 1
+    return result_ALU, instr_line
 
 
 def addi_instr(instr_line):
@@ -292,12 +298,14 @@ def addi_instr(instr_line):
     instr_line[2] = instr_line[2].strip()
 
     if isinstance(REGISTERS[instr_line[1]], str):
-        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]][2:]) + int(instr_line[2]) // 4
-        REGISTERS[instr_line[0]] = "0x" + str(REGISTERS[instr_line[0]])
+        result_ALU = int(REGISTERS[instr_line[1]][2:]) + int(instr_line[2]) // 4
+        result_ALU = "0x" + str(result_ALU)
+        return result_ALU, instr_line
     else:
-        REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) + int(instr_line[2])
+        result_ALU = int(REGISTERS[instr_line[1]]) + int(instr_line[2])
+        return result_ALU, instr_line
 
-    return PC + 1
+    return result_ALU, instr_line
 
 
 def li_instr(instr_line):
@@ -305,9 +313,9 @@ def li_instr(instr_line):
     for l in range(len(instr_line) - 1):
         instr_line[l] = str(instr_line[l].strip()[1:])
     instr_line[1] = instr_line[1].strip()
-    REGISTERS[instr_line[0]] = int(instr_line[1])
+    result_ALU = int(instr_line[1])
 
-    return PC + 1
+    return result_ALU, instr_line
 
 
 def sll_instr(instr_line):
@@ -315,9 +323,9 @@ def sll_instr(instr_line):
     for l in range(len(instr_line) - 1):
         instr_line[l] = str(instr_line[l].strip()[1:])
 
-    REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) * pow(2, int(instr_line[2]))
+    result_ALU = int(REGISTERS[instr_line[1]]) * pow(2, int(instr_line[2]))
 
-    return PC + 1
+    return result_ALU, instr_line
 
 
 def srl_instr(instr_line):
@@ -325,9 +333,9 @@ def srl_instr(instr_line):
     for l in range(len(instr_line) - 1):
         instr_line[l] = str(instr_line[l].strip()[1:])
 
-    REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) // pow(2, int(instr_line[2]))
+    result_ALU = int(REGISTERS[instr_line[1]]) // pow(2, int(instr_line[2]))
 
-    return PC + 1
+    return result_ALU, instr_line
 
 
 def la_instr(instr_line):
@@ -348,9 +356,9 @@ def slt_instr(instr_line):
     instr_line = instr_line.split(",")
     for l in range(len(instr_line)):
         instr_line[l] = str(instr_line[l].strip()[1:])
-    REGISTERS[instr_line[0]] = int(int(REGISTERS[instr_line[1]]) < int(REGISTERS[instr_line[2]]))
+    result_ALU = int(int(REGISTERS[instr_line[1]]) < int(REGISTERS[instr_line[2]]))
 
-    return PC + 1
+    return result_ALU, instr_line
 
 
 def syscall_instr():
