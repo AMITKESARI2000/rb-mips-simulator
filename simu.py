@@ -30,7 +30,7 @@ class InstrSyntaxError:
 Throw_error_instr = InstrSyntaxError(is_error_there=False, line_fault=0)
 
 REGISTERS = {'zero': 0, 'ra': 0, 'at': 0, 'v0': 0, 'v1': 0, 'a0': 0, 'a1': 0, 'a2': 0, 'a3': 0,
-             's0': 0, 's1': 1, 's2': 0, 's3': 0, 's4': 0, 's5': 0, 's6': 0, 's7': 0, 's8': 0,
+             's0': 0, 's1': 0, 's2': 2, 's3': 0, 's4': 0, 's5': 0, 's6': 0, 's7': 0, 's8': 0,
              't0': 0, 't1': 0, 't2': 0, 't3': 0, 't4': 0, 't5': 0, 't6': 0, 't7': 0, 't8': 0, 't9': 0,
              'r': 0, 'k0': 0, 'k1': 0, 'sp': '0x20000'}  # 32
 
@@ -129,7 +129,7 @@ def pre_data_process():
         if re.findall(r"^\w*:", lines[i]):
             label_name_array = lines[i].split(sep=":", maxsplit=1)
             label_name = label_name_array[0].strip()
-            if len(label_name_array[1]) == 0 :
+            if len(label_name_array[1]) == 0:
                 lines.remove(lines[i])
             instr_label[label_name] = i
 
@@ -153,6 +153,26 @@ def main_once():
     PC = find_instr_type(lines[PC])
 
 
+def memory_op(instr_word, instr_line, adv):
+    if instr_word == "lw":
+        # To load register from memory
+        result_MEM = RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv]
+
+    elif instr_word == "sw":
+        # To store register into memory
+        result_MEM = RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv] = int(REGISTERS[instr_line[0]])
+
+    return result_MEM
+
+
+def write_back_op(instr_line, result_MEM_ALU):
+    try:
+        REGISTERS[instr_line[0]] = result_MEM_ALU
+        return 1
+    except:
+        return 0
+
+
 # Define the functions for simulating
 def add_instr(instr_line):
     instr_line = instr_line.split(",")
@@ -174,7 +194,7 @@ def add_instr(instr_line):
         REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) + int(REGISTERS[instr_line[2]])
 
     else:
-        print("Invalid instruction format.")
+        print("Invalid instruction format for add.")
     return PC + 1
 
 
@@ -193,7 +213,7 @@ def sub_instr(instr_line):
         REGISTERS[instr_line[0]] = int(REGISTERS[instr_line[1]]) - int(REGISTERS[instr_line[2]])
 
     else:
-        print("Invalid instruction format.")
+        print("Invalid instruction format for sub.")
     return PC + 1
 
 
@@ -207,10 +227,8 @@ def lw_instr(instr_line):
 
     instr_line[1] = instr_line[1].split(sep="$", maxsplit=1)[1][:-1]
 
-    # To load register from memory
-    REGISTERS[instr_line[0]] = RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv]
-
-    return PC + 1
+    result_ALU = adv
+    return result_ALU
 
 
 def sw_instr(instr_line):
@@ -223,9 +241,8 @@ def sw_instr(instr_line):
 
     instr_line[1] = instr_line[1].split(sep="$", maxsplit=1)[1][:-1]
 
-    # To store register into memory
-    RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv] = int(REGISTERS[instr_line[0]])
-    return PC + 1
+    result_ALU = adv
+    return result_ALU
 
 
 def bne_instr(instr_line):
@@ -397,7 +414,7 @@ def find_instr_type(line):
         pass
     instr_word = instr_word[0]
 
-    return instr_word,instr_line
+    return instr_word, instr_line
 
 
 def execute_ALU(instr_word, instr_line):
@@ -440,10 +457,6 @@ def execute_ALU(instr_word, instr_line):
         Throw_error_instr.error_occurred(PC)
 
         return len(lines)
-
-
-
-
 
 # rm_comments()
 # main()
