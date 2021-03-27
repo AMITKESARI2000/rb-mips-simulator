@@ -31,18 +31,20 @@ class HWUnits:
 
         # Check current instr (like add) dependency on prev instrs
         if len(Pipeline_units[0].dissambled_instr == 4):
-            for k in range (0,2):
-                if len(Pipeline_units[k].dissambled_instr == 4):     # Check crnt instr dep on prev instr like add
+            for k in range(0, 2):
+                if len(Pipeline_units[k].dissambled_instr == 4):  # Check crnt instr dep on prev instr like add
                     if Pipeline_units[0].dissambled_instr[2] == Pipeline_units[k].dissambled_instr[1]:
                         self.is_stall(simu.PC, k)
                     elif Pipeline_units[0].dissambled_instr[3] == Pipeline_units[k].dissambled_instr[1]:
                         self.is_stall(simu.PC, k)
-                elif (len(Pipeline_units[k].dissambled_instr == 3)) and (Pipeline_units[k].dissambled_instr[0] == "sw"):     # Check crnt instr dep on prev instr like sw
+                elif (len(Pipeline_units[k].dissambled_instr == 3)) and (
+                        Pipeline_units[k].dissambled_instr[0] == "sw"):  # Check crnt instr dep on prev instr like sw
                     if Pipeline_units[0].dissambled_instr[2] == Pipeline_units[k].dissambled_instr[2][3:5]:
                         self.is_stall(simu.PC, k)
                     elif Pipeline_units[0].dissambled_instr[3] == Pipeline_units[k].dissambled_instr[2][3:5]:
                         self.is_stall(simu.PC, k)
-                elif (len(Pipeline_units[k].dissambled_instr == 3)) and (Pipeline_units[k].dissambled_instr[0] == "lw"):     # Check crnt instr dep on prev instr like lw
+                elif (len(Pipeline_units[k].dissambled_instr == 3)) and (
+                        Pipeline_units[k].dissambled_instr[0] == "lw"):  # Check crnt instr dep on prev instr like lw
                     if Pipeline_units[0].dissambled_instr[2] == Pipeline_units[k].dissambled_instr[1]:
                         self.is_stall(simu.PC, k)
                     elif Pipeline_units[0].dissambled_instr[3] == Pipeline_units[k].dissambled_instr[1]:
@@ -50,30 +52,33 @@ class HWUnits:
 
         # Check current instr (like sw) dependency on prev instrs
         elif (len(Pipeline_units[0].dissambled_instr == 3)) and (Pipeline_units[0].dissambled_instr[0] == "sw"):
-            for k in range (0,2):
-                if len(Pipeline_units[k].dissambled_instr == 4):     # Check crnt instr dep on prev instr like add
+            for k in range(0, 2):
+                if len(Pipeline_units[k].dissambled_instr == 4):  # Check crnt instr dep on prev instr like add
                     if Pipeline_units[0].dissambled_instr[1] == Pipeline_units[k].dissambled_instr[1]:
                         self.is_stall(simu.PC, k)
-                elif (len(Pipeline_units[k].dissambled_instr == 3)) and (Pipeline_units[k].dissambled_instr[0] == "sw"):     # Check crnt instr dep on prev instr like sw
+                elif (len(Pipeline_units[k].dissambled_instr == 3)) and (
+                        Pipeline_units[k].dissambled_instr[0] == "sw"):  # Check crnt instr dep on prev instr like sw
                     if Pipeline_units[0].dissambled_instr[1] == Pipeline_units[k].dissambled_instr[2][3:5]:
                         self.is_stall(simu.PC, k)
-                elif (len(Pipeline_units[k].dissambled_instr == 3)) and (Pipeline_units[k].dissambled_instr[0] == "lw"):     # Check crnt instr dep on prev instr like lw
+                elif (len(Pipeline_units[k].dissambled_instr == 3)) and (
+                        Pipeline_units[k].dissambled_instr[0] == "lw"):  # Check crnt instr dep on prev instr like lw
                     if Pipeline_units[0].dissambled_instr[1] == Pipeline_units[k].dissambled_instr[1]:
                         self.is_stall(simu.PC, k)
 
         # Check current instr (like lw) dependency on prev instrs
         elif (len(Pipeline_units[0].dissambled_instr == 3)) and (Pipeline_units[0].dissambled_instr[0] == "lw"):
-            for k in range (0,2):
-                if len(Pipeline_units[k].dissambled_instr == 4):     # Check crnt instr dep on prev instr like add
+            for k in range(0, 2):
+                if len(Pipeline_units[k].dissambled_instr == 4):  # Check crnt instr dep on prev instr like add
                     if Pipeline_units[0].dissambled_instr[2][3:5] == Pipeline_units[k].dissambled_instr[1]:
                         self.is_stall(simu.PC, k)
-                elif (len(Pipeline_units[k].dissambled_instr == 3)) and (Pipeline_units[k].dissambled_instr[0] == "sw"):     # Check crnt instr dep on prev instr like sw
+                elif (len(Pipeline_units[k].dissambled_instr == 3)) and (
+                        Pipeline_units[k].dissambled_instr[0] == "sw"):  # Check crnt instr dep on prev instr like sw
                     if Pipeline_units[0].dissambled_instr[2][3:5] == Pipeline_units[k].dissambled_instr[2][3:5]:
                         self.is_stall(simu.PC, k)
-                elif (len(Pipeline_units[k].dissambled_instr == 3)) and (Pipeline_units[k].dissambled_instr[0] == "lw"):     # Check crnt instr dep on prev instr like lw
+                elif (len(Pipeline_units[k].dissambled_instr == 3)) and (
+                        Pipeline_units[k].dissambled_instr[0] == "lw"):  # Check crnt instr dep on prev instr like lw
                     if Pipeline_units[0].dissambled_instr[2][3:5] == Pipeline_units[k].dissambled_instr[1]:
                         self.is_stall(simu.PC, k)
-
 
     def is_stall(self, current_instr_line, dep_instr):
         stall = 0
@@ -89,11 +94,11 @@ class HWUnits:
         self.stalls_left += stall
 
 
-Pipeline_units = [HWUnits(current_instr_line=simu.PC, stalls_left=0),  # IF
-                  HWUnits(current_instr_line=simu.PC, stalls_left=0),  # ID
-                  HWUnits(current_instr_line=simu.PC, stalls_left=0),  # EX
-                  HWUnits(current_instr_line=simu.PC, stalls_left=0),  # MEM
-                  HWUnits(current_instr_line=simu.PC, stalls_left=0)]  # WB
+Pipeline_units = [HWUnits(current_instr_line=simu.PC, stalls_left=0, dissambled_instr=[]),  # IF
+                  HWUnits(current_instr_line=simu.PC, stalls_left=0, dissambled_instr=[]),  # ID
+                  HWUnits(current_instr_line=simu.PC, stalls_left=0, dissambled_instr=[]),  # EX
+                  HWUnits(current_instr_line=simu.PC, stalls_left=0, dissambled_instr=[]),  # MEM
+                  HWUnits(current_instr_line=simu.PC, stalls_left=0, dissambled_instr=[])]  # WB
 
 # Pipeline_units[1].instr_breakdown(12)
 

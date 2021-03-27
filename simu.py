@@ -389,7 +389,7 @@ def find_instr_type(line):
         if line == '':
             return PC + 1
     '''
-
+    instr_line = ""
     instr_word = line.split(sep=" ", maxsplit=1)
     try:
         instr_line = instr_word[1]
@@ -445,5 +445,5 @@ def execute_ALU(instr_word, instr_line):
 
 
 
-rm_comments()
-main()
+# rm_comments()
+# main()
