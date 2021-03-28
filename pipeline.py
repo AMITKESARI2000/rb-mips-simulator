@@ -33,60 +33,81 @@ class HWUnits:
         print(4, Pipeline_units[3].disassembled_instr)
         print(5, Pipeline_units[4].disassembled_instr)
 
-        # Check current instr (like add) dependency on prev instrs
-        if len(Pipeline_units[0].disassembled_instr == 4):
+        # Check current instr (like add or sub) dependency on prev instrs
+        if len(Pipeline_units[0].disassembled_instr) == 4 and (
+                Pipeline_units[0].disassembled_instr[0] in ("add", "sub")):
             for k in range(0, 2):
                 if len(Pipeline_units[k].disassembled_instr == 4):  # Check crnt instr dep on prev instr like add
                     if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[1]:
                         self.is_stall(k, self.frwd)
                     elif Pipeline_units[0].disassembled_instr[3] == Pipeline_units[k].disassembled_instr[1]:
                         self.is_stall(k, self.frwd)
+
                 elif (len(Pipeline_units[k].disassembled_instr == 3)) and (
                         Pipeline_units[k].disassembled_instr[0] == "sw"):  # Check crnt instr dep on prev instr like sw
 
                     if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[2][3:5]:
-                        self.is_stall(k, self.frwd)
+                        self.is_stall(k, False)
                     elif Pipeline_units[0].disassembled_instr[3] == Pipeline_units[k].disassembled_instr[2][3:5]:
-                        self.is_stall(k, self.frwd)
+                        self.is_stall(k, False)
+
                 elif (len(Pipeline_units[k].disassembled_instr == 3)) and (
                         Pipeline_units[k].disassembled_instr[0] == "lw"):  # Check crnt instr dep on prev instr like lw
-
                     if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[1]:
-                        self.is_stall(k, self.frwd)
+                        self.is_stall(k, False)
                     elif Pipeline_units[0].disassembled_instr[3] == Pipeline_units[k].disassembled_instr[1]:
-                        self.is_stall(k, self.frwd)
+                        self.is_stall(k, False)
 
         # Check current instr (like sw) dependency on prev instrs
         elif (len(Pipeline_units[0].disassembled_instr == 3)) and (Pipeline_units[0].disassembled_instr[0] == "sw"):
             for k in range(0, 2):
                 if len(Pipeline_units[k].disassembled_instr == 4):  # Check crnt instr dep on prev instr like add
                     if Pipeline_units[0].disassembled_instr[1] == Pipeline_units[k].disassembled_instr[1]:
-                        self.is_stall(k, self.frwd, False)
+                        self.is_stall(k, self.frwd)
+
                 elif (len(Pipeline_units[k].disassembled_instr == 3)) and (
                         Pipeline_units[k].disassembled_instr[0] == "sw"):  # Check crnt instr dep on prev instr like sw
                     if Pipeline_units[0].disassembled_instr[1] == Pipeline_units[k].disassembled_instr[2][3:5]:
-                        self.is_stall(k, self.frwd, False)
+                        self.is_stall(k, False)
+
                 elif (len(Pipeline_units[k].disassembled_instr == 3)) and (
                         Pipeline_units[k].disassembled_instr[0] == "lw"):  # Check crnt instr dep on prev instr like lw
-
                     if Pipeline_units[0].disassembled_instr[1] == Pipeline_units[k].disassembled_instr[1]:
-                        self.is_stall(k, self.frwd, False)
+                        self.is_stall(k, False)
 
         # Check current instr (like lw) dependency on prev instrs
         elif (len(Pipeline_units[0].disassembled_instr == 3)) and (Pipeline_units[0].disassembled_instr[0] == "lw"):
             for k in range(0, 2):
-                if len(Pipeline_units[k].disassembled_instr == 4):  # Check crnt instr dep on prev instr like add
+                if len(Pipeline_units[k].disassembled_instr) == 4:  # Check crnt instr dep on prev instr like add
                     if Pipeline_units[0].disassembled_instr[2][3:5] == Pipeline_units[k].disassembled_instr[1]:
-                        self.is_stall(k, self.frwd, False)
+                        self.is_stall(k, self.frwd)
+
                 elif (len(Pipeline_units[k].disassembled_instr == 3)) and (
                         Pipeline_units[k].disassembled_instr[0] == "sw"):  # Check crnt instr dep on prev instr like sw
                     if Pipeline_units[0].disassembled_instr[2][3:5] == Pipeline_units[k].disassembled_instr[2][3:5]:
-                        self.is_stall(k, self.frwd, False)
+                        self.is_stall(k, False)
+
                 elif (len(Pipeline_units[k].disassembled_instr == 3)) and (
                         Pipeline_units[k].disassembled_instr[0] == "lw"):  # Check crnt instr dep on prev instr like lw
-
                     if Pipeline_units[0].disassembled_instr[2][3:5] == Pipeline_units[k].disassembled_instr[1]:
-                        self.is_stall(k, self.frwd, False)
+                        self.is_stall(k, False)
+
+        elif len(Pipeline_units[0].disassembled_instr) == 4 and (Pipeline_units[0].disassembled_instr[0] in "addi"):
+            for k in range(0, 2):
+                if len(Pipeline_units[k].disassembled_instr == 4):  # Check crnt instr dep on prev instr like add
+                    if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[1]:
+                        self.is_stall(k, self.frwd)
+
+                elif (len(Pipeline_units[k].disassembled_instr == 3)) and (
+                        Pipeline_units[k].disassembled_instr[0] == "sw"):  # Check crnt instr dep on prev instr like sw
+
+                    if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[2][3:5]:
+                        self.is_stall(k, False)
+
+                elif (len(Pipeline_units[k].disassembled_instr == 3)) and (
+                        Pipeline_units[k].disassembled_instr[0] == "lw"):  # Check crnt instr dep on prev instr like lw
+                    if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[1]:
+                        self.is_stall(k, False)
 
     def is_stall(self, dep_instr, frwd):
 
