@@ -26,25 +26,42 @@ class HWUnits:
         print(self.disassembled_instr)
         return self.disassembled_instr
 
-    def check_for_stall(self, current_instr_line):
+    def check_for_stall(self, current_instr_line, existence_of_instr_line = None):
 
-        if current_instr_line - base_instr_line_PC >= 0:
+        # Checking existence of instructions
+        existence_of_instr_line[0] = current_instr_line - base_instr_line_PC >= 0
+        existence_of_instr_line[1] = current_instr_line - base_instr_line_PC - 1 >= 0
+        existence_of_instr_line[2] = current_instr_line - base_instr_line_PC - 2 >= 0
+
+        # Breaking down of instructions
+        if existence_of_instr_line[0]:
             Pipeline_units[0].disassembled_instr = self.instr_breakdown(current_instr_line)
 
-        if current_instr_line - base_instr_line_PC - 1 >= 0:
+        if existence_of_instr_line[1]:
             Pipeline_units[1].disassembled_instr = self.instr_breakdown(current_instr_line)
 
-        if current_instr_line - base_instr_line_PC - 2 >= 0:
+        if existence_of_instr_line[2]:
             Pipeline_units[2].disassembled_instr = self.instr_breakdown(current_instr_line)
 
-        print(1, Pipeline_units[0].disassembled_instr)
-        print(2, Pipeline_units[1].disassembled_instr)
-        print(3, Pipeline_units[2].disassembled_instr)
+        print(0, Pipeline_units[0].disassembled_instr)
+        print(1, Pipeline_units[1].disassembled_instr)
+        print(2, Pipeline_units[2].disassembled_instr)
+
+        # Checking for how many instructions to be check for dependencies.
+        t = -1
+        if existence_of_instr_line[0]:
+            t = 0
+
+        if existence_of_instr_line[1]:
+            t = 1
+
+        if existence_of_instr_line[2]:
+            t = 2
 
         # Check current instr (like add or sub) dependency on prev instrs
         if len(Pipeline_units[0].disassembled_instr) == 4 and (
                 Pipeline_units[0].disassembled_instr[0] in ("add", "sub")):
-            for k in range(0, 2):
+            for k in range(0, t):
                 if len(Pipeline_units[k].disassembled_instr == 4):  # Check crnt instr dep on prev instr like add
                     if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[1]:
                         self.is_stall(k, self.frwd)
@@ -68,7 +85,7 @@ class HWUnits:
 
         # Check current instr (like sw) dependency on prev instrs
         elif (len(Pipeline_units[0].disassembled_instr == 3)) and (Pipeline_units[0].disassembled_instr[0] == "sw"):
-            for k in range(0, 2):
+            for k in range(0, t):
                 if len(Pipeline_units[k].disassembled_instr == 4):  # Check crnt instr dep on prev instr like add
                     if Pipeline_units[0].disassembled_instr[1] == Pipeline_units[k].disassembled_instr[1]:
                         self.is_stall(k, self.frwd)
@@ -85,7 +102,7 @@ class HWUnits:
 
         # Check current instr (like lw) dependency on prev instrs
         elif (len(Pipeline_units[0].disassembled_instr == 3)) and (Pipeline_units[0].disassembled_instr[0] == "lw"):
-            for k in range(0, 2):
+            for k in range(0, t):
                 if len(Pipeline_units[k].disassembled_instr) == 4:  # Check crnt instr dep on prev instr like add
                     if Pipeline_units[0].disassembled_instr[2][3:5] == Pipeline_units[k].disassembled_instr[1]:
                         self.is_stall(k, self.frwd)
@@ -101,7 +118,7 @@ class HWUnits:
                         self.is_stall(k, False)
 
         elif len(Pipeline_units[0].disassembled_instr) == 4 and (Pipeline_units[0].disassembled_instr[0] in "addi"):
-            for k in range(0, 2):
+            for k in range(0, t):
                 if len(Pipeline_units[k].disassembled_instr == 4):  # Check crnt instr dep on prev instr like add
                     if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[1]:
                         self.is_stall(k, self.frwd)
