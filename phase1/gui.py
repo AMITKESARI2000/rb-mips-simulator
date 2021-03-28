@@ -1,23 +1,23 @@
 import re
 from tkinter import *
 from tkinter.messagebox import showinfo, askyesno
-import simu
+import simu_1
 
-simu.rm_comments()
+simu_1.rm_comments()
 
 root = Tk()
 
 # root.resizable(width=False, height=False) #Restricting Resizable
-root.title("RB Mips Simulator 😎")
+root.title("RB Mips simu_1lator 😎")
 # Panel
-simulator_body = PanedWindow(orient=VERTICAL, width=1300, height=600, bg="black")
-simulator_body.pack(fill=BOTH, expand=1)
+simu_1lator_body = PanedWindow(orient=VERTICAL, width=1300, height=600, bg="black")
+simu_1lator_body.pack(fill=BOTH, expand=1)
 
 # Head Panel
-head_panel = PanedWindow(simulator_body, bd=1, relief="raised", bg="black")
-simulator_body.add(head_panel)
+head_panel = PanedWindow(simu_1lator_body, bd=1, relief="raised", bg="black")
+simu_1lator_body.add(head_panel)
 
-head = Label(head_panel, text="SIMULATOR", font=("Arial", 14))
+head = Label(head_panel, text="simu_1LATOR", font=("Arial", 14))
 head_panel.add(head)
 
 # Execution Panel
@@ -33,8 +33,8 @@ console_button = Button(text="Upload a file", bg="#f79400", fg="#efefef",
                         command=lambda: showinfo("Message", "STILL IN PROGRESS!!!")).pack(side=LEFT)
 
 # Body Panel
-body_panel = PanedWindow(simulator_body, orient=HORIZONTAL, relief="raised", bg="black")
-simulator_body.add(body_panel)
+body_panel = PanedWindow(simu_1lator_body, orient=HORIZONTAL, relief="raised", bg="black")
+simu_1lator_body.add(body_panel)
 
 # Register Panel
 reg_panel = PanedWindow(body_panel, orient=VERTICAL, bd=1, relief="raised", bg="black")
@@ -94,7 +94,7 @@ t_console = Text(console, height=50, width=70, bg="#0e141e", wrap=NONE, font=("R
 
 # Current Execution line
 current_instr_label = Text(root, height=1, width=10, font=("Roboto", 12), fg="#484767")
-current_instr_label.insert(END, "On Line: " + str(simu.PC + 1))
+current_instr_label.insert(END, "On Line: " + str(simu_1.PC + 1))
 current_instr_label.pack()
 
 
@@ -111,15 +111,15 @@ def run_gui_data():
     # Data in Register Panel
     t_reg.insert(END, "PC = 0\n")
     k = 4
-    for i in simu.REGISTERS:
-        t_reg.insert(END, str(i) + " = " + str(simu.REGISTERS[i]) + "\n")
+    for i in simu_1.REGISTERS:
+        t_reg.insert(END, str(i) + " = " + str(simu_1.REGISTERS[i]) + "\n")
         k += 1
     t_reg.pack(side=TOP, fill=X)
     scroll_reg.config(command=t_reg.yview)
 
     # Data in Memory Panel
     k = 4
-    for i in simu.RAM:
+    for i in simu_1.RAM:
         i = re.sub(r"\n", " ", str(i))
         t_mem.insert(END, str(k - 4) + " : " + str(i) + "\n")
         k += 1
@@ -128,17 +128,17 @@ def run_gui_data():
 
     # Data in User Text Panel
     k = 4
-    for i in simu.lines:
+    for i in simu_1.lines:
         t_user.insert(END, str(k - 3) + " : " + str(i) + "\n")
         k += 1
     t_user.pack(side=TOP, fill=X)
     scroll_user.config(command=t_user.yview)
 
     # Data in console
-    for i in simu.cnsl:
+    for i in simu_1.cnsl:
         t_console.insert(END, str(i) + " ")
     t_console.pack(side=TOP, fill=X)
-    simu.cnsl = []
+    simu_1.cnsl = []
 
     t_reg.configure(state='disabled')
     t_mem.configure(state='disabled')
@@ -147,14 +147,14 @@ def run_gui_data():
 
 
 def modify_gui_data():
-    simu.main()
-    if simu.Throw_error_instr.is_error_there:
+    simu_1.main()
+    if simu_1.Throw_error_instr.is_error_there:
         response = 0
 
         def popclick():
             response = askyesno("Execution Stopped!", "Error found in your assembly code on line " +
-                                str(simu.Throw_error_instr.line_fault + 1) + ".\n\n" + str(
-                simu.lines[simu.Throw_error_instr.line_fault]) +
+                                str(simu_1.Throw_error_instr.line_fault + 1) + ".\n\n" + str(
+                simu_1.lines[simu_1.Throw_error_instr.line_fault]) +
                                 "\n\nExit?")
             if response == 1:
                 root.destroy()
@@ -167,30 +167,30 @@ def modify_gui_data():
         run_gui_data()
         current_instr_label.configure(state='normal')
         current_instr_label.delete("1.0", END)
-        current_instr_label.insert(END, "On Line: " + str(simu.PC))
+        current_instr_label.insert(END, "On Line: " + str(simu_1.PC))
         current_instr_label.configure(state='disabled')
         step_exe.configure(state=DISABLED)
 
 
-simu.pre_data_process()
+simu_1.pre_data_process()
 
 
 def modify_gui_data_once():
-    simu.main_once()
+    simu_1.main_once()
     # current_instr_label.grid_forget()
     current_instr_label.configure(state='normal')
     current_instr_label.delete("1.0", END)
-    current_instr_label.insert(END, "On Line: " + str(simu.PC))
+    current_instr_label.insert(END, "On Line: " + str(simu_1.PC))
     current_instr_label.configure(state='disabled')
-    if simu.PC >= simu.REGISTERS["ra"]:
+    if simu_1.PC >= simu_1.REGISTERS["ra"]:
         step_exe.configure(state=DISABLED)
-    if simu.Throw_error_instr.is_error_there:
+    if simu_1.Throw_error_instr.is_error_there:
         response = 0
 
         def popclick():
             response = askyesno("Execution Stopped!", "Error found in your assembly code on line " +
-                                str(simu.Throw_error_instr.line_fault + 1) + ".\n\n" + str(
-                simu.lines[simu.Throw_error_instr.line_fault]) +
+                                str(simu_1.Throw_error_instr.line_fault + 1) + ".\n\n" + str(
+                simu_1.lines[simu_1.Throw_error_instr.line_fault]) +
                                 "\n\nExit?")
             if response == 1:
                 root.destroy()

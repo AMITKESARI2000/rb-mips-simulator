@@ -5,7 +5,7 @@
 * Anu Anand Annu (CS19B044)
 
 ### Simulate MIPS Architecture instruction sets
-* Main starting file is **gui.py**
+* Main starting file is **gui.py** located in phase 1 folder
 * The simulator supports the following MIPS instructions: 
   * add/sub
   * bne/beq
@@ -29,3 +29,8 @@ the contents of the registers, and the memory.
 
 ### Phase 2
 In phase 2 we are implementing pipeline so that the throughput can be increased.
+
+* The main file is **pipeline.py**
+* All 5 stages (IF, ID/RF, EX, MEM, WB) have been modularised.
+* Stalls have been added according to data dependencies only
+* Structural hazards have been removed assuming writing in 1st half of the cycle and reading in 2nd half of the cycle.
