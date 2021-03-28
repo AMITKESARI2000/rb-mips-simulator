@@ -116,10 +116,10 @@ if input("Data Forwarding is disabled by default. Want to enable?(y/n): ").lower
 
 Pipeline_units = [
     HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[], frwd=forward_enable),  # IF
-    HWUnits(current_instr_line=simu.PC - 1, stalls_left=0, disassembled_instr=[], frwd=forward_enable),  # ID
-    HWUnits(current_instr_line=simu.PC - 2, stalls_left=0, disassembled_instr=[], frwd=forward_enable),  # EX
-    HWUnits(current_instr_line=simu.PC - 3, stalls_left=0, disassembled_instr=[], frwd=forward_enable),  # MEM
-    HWUnits(current_instr_line=simu.PC - 4, stalls_left=0, disassembled_instr=[], frwd=forward_enable)]  # WB
+    HWUnits(current_instr_line=simu.PC - 1, stalls_left=1, disassembled_instr=[], frwd=forward_enable),  # ID
+    HWUnits(current_instr_line=simu.PC - 2, stalls_left=1, disassembled_instr=[], frwd=forward_enable),  # EX
+    HWUnits(current_instr_line=simu.PC - 3, stalls_left=1, disassembled_instr=[], frwd=forward_enable),  # MEM
+    HWUnits(current_instr_line=simu.PC - 4, stalls_left=1, disassembled_instr=[], frwd=forward_enable)]  # WB
 
 
 def pass_to_nextHW(index_of_HWunit):
@@ -139,7 +139,7 @@ while not is_Program_Done:
 
     # If Stall came, percolate it downwards.
     # IF
-    if Pipeline_units[0].stalls_left or Pipeline_units[0].current_instr_line == simu.REGISTERS["ra"]:
+    if Pipeline_units[0].stalls_left or Pipeline_units[0].current_instr_line >= simu.REGISTERS["ra"]:
         # If stall is there OR the stage has executed all the instructions and is sitting idle.
         CLOCK_OF_GOD += 1
     else:
@@ -150,8 +150,9 @@ while not is_Program_Done:
             fetch_line = instruction_fetch()
 
     # ID/RF
-    if Pipeline_units[1].stalls_left or Pipeline_units[1].current_instr_line == simu.REGISTERS["ra"]:
-        CLOCK_OF_GOD += 1
+    if Pipeline_units[1].stalls_left or Pipeline_units[1].current_instr_line >= simu.REGISTERS["ra"]:
+        if Pipeline_units[1].current_instr_line - base_instr_line_PC >= 0:
+            CLOCK_OF_GOD += 1
         for i in range(1):
             Pipeline_units[i].stalls_left += 1
     else:
@@ -163,8 +164,9 @@ while not is_Program_Done:
             Pipeline_units[1].current_instr_line += 1
 
     # EX
-    if Pipeline_units[2].stalls_left or Pipeline_units[2].current_instr_line == simu.REGISTERS["ra"]:
-        CLOCK_OF_GOD += 1
+    if Pipeline_units[2].stalls_left or Pipeline_units[2].current_instr_line >= simu.REGISTERS["ra"]:
+        if Pipeline_units[2].current_instr_line - base_instr_line_PC >= 0:
+            CLOCK_OF_GOD += 1
         for i in range(2):
             Pipeline_units[i].stalls_left += 1
     else:
@@ -177,8 +179,9 @@ while not is_Program_Done:
             Pipeline_units[2].current_instr_line += 1
 
     # MEM
-    if Pipeline_units[3].stalls_left or Pipeline_units[3].current_instr_line == simu.REGISTERS["ra"]:
-        CLOCK_OF_GOD += 1
+    if Pipeline_units[3].stalls_left or Pipeline_units[3].current_instr_line >= simu.REGISTERS["ra"]:
+        if Pipeline_units[3].current_instr_line - base_instr_line_PC >= 0:
+            CLOCK_OF_GOD += 1
         for i in range(3):
             Pipeline_units[i].stalls_left += 1
     else:
@@ -193,8 +196,9 @@ while not is_Program_Done:
                 pass_to_nextHW(3)
 
     # WB
-    if Pipeline_units[4].stalls_left or Pipeline_units[4].current_instr_line == simu.REGISTERS["ra"]:
-        CLOCK_OF_GOD += 1
+    if Pipeline_units[4].stalls_left or Pipeline_units[4].current_instr_line >= simu.REGISTERS["ra"]:
+        if Pipeline_units[4].current_instr_line - base_instr_line_PC >= 0:
+            CLOCK_OF_GOD += 1
         for i in range(4):
             Pipeline_units[i].stalls_left += 1
     else:
