@@ -27,11 +27,19 @@ class HWUnits:
         return self.disassembled_instr
 
     def check_for_stall(self, current_instr_line):
+
+        if current_instr_line - base_instr_line_PC >= 0:
+            Pipeline_units[0].disassembled_instr = self.instr_breakdown(current_instr_line)
+
+        if current_instr_line - base_instr_line_PC - 1 >= 0:
+            Pipeline_units[1].disassembled_instr = self.instr_breakdown(current_instr_line)
+
+        if current_instr_line - base_instr_line_PC - 2 >= 0:
+            Pipeline_units[2].disassembled_instr = self.instr_breakdown(current_instr_line)
+
         print(1, Pipeline_units[0].disassembled_instr)
         print(2, Pipeline_units[1].disassembled_instr)
         print(3, Pipeline_units[2].disassembled_instr)
-        print(4, Pipeline_units[3].disassembled_instr)
-        print(5, Pipeline_units[4].disassembled_instr)
 
         # Check current instr (like add or sub) dependency on prev instrs
         if len(Pipeline_units[0].disassembled_instr) == 4 and (
