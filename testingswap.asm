@@ -12,6 +12,13 @@
     .globl main
 
 main:
+  add $t2, $zero, $s0               #for iterating addr by i
+  add $t3, $zero, $t2               #for iterating addr by j
+  #nonimp
+  add $t5, $t4, $t4               #for iterating addr by j
+  add $t6, $t7, $t8               #for iterating addr by j
+  add $t8, $t9, $t9               #for iterating addr by j
+  add $s6, $s7, $s8               #for iterating addr by j
     #test: addi $s0 , $s1 , 2
     #sll $s0, $s0, 2
     #bne $s0, $s1, test
