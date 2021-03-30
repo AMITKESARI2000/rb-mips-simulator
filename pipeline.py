@@ -24,12 +24,13 @@ class HWUnits:
         for l in line[1]:
             l = l.strip()[1:]
             self.disassembled_instr.append(l)
-        print(self.disassembled_instr)
+        #print(self.disassembled_instr)
         return self.disassembled_instr
 
     def check_for_stall(self, index_of_HWunit, current_instr_line, existence_of_instr_line=[0, 0, 0]):
 
         # Checking existence of instructions
+        print("++++++++++++++++++++++++++++++")
         existence_of_instr_line[0] = current_instr_line - base_instr_line_PC >= 0
         existence_of_instr_line[1] = current_instr_line - base_instr_line_PC - 1 >= 0
         existence_of_instr_line[2] = current_instr_line - base_instr_line_PC - 2 >= 0
@@ -37,12 +38,20 @@ class HWUnits:
         # Breaking down of instructions
         if existence_of_instr_line[0]:
             Pipeline_units[0].disassembled_instr = self.instr_breakdown(current_instr_line)
+            print(0, Pipeline_units[0].disassembled_instr)
 
         if existence_of_instr_line[1]:
             Pipeline_units[1].disassembled_instr = self.instr_breakdown(current_instr_line - 1)
+            print(1, Pipeline_units[1].disassembled_instr)
 
         if existence_of_instr_line[2]:
             Pipeline_units[2].disassembled_instr = self.instr_breakdown(current_instr_line - 2)
+            print(2, Pipeline_units[2].disassembled_instr)
+
+        print(00, Pipeline_units[0].disassembled_instr)
+        print(11, Pipeline_units[1].disassembled_instr)
+        print(22, Pipeline_units[2].disassembled_instr)
+        print("---------------------------")
 
         # Checking for how many instructions to be check for dependencies.
         t = -1
@@ -200,7 +209,7 @@ while not is_Program_Done:
             Pipeline_units[1].data.append(fetch_line)
 
     # ID/RF
-    Pipeline_units[1].check_for_stall(1, current_instr_line=Pipeline_units[1].current_instr_line)
+    Pipeline_units[1].check_for_stall(1, current_instr_line = Pipeline_units[1].current_instr_line)
     if Pipeline_units[1].stalls_left or Pipeline_units[1].current_instr_line >= simu.REGISTERS["ra"] - 1:
         CLOCK_OF_GOD += 1
         for i in range(1):
