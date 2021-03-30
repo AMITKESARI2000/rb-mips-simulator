@@ -39,10 +39,10 @@ class HWUnits:
             Pipeline_units[0].disassembled_instr = self.instr_breakdown(current_instr_line)
 
         if existence_of_instr_line[1]:
-            Pipeline_units[1].disassembled_instr = self.instr_breakdown(current_instr_line)
+            Pipeline_units[1].disassembled_instr = self.instr_breakdown(current_instr_line - 1)
 
         if existence_of_instr_line[2]:
-            Pipeline_units[2].disassembled_instr = self.instr_breakdown(current_instr_line)
+            Pipeline_units[2].disassembled_instr = self.instr_breakdown(current_instr_line - 2)
 
         print(0, Pipeline_units[0].disassembled_instr)
         print(1, Pipeline_units[1].disassembled_instr)
