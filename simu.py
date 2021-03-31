@@ -1,10 +1,6 @@
 import re
 
-<<<<<<< HEAD
-file = open("test 1", "r")
-=======
 file = open("testingbubblesort.asm", "r")
->>>>>>> a0005c555bca341619238fe740243530642072a1
 lines = file.readlines()
 file.close()
 
@@ -264,32 +260,32 @@ def sw_instr(instr_line):
     return result_ALU, instr_line
 
 
-def bne_instr(instr_line):
+def bne_instr(instr_line, index_pc):
     #  bne $t1, $s2, loop
     instr_line = instr_line.split(",")
     for l in range(len(instr_line) - 1):
         instr_line[l] = str(instr_line[l].strip()[1:])
     instr_line[2] = instr_line[2].strip()
     if REGISTERS[instr_line[0]] == REGISTERS[instr_line[1]]:
-        return PC + 1
+        return index_pc + 1
 
-    return int(instr_label[instr_line[2]]), instr_line
+    return int(instr_label[instr_line[2]])
 
 
-def beq_instr(instr_line):
+def beq_instr(instr_line, index_pc):
     #  beq $t1, $s2, loop
     instr_line = instr_line.split(",")
     for l in range(len(instr_line) - 1):
         instr_line[l] = str(instr_line[l].strip()[1:])
     instr_line[2] = instr_line[2].strip()
     if REGISTERS[instr_line[0]] != REGISTERS[instr_line[1]]:
-        return PC + 1
+        return index_pc + 1
 
-    return int(instr_label[instr_line[2]]), instr_line
+    return int(instr_label[instr_line[2]])
 
 
 def j_instr(instr_line):
-    return instr_label[instr_line], instr_line
+    return instr_label[instr_line]
 
 
 def lui_instr(instr_line):
@@ -375,8 +371,8 @@ def slt_instr(instr_line):
     return result_ALU, instr_line
 
 
-def syscall_instr(chota_pc):
-    l_type = lines[chota_pc]
+def syscall_instr(index_pc):
+    l_type = lines[index_pc]
     l_type = l_type.split(sep=" ")
     l_type[0] = l_type[0].strip()
     l_type[1] = l_type[1].strip()[1:-1]
@@ -397,7 +393,7 @@ def syscall_instr(chota_pc):
         # syscall
 
         l_print = l_type
-        l_type = lines[chota_pc - 1]
+        l_type = lines[index_pc - 1]
 
         l_type = l_type.split(sep=" ")
         l_type[0] = l_type[0].strip()
@@ -446,12 +442,12 @@ def execute_ALU(instr_word, instr_line):
         return add_instr(instr_line)
     elif instr_word == 'sub':
         return sub_instr(instr_line)
-    elif instr_word == 'bne':
-        return bne_instr(instr_line)
-    elif instr_word == 'beq':
-        return beq_instr(instr_line)
-    elif instr_word == 'j':
-        return j_instr(instr_line)
+    # elif instr_word == 'bne':
+    #     return bne_instr(instr_line)
+    # elif instr_word == 'beq':
+    #     return beq_instr(instr_line)
+    # elif instr_word == 'j':
+    #     return j_instr(instr_line)
     elif instr_word == 'lw':
         return lw_instr(instr_line)
     elif instr_word == 'sw':
