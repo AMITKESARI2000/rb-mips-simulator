@@ -1,6 +1,6 @@
 import re
 
-file = open("test 1", "r")
+file = open("testingbubblesort.asm", "r")
 lines = file.readlines()
 file.close()
 
@@ -448,6 +448,9 @@ def execute_ALU(instr_word, instr_line):
     #     return beq_instr(instr_line)
     # elif instr_word == 'j':
     #     return j_instr(instr_line)
+    elif instr_word in ("bne","beq","j"):
+        # pass
+        return 0,0
     elif instr_word == 'lw':
         return lw_instr(instr_line)
     elif instr_word == 'sw':

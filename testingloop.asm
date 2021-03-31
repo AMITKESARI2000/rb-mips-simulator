@@ -1,5 +1,5 @@
   .data
-  N: .word 3, 3, 4, 3
+  N: .word 5, 6, 4, 3
   Tir: .asciiz "Tirutsava 2020 is lub\n"
   Val: .asciiz "Value of i is: "
 

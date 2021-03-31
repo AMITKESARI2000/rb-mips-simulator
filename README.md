@@ -34,3 +34,10 @@ In phase 2 we are implementing pipeline so that the throughput can be increased.
 * All 5 stages (IF, ID/RF, EX, MEM, WB) have been modularised.
 * Stalls have been added according to data dependencies only
 * Structural hazards have been removed assuming writing in 1st half of the cycle and reading in 2nd half of the cycle.
+
+Note: 
+* We were unable to complete the phase 2. We tried implementing all the 5 HW units as objects and tried to find and accumulate the stalls based on the data dependency between the instructions.
+* But somehow we were not able to properly deal with branch statements properly due to which any program having loops runs only a single time.
+* We tried to compare and jump to that instruction point but were unable to do so somehow, sorry.
+
+
