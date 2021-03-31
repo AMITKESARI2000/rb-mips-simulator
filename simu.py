@@ -1,10 +1,11 @@
 import re
 
 file = open("testingbubblesort.asm", "r")
+
 lines = file.readlines()
 file.close()
 
-# Global Storagess
+# Global Storages
 global RAM, ram_iter, ram_label, instr_label, PC, i, cnsl
 RAM = []
 ram_iter = 0
@@ -314,7 +315,6 @@ def addi_instr(instr_line):
         result_ALU = int(REGISTERS[instr_line[1]]) + int(instr_line[2])
         return result_ALU, instr_line
 
-    return result_ALU, instr_line
 
 
 def li_instr(instr_line):
@@ -448,6 +448,9 @@ def execute_ALU(instr_word, instr_line):
     #     return beq_instr(instr_line)
     # elif instr_word == 'j':
     #     return j_instr(instr_line)
+    elif instr_word in ("bne","beq","j"):
+        # pass
+        return 0,0
     elif instr_word == 'lw':
         return lw_instr(instr_line)
     elif instr_word == 'sw':

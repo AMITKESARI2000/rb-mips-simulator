@@ -5,6 +5,7 @@
 * Anu Anand Annu (CS19B044)
 
 ### Simulate MIPS Architecture instruction sets
+###PHASE 1:
 * Main starting file is **gui.py** located in phase 1 folder
 * The simulator supports the following MIPS instructions: 
   * add/sub
@@ -27,10 +28,16 @@ the contents of the registers, and the memory.
   
 ---
 
-### Phase 2
+### PHASE 2:
 In phase 2 we are implementing pipeline so that the throughput can be increased.
 
 * The main file is **pipeline.py**
 * All 5 stages (IF, ID/RF, EX, MEM, WB) have been modularised.
 * Stalls have been added according to data dependencies only
 * Structural hazards have been removed assuming writing in 1st half of the cycle and reading in 2nd half of the cycle.
+
+* We tried implementing all the 5 HW units as objects and tried to find and accumulate the stalls based on the data dependency between the instructions.
+* We tried to compare and jump to that instruction point in the ID/RF stage itself.
+* Enabling/Disabling of data forwarding is implemented which will be asked before running the program.
+
+
