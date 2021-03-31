@@ -1,6 +1,6 @@
 import re
 
-file = open("testingswap.asm", "r")
+file = open("testingbubblesort.asm", "r")
 lines = file.readlines()
 file.close()
 
