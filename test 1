@@ -6,9 +6,8 @@
 .globl main
 
 main:
+    bne $t1, $t2, cond
     add $t1, $t2, $t3
     add $t1, $t3, $t1
     add $t1, $t1, $t3
     addi $t1, $t1, 41
-
-    jr $ra
