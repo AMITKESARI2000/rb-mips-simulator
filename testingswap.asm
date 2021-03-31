@@ -50,12 +50,4 @@ main:
 #                   ,1,2,3,4,5
 
 
-  li $v0, 1
-  add $a0, $s2, $zero
-  syscall
-
-   li $v0, 1
-  add $a0, $s1, $zero
-  syscall
-
 

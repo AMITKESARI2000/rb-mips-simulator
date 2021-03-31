@@ -6,6 +6,10 @@
 .globl main
 
 main:
+    beq $t3, $t1, exit
     add $t3, $t1, $t3
     add $t1, $t2, $t3
+
+exit:
+    jr $ra
 

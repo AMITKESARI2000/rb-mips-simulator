@@ -4,7 +4,6 @@ import re
 CLOCK_OF_GOD = 0
 STALL_OF_GOD = 0
 
-
 class HWUnits:
     def __init__(self, current_instr_line, stalls_left, disassembled_instr, frwd):
         self.current_instr_line = current_instr_line
@@ -293,7 +292,7 @@ class HWUnits:
         print("stall: " + str(stall))
         self.stalls_left += stall
         global STALL_OF_GOD
-        STALL_OF_GOD += stall-1
+        STALL_OF_GOD += stall
         return stall
 
 
@@ -470,10 +469,10 @@ while not is_Program_Done:
 
 
 # Console Prints
-# print("Final Memory state: \n", simu.RAM)
-# print("=" * 100)
-# print("Register values: \n", simu.REGISTERS)
-# print("=" * 100)
-# print("Total Clock Cycles: ", CLOCK_OF_GOD)
-# print("Total Stalls: ", STALL_OF_GOD)
-# print("IPC: ", CLOCK_OF_GOD / simu.REGISTERS['ra'])
+print("Final Memory state: \n", simu.RAM)
+print("=" * 100)
+print("Register values: \n", simu.REGISTERS)
+print("=" * 100)
+print("Total Clock Cycles: ", CLOCK_OF_GOD)
+print("Total Stalls: ", STALL_OF_GOD)
+print("IPC: ", CLOCK_OF_GOD / simu.REGISTERS['ra'])
