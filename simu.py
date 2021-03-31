@@ -1,6 +1,6 @@
 import re
 
-file = open("testingswap.asm", "r")
+file = open("testingbubblesort.asm", "r")
 lines = file.readlines()
 file.close()
 
@@ -12,6 +12,7 @@ ram_label = {}
 instr_label = {}
 PC = 0
 cnsl = []
+syscall_array = []
 
 
 class InstrSyntaxError:
@@ -110,7 +111,6 @@ def pre_data_process():
     print("=" * 100)
     global PC
     PC = i
-    REGISTERS["ra"] = len(lines)
 
     # Removing all comments from instruction lines
     while i < len(lines):
@@ -135,6 +135,15 @@ def pre_data_process():
 
         i += 1
 
+    # Process syscalls
+    i = PC
+    while i < len(lines):
+        if re.findall(r"^syscall", lines[i]):
+            syscall_array.append(i - 1)
+            lines.remove(lines[i])
+
+        i += 1
+    REGISTERS["ra"] = len(lines)
 
 def main():
     pre_data_process()
@@ -345,10 +354,11 @@ def la_instr(instr_line):
     instr_line[1] = str(instr_line[1].strip())
 
     # Getting adr of label
-    REGISTERS[instr_line[0]] = int(BaseAdr[2:]) + ram_label[instr_line[1]]
-    REGISTERS[instr_line[0]] = "0x" + str(REGISTERS[instr_line[0]])
 
-    return PC + 1
+    result_ALU = int(BaseAdr[2:]) + ram_label[instr_line[1]]
+    result_ALU = "0x" + str(result_ALU)
+
+    return result_ALU, instr_line
 
 
 def slt_instr(instr_line):
@@ -361,8 +371,8 @@ def slt_instr(instr_line):
     return result_ALU, instr_line
 
 
-def syscall_instr():
-    l_type = lines[PC - 1]
+def syscall_instr(chota_pc):
+    l_type = lines[chota_pc]
     l_type = l_type.split(sep=" ")
     l_type[0] = l_type[0].strip()
     l_type[1] = l_type[1].strip()[1:-1]
@@ -373,6 +383,7 @@ def syscall_instr():
         #   syscall
 
         if int(l_type[2]) == 10:
+            print("Exit syscall!")
             return REGISTERS["ra"]
 
     else:
@@ -382,7 +393,7 @@ def syscall_instr():
         # syscall
 
         l_print = l_type
-        l_type = lines[PC - 2]
+        l_type = lines[chota_pc - 1]
 
         l_type = l_type.split(sep=" ")
         l_type[0] = l_type[0].strip()
@@ -392,14 +403,14 @@ def syscall_instr():
         if int(l_type[2]) == 1:
             # Print register value
             cnsl.append(REGISTERS[l_print[1]])
-            print(REGISTERS[l_print[1]])
+            print("From syscall console: ",REGISTERS[l_print[1]])
 
         elif int(l_type[2]) == 4:
             # Print asciiz text
             cnsl.append(RAM[ram_label[l_print[2]]])
             print(RAM[ram_label[l_print[2]]])
 
-    return PC + 1
+    # return PC + 1
 
 
 # Finding the type of current instruction to be parsed
@@ -450,7 +461,7 @@ def execute_ALU(instr_word, instr_line):
     elif instr_word == 'srl':
         return srl_instr(instr_line)
     elif instr_word == 'jr':
-        return REGISTERS["ra"]
+        return REGISTERS["ra"], instr_line
     elif instr_word == 'li':
         return li_instr(instr_line)
     elif instr_word == 'la':
