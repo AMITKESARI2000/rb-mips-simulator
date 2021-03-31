@@ -4,7 +4,7 @@ file = open("testingswap.asm", "r")
 lines = file.readlines()
 file.close()
 
-# Global Storages
+# Global Storagess
 global RAM, ram_iter, ram_label, instr_label, PC, i, cnsl
 RAM = []
 ram_iter = 0
