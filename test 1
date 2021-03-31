@@ -1,0 +1,14 @@
+.data
+    .word 7
+    .word 8
+
+.text
+.globl main
+
+main:
+    add $t1, $t2, $t3
+    add $t1, $t3, $t1
+    add $t1, $t1, $t3
+    addi $t1, $t1, 41
+
+    jr $ra
