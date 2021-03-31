@@ -15,17 +15,17 @@ class HWUnits:
         self.data = []
 
     def instr_breakdown(self, current_instr_line):
-        self.disassembled_instr = []
+        disassembled_instr = []
         line = simu.lines[current_instr_line].strip()
         line = line.split(sep=" ", maxsplit=1)
 
-        self.disassembled_instr.append(line[0].strip())  # as sw functionality is different
+        disassembled_instr.append(line[0].strip())  # as sw functionality is different
         line[1] = re.findall(r"\$\w?\w\w?\w", line[1])
         for l in line[1]:
             l = l.strip()[1:]
-            self.disassembled_instr.append(l)
+            disassembled_instr.append(l)
         #print(self.disassembled_instr)
-        return self.disassembled_instr
+        return disassembled_instr
 
     def check_for_stall(self, index_of_HWunit, current_instr_line, existence_of_instr_line=[0, 0, 0]):
 
@@ -79,9 +79,9 @@ class HWUnits:
                 elif (len(Pipeline_units[k].disassembled_instr) == 3) and (
                         Pipeline_units[k].disassembled_instr[0] == "sw"):  # Check crnt instr dep on prev instr like sw
 
-                    if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[2][3:5]:
+                    if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[2]:
                         self.is_stall(k, False)
-                    elif Pipeline_units[0].disassembled_instr[3] == Pipeline_units[k].disassembled_instr[2][3:5]:
+                    elif Pipeline_units[0].disassembled_instr[3] == Pipeline_units[k].disassembled_instr[2]:
                         self.is_stall(k, False)
 
                 elif (len(Pipeline_units[k].disassembled_instr) == 3) and (
@@ -100,7 +100,7 @@ class HWUnits:
 
                 elif (len(Pipeline_units[k].disassembled_instr) == 3) and (
                         Pipeline_units[k].disassembled_instr[0] == "sw"):  # Check crnt instr dep on prev instr like sw
-                    if Pipeline_units[0].disassembled_instr[1] == Pipeline_units[k].disassembled_instr[2][3:5]:
+                    if Pipeline_units[0].disassembled_instr[1] == Pipeline_units[k].disassembled_instr[2]:
                         self.is_stall(k, False)
 
                 elif (len(Pipeline_units[k].disassembled_instr) == 3) and (
@@ -112,17 +112,17 @@ class HWUnits:
         elif (len(Pipeline_units[0].disassembled_instr) == 3) and (Pipeline_units[0].disassembled_instr[0] == "lw"):
             for k in range(1, t+1):
                 if len(Pipeline_units[k].disassembled_instr) == 4:  # Check crnt instr dep on prev instr like add
-                    if Pipeline_units[0].disassembled_instr[2][3:5] == Pipeline_units[k].disassembled_instr[1]:
+                    if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[1]:
                         self.is_stall(k, self.frwd)
 
                 elif (len(Pipeline_units[k].disassembled_instr) == 3) and (
                         Pipeline_units[k].disassembled_instr[0] == "sw"):  # Check crnt instr dep on prev instr like sw
-                    if Pipeline_units[0].disassembled_instr[2][3:5] == Pipeline_units[k].disassembled_instr[2][3:5]:
+                    if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[2]:
                         self.is_stall(k, False)
 
                 elif (len(Pipeline_units[k].disassembled_instr) == 3) and (
                         Pipeline_units[k].disassembled_instr[0] == "lw"):  # Check crnt instr dep on prev instr like lw
-                    if Pipeline_units[0].disassembled_instr[2][3:5] == Pipeline_units[k].disassembled_instr[1]:
+                    if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[1]:
                         self.is_stall(k, False)
 
         elif len(Pipeline_units[0].disassembled_instr) == 4 and (Pipeline_units[0].disassembled_instr[0] in "addi"):
@@ -134,7 +134,7 @@ class HWUnits:
                 elif (len(Pipeline_units[k].disassembled_instr) == 3) and (
                         Pipeline_units[k].disassembled_instr[0] == "sw"):  # Check crnt instr dep on prev instr like sw
 
-                    if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[2][3:5]:
+                    if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[2]:
                         self.is_stall(k, False)
 
                 elif (len(Pipeline_units[k].disassembled_instr) == 3) and (
@@ -145,14 +145,15 @@ class HWUnits:
     def is_stall(self, dep_instr, frwd):
 
         stall = 0
-        if dep_instr == 0 and frwd == False:
+        if dep_instr == 1 and frwd == False:
+            stall += 3
+        elif dep_instr == 2 and frwd == False:
             stall += 2
-        elif dep_instr == 1 and frwd == False:
-            stall += 1
-        elif dep_instr == 0 and frwd == True:
-            stall += 1
         elif dep_instr == 1 and frwd == True:
+            stall += 1
+        elif dep_instr == 2 and frwd == True:
             stall += 0
+        print(122121, stall)
         self.stalls_left += stall
 
 
@@ -191,7 +192,10 @@ def instruction_fetch():
 
 
 while not is_Program_Done:
+    for i in range(5):
+        Pipeline_units[i].stalls_left = max(0, Pipeline_units[i].stalls_left-1)
     CLOCK_OF_GOD += 1
+    print(CLOCK_OF_GOD)
 
     # If Stall came, percolate it downwards.
     # IF
@@ -209,9 +213,8 @@ while not is_Program_Done:
             Pipeline_units[1].data.append(fetch_line)
 
     # ID/RF
-    Pipeline_units[1].check_for_stall(1, current_instr_line = Pipeline_units[1].current_instr_line)
     if Pipeline_units[1].stalls_left or Pipeline_units[1].current_instr_line >= simu.REGISTERS["ra"] - 1:
-        CLOCK_OF_GOD += 1
+        # CLOCK_OF_GOD += 1
         for i in range(1):
             Pipeline_units[i].stalls_left += 1
     else:
@@ -224,17 +227,19 @@ while not is_Program_Done:
             (instr_word, instr_line) = simu.find_instr_type(fetch_line)
             Pipeline_units[1].current_instr_line += 1
 
+            Pipeline_units[1].check_for_stall(1, current_instr_line=Pipeline_units[1].current_instr_line)
+
             # Moving data to next unit
             Pipeline_units[2].data.append((instr_word, instr_line))
 
     # EX
     if Pipeline_units[2].stalls_left or Pipeline_units[2].current_instr_line >= simu.REGISTERS["ra"] - 1:
-        CLOCK_OF_GOD += 1
+        # CLOCK_OF_GOD += 1
         for i in range(2):
             Pipeline_units[i].stalls_left += 1
     else:
         # While filling up the pipeline in the start
-        if Pipeline_units[2].current_instr_line - base_instr_line_PC < 0:
+        if Pipeline_units[2].current_instr_line - base_instr_line_PC < 0 or len(Pipeline_units[2].data) < 1:
             pass_to_nextHW(2)
         else:
             (instr_word, instr_line) = Pipeline_units[2].data[0]
@@ -248,7 +253,7 @@ while not is_Program_Done:
 
     # MEM
     if Pipeline_units[3].stalls_left or Pipeline_units[3].current_instr_line >= simu.REGISTERS["ra"] - 1:
-        CLOCK_OF_GOD += 1
+        # CLOCK_OF_GOD += 1
         for i in range(3):
             Pipeline_units[i].stalls_left += 1
     else:
@@ -268,7 +273,7 @@ while not is_Program_Done:
 
     # WB
     if Pipeline_units[4].stalls_left or Pipeline_units[4].current_instr_line >= simu.REGISTERS["ra"] - 1:
-        CLOCK_OF_GOD += 1
+        # CLOCK_OF_GOD += 1
         for i in range(4):
             Pipeline_units[i].stalls_left += 1
     else:
