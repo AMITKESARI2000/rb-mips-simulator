@@ -33,13 +33,13 @@ class HWUnits:
 
         # Checking existence of instructions
         # print("++++++++++++++++++++++++++++++")
-        s=0
+        s = 0
 
         existence_of_instr_line[0] = True  # current_instr_line - base_instr_line_PC >= 0
         existence_of_instr_line[1] = (
-                    Pipeline_units[0].disassembled_instr != [])  # current_instr_line - base_instr_line_PC - 1 >= 0
+                Pipeline_units[0].disassembled_instr != [])  # current_instr_line - base_instr_line_PC - 1 >= 0
         existence_of_instr_line[2] = (
-                    Pipeline_units[1].disassembled_instr != [])  # current_instr_line - base_instr_line_PC - 2 >= 0
+                Pipeline_units[1].disassembled_instr != [])  # current_instr_line - base_instr_line_PC - 2 >= 0
 
         # print(existence_of_instr_line[1])
         # print(existence_of_instr_line[2])
@@ -80,11 +80,11 @@ class HWUnits:
 
                 if Pipeline_units[1].disassembled_instr[0] in ("bne", "beq"):
                     self.stalls_left += 1
-                    print("stall: " + str(self.stalls_left), "in ",Pipeline_units[1].disassembled_instr)
+                    print("stall: " + str(self.stalls_left), "in ", Pipeline_units[1].disassembled_instr)
                     s = 1
 
                 elif Pipeline_units[k].disassembled_instr[0] in (
-                "add", "sub", "slt"):  # Check crnt instr dep on prev instr like add
+                        "add", "sub", "slt"):  # Check crnt instr dep on prev instr like add
 
                     if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[1]:
                         s = self.is_stall(k, self.frwd)
@@ -127,11 +127,11 @@ class HWUnits:
 
                 if Pipeline_units[1].disassembled_instr[0] in ("bne", "beq"):
                     self.stalls_left += 1
-                    print("stall: " + str(self.stalls_left), "in ",Pipeline_units[1].disassembled_instr)
+                    print("stall: " + str(self.stalls_left), "in ", Pipeline_units[1].disassembled_instr)
                     s = 1
 
                 elif Pipeline_units[k].disassembled_instr[0] in (
-                "add", "sub"):  # Check crnt instr dep on prev instr like add
+                        "add", "sub"):  # Check crnt instr dep on prev instr like add
 
                     if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[1]:
                         s = self.is_stall(k, self.frwd)
@@ -165,11 +165,11 @@ class HWUnits:
 
                 if Pipeline_units[1].disassembled_instr[0] in ("bne", "beq"):
                     self.stalls_left += 1
-                    print("stall: " + str(self.stalls_left), "in ",Pipeline_units[1].disassembled_instr)
+                    print("stall: " + str(self.stalls_left), "in ", Pipeline_units[1].disassembled_instr)
                     s = 1
 
                 elif Pipeline_units[k].disassembled_instr[0] in (
-                "add", "sub"):  # Check crnt instr dep on prev instr like add
+                        "add", "sub"):  # Check crnt instr dep on prev instr like add
 
                     if Pipeline_units[0].disassembled_instr[1] == Pipeline_units[k].disassembled_instr[1]:
                         s = self.is_stall(k, self.frwd)
@@ -202,11 +202,11 @@ class HWUnits:
 
                 if Pipeline_units[1].disassembled_instr[0] in ("bne", "beq"):
                     self.stalls_left += 1
-                    print("stall: " + str(self.stalls_left), "in ",Pipeline_units[1].disassembled_instr)
+                    print("stall: " + str(self.stalls_left), "in ", Pipeline_units[1].disassembled_instr)
                     s = 1
 
                 elif Pipeline_units[k].disassembled_instr[0] in (
-                "add", "sub"):  # Check crnt instr dep on prev instr like add
+                        "add", "sub"):  # Check crnt instr dep on prev instr like add
 
                     if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[1]:
                         s = self.is_stall(k, self.frwd)
@@ -237,12 +237,10 @@ class HWUnits:
             for k in range(1, t + 1):
                 s = 0
 
-
                 if Pipeline_units[1].disassembled_instr[0] in ("bne", "beq"):
                     self.stalls_left += 1
-                    print("stall: " + str(self.stalls_left), "in ",Pipeline_units[1].disassembled_instr)
+                    print("stall: " + str(self.stalls_left), "in ", Pipeline_units[1].disassembled_instr)
                     s = 1
-
 
                 if s:
                     break
@@ -255,11 +253,11 @@ class HWUnits:
 
                 if Pipeline_units[1].disassembled_instr[0] in ("bne", "beq"):
                     self.stalls_left += 1
-                    print("stall: " + str(self.stalls_left), "in ",Pipeline_units[1].disassembled_instr)
+                    print("stall: " + str(self.stalls_left), "in ", Pipeline_units[1].disassembled_instr)
                     s = 1
 
                 elif Pipeline_units[k].disassembled_instr[0] in (
-                "add", "sub", "slt"):  # Check crnt instr dep on prev instr like add
+                        "add", "sub", "slt"):  # Check crnt instr dep on prev instr like add
                     if Pipeline_units[0].disassembled_instr[1] == Pipeline_units[k].disassembled_instr[1]:
                         s = self.is_stall(k, self.frwd)
                     elif Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[1]:
@@ -307,7 +305,7 @@ class HWUnits:
         elif dep_instr == 2 and frwd == True:
             stall += 0
 
-        print("stall: " + str(stall), "in ",Pipeline_units[1].disassembled_instr)
+        print("stall: " + str(stall), "in ", Pipeline_units[1].disassembled_instr)
         # self.stalls_left += stall
         global STALL_OF_GOD
         STALL_OF_GOD += stall
@@ -420,7 +418,8 @@ while not is_Program_Done:
             fetch_line = Pipeline_units[1].data[0]
             Pipeline_units[1].data.pop(0)
             (instr_word, instr_line) = simu.find_instr_type(fetch_line)
-            Pipeline_units[1].stalls_left += Pipeline_units[1].check_for_stall(1, current_instr_line=Pipeline_units[1].current_instr_line)
+            Pipeline_units[1].stalls_left += Pipeline_units[1].check_for_stall(1, current_instr_line=Pipeline_units[
+                1].current_instr_line)
 
             if instr_word in ("bne", "beq", "j"):
 
@@ -429,6 +428,10 @@ while not is_Program_Done:
                     return_bne_line = simu.bne_instr(instr_line, Pipeline_units[0].current_instr_line - 1)
                     if return_bne_line != Pipeline_units[0].current_instr_line:
                         Pipeline_units[0].current_instr_line = return_bne_line
+                        Pipeline_units[1].current_instr_line = return_bne_line - 1
+                        Pipeline_units[2].current_instr_line = return_bne_line - 2
+                        Pipeline_units[3].current_instr_line = return_bne_line - 3
+                        Pipeline_units[4].current_instr_line = return_bne_line - 4
                         if len(Pipeline_units[1].data):
                             Pipeline_units[1].data.pop(len(Pipeline_units[1].data) - 1)
                         STALL_OF_GOD += 1
@@ -436,13 +439,23 @@ while not is_Program_Done:
                     return_bne_line = simu.beq_instr(instr_line, Pipeline_units[0].current_instr_line - 1)
                     if return_bne_line != Pipeline_units[0].current_instr_line:
                         Pipeline_units[0].current_instr_line = return_bne_line
-                        Pipeline_units[1].data.pop(len(Pipeline_units[1].data) - 1)
+                        Pipeline_units[1].current_instr_line = return_bne_line - 1
+                        Pipeline_units[2].current_instr_line = return_bne_line - 2
+                        Pipeline_units[3].current_instr_line = return_bne_line - 3
+                        Pipeline_units[4].current_instr_line = return_bne_line - 4
+                        if len(Pipeline_units[1].data):
+                            Pipeline_units[1].data.pop(len(Pipeline_units[1].data) - 1)
                         STALL_OF_GOD += 1
                 elif instr_word == "j":
                     return_bne_line = simu.j_instr(instr_line)
                     if return_bne_line != Pipeline_units[0].current_instr_line:
                         Pipeline_units[0].current_instr_line = return_bne_line
-                        Pipeline_units[1].data.pop(len(Pipeline_units[1].data) - 1)
+                        Pipeline_units[1].current_instr_line = return_bne_line - 1
+                        Pipeline_units[2].current_instr_line = return_bne_line - 2
+                        Pipeline_units[3].current_instr_line = return_bne_line - 3
+                        Pipeline_units[4].current_instr_line = return_bne_line - 4
+                        if len(Pipeline_units[1].data):
+                            Pipeline_units[1].data.pop(len(Pipeline_units[1].data) - 1)
                         STALL_OF_GOD += 1
 
             # else:
