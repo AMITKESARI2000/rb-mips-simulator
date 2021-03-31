@@ -1,6 +1,6 @@
 import re
 
-file = open("test 1", "r")
+file = open("testingswap.asm", "r")
 lines = file.readlines()
 file.close()
 
