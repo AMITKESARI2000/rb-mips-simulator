@@ -318,7 +318,7 @@ while not is_Program_Done:
 
     # If Stall came, percolate it downwards.
     # IF
-    if Pipeline_units[0].stalls_left or Pipeline_units[0].current_instr_line >= simu.REGISTERS["ra"] - 1:
+    if Pipeline_units[0].stalls_left or Pipeline_units[0].current_instr_line >= simu.REGISTERS["ra"] :
         # If stall is there OR the stage has executed all the instructions and is sitting idle.
         # CLOCK_OF_GOD += 1
         print("stall in IF.")
@@ -333,7 +333,7 @@ while not is_Program_Done:
             Pipeline_units[1].data.append(fetch_line)
 
     # WB
-    if Pipeline_units[4].stalls_left or Pipeline_units[4].current_instr_line >= simu.REGISTERS["ra"] - 1:
+    if Pipeline_units[4].stalls_left or Pipeline_units[4].current_instr_line >= simu.REGISTERS["ra"] :
         # CLOCK_OF_GOD += 1
         for i in range(4):
             Pipeline_units[i].stalls_left += 1
@@ -364,8 +364,9 @@ while not is_Program_Done:
                     print("Error in Write Back stage. Aborting...")
                     is_Program_Done = True
 
+
     # ID/RF
-    if Pipeline_units[1].stalls_left or Pipeline_units[1].current_instr_line >= simu.REGISTERS["ra"] - 1:
+    if Pipeline_units[1].stalls_left or Pipeline_units[1].current_instr_line >= simu.REGISTERS["ra"] :
         # CLOCK_OF_GOD += 1
         for i in range(1):
             Pipeline_units[i].stalls_left += 1
@@ -385,7 +386,7 @@ while not is_Program_Done:
             Pipeline_units[2].data.append((instr_word, instr_line))
 
     # EX
-    if Pipeline_units[2].stalls_left or Pipeline_units[2].current_instr_line >= simu.REGISTERS["ra"] - 1:
+    if Pipeline_units[2].stalls_left or Pipeline_units[2].current_instr_line >= simu.REGISTERS["ra"] :
         # CLOCK_OF_GOD += 1
         for i in range(2):
             Pipeline_units[i].stalls_left += 1
@@ -404,7 +405,7 @@ while not is_Program_Done:
             Pipeline_units[3].data.append((instr_word, instr_line, result_ALU))
 
     # MEM
-    if Pipeline_units[3].stalls_left or Pipeline_units[3].current_instr_line >= simu.REGISTERS["ra"] - 1:
+    if Pipeline_units[3].stalls_left or Pipeline_units[3].current_instr_line >= simu.REGISTERS["ra"] :
         # CLOCK_OF_GOD += 1
         for i in range(3):
             Pipeline_units[i].stalls_left += 1
@@ -424,8 +425,13 @@ while not is_Program_Done:
                 Pipeline_units[4].data.append((instr_word, instr_line, result_ALU))
 
 
+    # Call syscalls
+    if len(simu.syscall_array) and Pipeline_units[4].current_instr_line-1 == simu.syscall_array[0]:
+        simu.syscall_instr(simu.syscall_array[0])
+        simu.syscall_array.pop(0)
+
     # Check if WB has reached last stage
-    if Pipeline_units[4].current_instr_line >= simu.REGISTERS["ra"] - 1:
+    if Pipeline_units[4].current_instr_line >= simu.REGISTERS["ra"]:
         is_Program_Done = True
 
 
