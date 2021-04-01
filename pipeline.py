@@ -379,39 +379,6 @@ while not is_Program_Done:
             # Moving data to next unit
             Pipeline_units[1].data.append(fetch_line)
 
-    # WB
-    if Pipeline_units[4].stalls_left or Pipeline_units[4].current_instr_line >= simu.REGISTERS["ra"]:
-        # CLOCK_OF_GOD += 1
-        for i in range(4):
-            Pipeline_units[i].stalls_left += 2
-    else:
-        # While filling up the pipeline in the start
-        if Pipeline_units[4].current_instr_line - base_instr_line_PC < 0 or len(Pipeline_units[4].data) < 1:
-            pass_to_nextHW(4)
-        else:
-            print("Executed WB")
-            (instr_word, instr_line, result_ALU_MEM) = Pipeline_units[4].data[0]
-            Pipeline_units[4].data.pop(0)
-            successful_write = 1
-            if instr_word in ("sw", "bne", "beq", "jr", "j"):
-                pass_to_nextHW(4)
-            else:
-                # In lw result from memory is used
-                if instr_word in "lw":
-                    result_MEM = result_ALU_MEM
-                    successful_write = simu.write_back_op(instr_line, result_MEM)
-
-                # In add/sub result from ALU is used
-                elif instr_word in ("add", "sub", "lui", "addi", "li", "sll", "srl", "slt"):
-                    result_ALU = result_ALU_MEM
-                    successful_write = simu.write_back_op(instr_line, result_ALU)
-
-                Pipeline_units[4].current_instr_line += 1
-
-                if successful_write == -1:
-                    # print("Error in Write Back stage. Aborting...")
-                    is_Program_Done = True
-
     # ID/RF
     if Pipeline_units[1].stalls_left or Pipeline_units[1].current_instr_line >= simu.REGISTERS["ra"]:
         # CLOCK_OF_GOD += 1
@@ -504,6 +471,39 @@ while not is_Program_Done:
             else:
                 pass_to_nextHW(3)
                 Pipeline_units[4].data.append((instr_word, instr_line, result_ALU))
+
+    # WB
+    if Pipeline_units[4].stalls_left or Pipeline_units[4].current_instr_line >= simu.REGISTERS["ra"]:
+        # CLOCK_OF_GOD += 1
+        for i in range(4):
+            Pipeline_units[i].stalls_left += 2
+    else:
+        # While filling up the pipeline in the start
+        if Pipeline_units[4].current_instr_line - base_instr_line_PC < 0 or len(Pipeline_units[4].data) < 1:
+            pass_to_nextHW(4)
+        else:
+            print("Executed WB")
+            (instr_word, instr_line, result_ALU_MEM) = Pipeline_units[4].data[0]
+            Pipeline_units[4].data.pop(0)
+            successful_write = 1
+            if instr_word in ("sw", "bne", "beq", "jr", "j"):
+                pass_to_nextHW(4)
+            else:
+                # In lw result from memory is used
+                if instr_word in "lw":
+                    result_MEM = result_ALU_MEM
+                    successful_write = simu.write_back_op(instr_line, result_MEM)
+
+                # In add/sub result from ALU is used
+                elif instr_word in ("add", "sub", "lui", "addi", "li", "sll", "srl", "slt"):
+                    result_ALU = result_ALU_MEM
+                    successful_write = simu.write_back_op(instr_line, result_ALU)
+
+                Pipeline_units[4].current_instr_line += 1
+
+                if successful_write == -1:
+                    # print("Error in Write Back stage. Aborting...")
+                    is_Program_Done = True
 
     # Call syscalls
     if len(simu.syscall_array) and Pipeline_units[4].current_instr_line - 1 == simu.syscall_array[0]:
