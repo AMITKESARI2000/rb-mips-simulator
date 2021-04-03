@@ -1,6 +1,6 @@
 import re
 
-file = open("testingbubblesort.asm", "r")
+file = open("bubblesort.asm", "r")
 lines = file.readlines()
 file.close()
 

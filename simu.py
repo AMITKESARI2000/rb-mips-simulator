@@ -1,4 +1,5 @@
 import re
+from gui_2 import *
 
 file = open("testingbubblesort.asm", "r")
 
@@ -416,7 +417,7 @@ def syscall_instr(index_pc):
 # Finding the type of current instruction to be parsed
 def find_instr_type(line):
     # Checking for labels beforehand
-    '''Since labels have been removed, check is not req
+    """Since labels have been removed, check is not req
     if re.findall(r"^\w*\s*:", line):
         label = line.split(sep=":", maxsplit=1)
         line = label[1].strip()
@@ -424,7 +425,7 @@ def find_instr_type(line):
         instr_label[label] = PC
         if line == '':
             return PC + 1
-    '''
+    """
     instr_line = ""
     instr_word = line.split(sep=" ", maxsplit=1)
     try:
@@ -448,9 +449,9 @@ def execute_ALU(instr_word, instr_line):
     #     return beq_instr(instr_line)
     # elif instr_word == 'j':
     #     return j_instr(instr_line)
-    elif instr_word in ("bne","beq","j"):
+    elif instr_word in ("bne", "beq", "j"):
         # pass
-        return 0,0
+        return 0, 0
     elif instr_word == 'lw':
         return lw_instr(instr_line)
     elif instr_word == 'sw':

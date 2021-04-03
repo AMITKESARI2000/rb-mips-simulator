@@ -1,8 +1,10 @@
-import simu as simu
+import simu
+from gui_2 import *
 import re
 
 CLOCK_OF_GOD = 0
 STALL_OF_GOD = 0
+space = 0
 
 
 class HWUnits:
@@ -307,10 +309,16 @@ class HWUnits:
         stall = 0
         if dep_instr == 1 and frwd is False:
             stall += 2
+            pipelining("STALL | STALL")
+
         elif dep_instr == 2 and frwd is False:
             stall += 1
+            pipelining("STALL")
+
         elif dep_instr == 1 and frwd is True:
             stall += 1
+            pipelining("STALL")
+
         elif dep_instr == 2 and frwd is True:
             stall += 0
 
@@ -329,9 +337,11 @@ simu.rm_comments()
 simu.pre_data_process()
 base_instr_line_PC = simu.PC
 
-if input("Data Forwarding is disabled by default. Want to enable?(y/n): ").lower() == "y":
+if input("Data Forwarding is disabled by default. Want to enable?(y): ").lower() == "y":
     forward_enable = True
     print("Data Forwarding Enabled")
+else:
+    print("Data Forwarding Disabled")
 
 
 Pipeline_units = [
@@ -372,9 +382,11 @@ while not is_Program_Done:
     else:
         # While filling up the pipeline in the start
         if Pipeline_units[0].current_instr_line - base_instr_line_PC < 0:
+            pipelining("IF")
             pass_to_nextHW(0)
         else:
             print("Executed IF")
+            pipelining("IF")
             fetch_line = instruction_fetch()
             # Moving data to next unit
             Pipeline_units[1].data.append(fetch_line)
@@ -387,9 +399,11 @@ while not is_Program_Done:
     else:
         # While filling up the pipeline in the start
         if Pipeline_units[1].current_instr_line - base_instr_line_PC < 0 or len(Pipeline_units[1].data) < 1:
+            pipelining("ID/RF")
             pass_to_nextHW(1)
         else:
             print("Executed ID/RF")
+            pipelining("ID/RF")
             fetch_line = Pipeline_units[1].data[0]
             Pipeline_units[1].data.pop(0)
             (instr_word, instr_line) = simu.find_instr_type(fetch_line)
@@ -438,14 +452,18 @@ while not is_Program_Done:
     else:
         # While filling up the pipeline in the start
         if Pipeline_units[2].current_instr_line - base_instr_line_PC < 0 or len(Pipeline_units[2].data) < 1:
+            pipelining("EX")
             pass_to_nextHW(2)
         else:
             print("Executed EX")
+            pipelining("EX")
             (instr_word, instr_line) = Pipeline_units[2].data[0]
             Pipeline_units[2].data.pop(0)
             (result_ALU, instr_line) = simu.execute_ALU(instr_word, instr_line)
 
-            # Returns a single result everytime along with disassembled instr. Eg- sum for add/sub, memory address with offset for lw/sw
+            # Returns a single result everytime along with disassembled instr.
+            # Eg- sum for add/sub, memory address with offset for lw/sw
+
             Pipeline_units[2].current_instr_line += 1
 
             # Moving data to next unit
@@ -459,9 +477,11 @@ while not is_Program_Done:
     else:
         # While filling up the pipeline in the start
         if Pipeline_units[3].current_instr_line - base_instr_line_PC < 0 or len(Pipeline_units[3].data) < 1:
+            pipelining("MEM")
             pass_to_nextHW(3)
         else:
             print("Executed MEM")
+            pipelining("MEM")
             (instr_word, instr_line, result_ALU) = Pipeline_units[3].data[0]
             Pipeline_units[3].data.pop(0)
             if instr_word in ("lw", "sw"):
@@ -480,9 +500,13 @@ while not is_Program_Done:
     else:
         # While filling up the pipeline in the start
         if Pipeline_units[4].current_instr_line - base_instr_line_PC < 0 or len(Pipeline_units[4].data) < 1:
+            pipelining("WB\n")
             pass_to_nextHW(4)
         else:
             print("Executed WB")
+            pipelining("WB\n")
+            pipelining("   " * space)
+            space += 4
             (instr_word, instr_line, result_ALU_MEM) = Pipeline_units[4].data[0]
             Pipeline_units[4].data.pop(0)
             successful_write = 1
@@ -512,6 +536,7 @@ while not is_Program_Done:
 
     # Check if WB has reached last stage
     if Pipeline_units[4].current_instr_line >= simu.REGISTERS["ra"]:
+        end()
         is_Program_Done = True
 
 # Console Prints

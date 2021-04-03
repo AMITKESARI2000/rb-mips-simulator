@@ -152,7 +152,7 @@ def modify_gui_data():
         response = 0
 
         def popclick():
-            response = askyesno("Execution Stopped!", "Error found in your assembly code on line " +
+            response = askyesno("Execution Stopped!!!", "Error found in your assembly code on line " +
                                 str(simu_1.Throw_error_instr.line_fault + 1) + ".\n\n" + str(
                 simu_1.lines[simu_1.Throw_error_instr.line_fault]) +
                                 "\n\nExit?")

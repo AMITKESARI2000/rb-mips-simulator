@@ -39,5 +39,5 @@ In phase 2 we are implementing pipeline so that the throughput can be increased.
 * We tried implementing all the 5 HW units as objects and tried to find and accumulate the stalls based on the data dependency between the instructions.
 * We tried to compare and jump to that instruction point in the ID/RF stage itself.
 * Enabling/Disabling of data forwarding is implemented which will be asked before running the program.
-
+* Work for GUI for this simulator is just started.
 
