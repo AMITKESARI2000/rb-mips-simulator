@@ -1,6 +1,8 @@
 from tkinter import *
 from tkinter.messagebox import showinfo, askyesno
 
+k = 0
+l = 0
 root = Tk()
 
 # root.resizable(width=False, height=False) #Restricting Resizable
@@ -34,9 +36,16 @@ t_pipe = Text(body_panel, height=50, width=15, wrap=NONE, yscrollcommand=v_scrol
 
 
 def pipelining(x):
-    t_pipe.insert(END, str(x) + " | ")
+    if x == "WB/n":
+        global l
+        global k
+        l += 1
+        k = l
+
+    t_pipe.insert(END, " "*l + str(x) + " | ")
     t_pipe.pack(side=TOP, fill=X)
     h_scroll.config(command=t_pipe.yview)
+    k += 1
 
 
 pipelining("PIPELINING:\n")
