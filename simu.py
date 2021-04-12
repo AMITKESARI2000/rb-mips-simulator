@@ -1,7 +1,6 @@
 import re
-from gui_2 import *
 
-file = open("../testingbubblesort.asm", "r")
+file = open("./testingbubblesort.asm", "r")
 
 lines = file.readlines()
 file.close()
