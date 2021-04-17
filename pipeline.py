@@ -332,11 +332,11 @@ simu.rm_comments()
 simu.pre_data_process()
 base_instr_line_PC = simu.PC
 
-# if input("Data Forwarding is disabled by default. Want to enable?(y): ").lower() == "y":
-#     forward_enable = True
-#     print("Data Forwarding Enabled")
-# else:
-print("Data Forwarding Disabled")
+if input("Data Forwarding is disabled by default. Want to enable?(y): ").lower() == "y":
+    forward_enable = True
+    print("Data Forwarding Enabled")
+else:
+    print("Data Forwarding Disabled")
 
 Pipeline_units = [
     HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[], frwd=forward_enable),  # IF
@@ -345,15 +345,6 @@ Pipeline_units = [
     HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[], frwd=forward_enable),  # MEM
     HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[], frwd=forward_enable)]  # WB
 
-
-# for i in range(1):
-#     Pipeline_units[1].data.append(nop)
-# for i in range(2):
-#     Pipeline_units[2].data.append(nop)
-# for i in range(3):
-#     Pipeline_units[3].data.append(['nop', [0, 0], 0])
-# for i in range(4):
-#     Pipeline_units[4].data.append(['nop', [0, 0], 0])
 
 
 def pass_to_nextHW(index_of_HWunit):
@@ -367,7 +358,7 @@ def instruction_fetch():
     # fetch_line is instr_word + instr_line
     return fetch_line
 
-
+last_checked_stall_line = 0
 while not is_Program_Done:
     for i in range(5):        Pipeline_units[i].stalls_left = max(0, Pipeline_units[i].stalls_left - 1)
     CLOCK_OF_GOD += 1
@@ -442,7 +433,7 @@ while not is_Program_Done:
 
     # ......................................................................................................
     # ID/RF
-    is_stall_checked = 0
+
     if len(Pipeline_units[1].data) < 1 or Pipeline_units[1].stalls_left:
         pass_to_nextHW(1)
         print("Pass ID/RF")
@@ -450,11 +441,12 @@ while not is_Program_Done:
 
         # ======Stall checking=======
         nop = ["nop", [0, 0]]
-        Pipeline_units[1].stalls_left += Pipeline_units[1].check_for_stall(1, current_instr_line=Pipeline_units[
+        if(last_checked_stall_line != Pipeline_units[0].current_instr_line-1):
+            Pipeline_units[1].stalls_left += Pipeline_units[1].check_for_stall(1, current_instr_line=Pipeline_units[
                                                                                                      0].current_instr_line - 1)
 
         if Pipeline_units[1].stalls_left and instr_word != 'nop':
-
+            last_checked_stall_line = Pipeline_units[0].current_instr_line-1
             for i in range(Pipeline_units[1].stalls_left):
                 Pipeline_units[2].data.insert(0, nop)
                 # Pipeline_units[1].data.insert(0, "nop")
