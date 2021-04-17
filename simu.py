@@ -1,6 +1,6 @@
 import re
 
-file = open("./testingbubblesort.asm", "r")
+file = open("./testingswap.asm", "r")
 
 lines = file.readlines()
 file.close()
@@ -474,6 +474,9 @@ def execute_ALU(instr_word, instr_line):
 
     elif instr_word == 'syscall':
         return syscall_instr()
+
+    elif instr_word=='nop':
+        return 0,0
     else:
         print("Invalid Instruction Set ", instr_word, " !!! Aborting...")
         Throw_error_instr.error_occurred(PC)
