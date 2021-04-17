@@ -317,7 +317,7 @@ class HWUnits:
         elif dep_instr == 2 and frwd is True:
             stall += 0
 
-        print("Stall count return: " + str(stall), "for ", Pipeline_units[1].disassembled_instr)
+        print("Stall count return: " + str(stall), "for ", Pipeline_units[0].disassembled_instr)
         # self.stalls_left += stall
         global STALL_OF_GOD
         STALL_OF_GOD += stall
@@ -332,18 +332,28 @@ simu.rm_comments()
 simu.pre_data_process()
 base_instr_line_PC = simu.PC
 
-if input("Data Forwarding is disabled by default. Want to enable?(y): ").lower() == "y":
-    forward_enable = True
-    print("Data Forwarding Enabled")
-else:
-    print("Data Forwarding Disabled")
+# if input("Data Forwarding is disabled by default. Want to enable?(y): ").lower() == "y":
+#     forward_enable = True
+#     print("Data Forwarding Enabled")
+# else:
+print("Data Forwarding Disabled")
 
 Pipeline_units = [
     HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[], frwd=forward_enable),  # IF
-    HWUnits(current_instr_line=simu.PC - 1, stalls_left=0, disassembled_instr=[], frwd=forward_enable),  # ID
-    HWUnits(current_instr_line=simu.PC - 2, stalls_left=0, disassembled_instr=[], frwd=forward_enable),  # EX
-    HWUnits(current_instr_line=simu.PC - 3, stalls_left=0, disassembled_instr=[], frwd=forward_enable),  # MEM
-    HWUnits(current_instr_line=simu.PC - 4, stalls_left=0, disassembled_instr=[], frwd=forward_enable)]  # WB
+    HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[], frwd=forward_enable),  # ID
+    HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[], frwd=forward_enable),  # EX
+    HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[], frwd=forward_enable),  # MEM
+    HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[], frwd=forward_enable)]  # WB
+
+
+# for i in range(1):
+#     Pipeline_units[1].data.append(nop)
+# for i in range(2):
+#     Pipeline_units[2].data.append(nop)
+# for i in range(3):
+#     Pipeline_units[3].data.append(['nop', [0, 0], 0])
+# for i in range(4):
+#     Pipeline_units[4].data.append(['nop', [0, 0], 0])
 
 
 def pass_to_nextHW(index_of_HWunit):
@@ -352,196 +362,148 @@ def pass_to_nextHW(index_of_HWunit):
 
 
 def instruction_fetch():
-    # print(Pipeline_units[0].current_instr_line)
-    # print(simu.lines)
     fetch_line = simu.lines[Pipeline_units[0].current_instr_line]
     Pipeline_units[0].current_instr_line += 1
-    # fetch_line = instr_word + instr_line
+    # fetch_line is instr_word + instr_line
     return fetch_line
 
 
 while not is_Program_Done:
-    for i in range(5):
-        Pipeline_units[i].stalls_left = max(0, Pipeline_units[i].stalls_left - 1)
+    for i in range(5):        Pipeline_units[i].stalls_left = max(0, Pipeline_units[i].stalls_left - 1)
     CLOCK_OF_GOD += 1
     print("." * 100)
     print("In Clock Cycle ", CLOCK_OF_GOD)
 
     # ....................................................................................................
     # WB
-    if Pipeline_units[4].current_instr_line >= simu.REGISTERS["ra"]:
-        # CLOCK_OF_GOD += 1
-        # for i in range(4):
-        #     Pipeline_units[i].stalls_left += 0
-        print("Pass WB.")
+    if len(Pipeline_units[4].data) < 1:
+        pass_to_nextHW(4)
+        print("Pass WB")
     else:
-        # While filling up the pipeline in the start
-        if Pipeline_units[4].current_instr_line - base_instr_line_PC < 0 \
-                or len(Pipeline_units[4].data) < 1:
-            pass_to_nextHW(4)
-            print("Pass WB")
-        else:
+        (instr_word, instr_line, result_ALU_MEM) = Pipeline_units[4].data[0]
+        Pipeline_units[4].data.pop(0)
+        successful_write = 1
+        if instr_word not in ("sw", "bne", "beq", "jr", "j", "nop"):
 
-            (instr_word, instr_line, result_ALU_MEM) = Pipeline_units[4].data[0]
-            Pipeline_units[4].data.pop(0)
-            successful_write = 1
-            if instr_word in ("sw", "bne", "beq", "jr", "j"):
-                pass_to_nextHW(4)
-            else:
-                # In lw result from memory is used
-                if instr_word in "lw":
-                    result_MEM = result_ALU_MEM
-                    successful_write = simu.write_back_op(instr_line, result_MEM)
+            # In lw result from memory is used
+            if instr_word in "lw":
+                result_MEM = result_ALU_MEM
+                successful_write = simu.write_back_op(instr_line, result_MEM)
 
-                # In add/sub result from ALU is used
-                elif instr_word in ("add", "sub", "lui", "addi", "li", "sll", "srl", "slt"):
-                    result_ALU = result_ALU_MEM
-                    successful_write = simu.write_back_op(instr_line, result_ALU)
+            # In add/sub result from ALU is used
+            elif instr_word in ("add", "sub", "lui", "addi", "li", "sll", "srl", "slt"):
+                result_ALU = result_ALU_MEM
+                successful_write = simu.write_back_op(instr_line, result_ALU)
 
-                Pipeline_units[4].current_instr_line += 1
+            if successful_write == -1:
+                # print("Error in Write Back stage. Aborting...")
+                is_Program_Done = True
 
-                if successful_write == -1:
-                    # print("Error in Write Back stage. Aborting...")
-                    is_Program_Done = True
-
-            print("Executed WB on line ", instr_word, instr_line)
+        print("Executed WB on line ", instr_word, instr_line)
 
     # .......................................................................................................
     # MEM
-    if Pipeline_units[3].current_instr_line >= simu.REGISTERS["ra"]:
-        # CLOCK_OF_GOD += 1
-        # for i in range(3):
-        #     Pipeline_units[i].stalls_left += 0
-        print("Pass MEM.")
+    if len(Pipeline_units[3].data) < 1:
+        pass_to_nextHW(3)
+        print("Pass MEM")
     else:
-        # While filling up the pipeline in the start
-        if Pipeline_units[3].current_instr_line - base_instr_line_PC < 0 \
-                or len(Pipeline_units[3].data) < 1:
-            pass_to_nextHW(3)
-            print("Pass MEM")
+        (instr_word, instr_line, result_ALU) = Pipeline_units[3].data[0]
+        Pipeline_units[3].data.pop(0)
+        if instr_word in ("lw", "sw"):
+            result_MEM = simu.memory_op(instr_word, instr_line, result_ALU)
+            Pipeline_units[3].current_instr_line += 1
+            Pipeline_units[4].data.append((instr_word, instr_line, result_MEM))
         else:
+            pass_to_nextHW(3)
+            Pipeline_units[4].data.append((instr_word, instr_line, result_ALU))
 
-            (instr_word, instr_line, result_ALU) = Pipeline_units[3].data[0]
-            Pipeline_units[3].data.pop(0)
-            if instr_word in ("lw", "sw"):
-                result_MEM = simu.memory_op(instr_word, instr_line, result_ALU)
-                Pipeline_units[3].current_instr_line += 1
-                Pipeline_units[4].data.append((instr_word, instr_line, result_MEM))
-            else:
-                pass_to_nextHW(3)
-                Pipeline_units[4].data.append((instr_word, instr_line, result_ALU))
-
-            print("Executed MEM on line ", instr_word, instr_line)
+        print("Executed MEM on line ", instr_word, instr_line)
 
     # ..............................................................................................................
     # EX
-    if Pipeline_units[2].current_instr_line >= simu.REGISTERS["ra"]:
-        # CLOCK_OF_GOD += 1
-        # for i in range(2):
-        #     Pipeline_units[i].stalls_left += 0
-        print("Pass EX.")
+    if len(Pipeline_units[2].data) < 1:
+        pass_to_nextHW(2)
+        print("Pass EX")
     else:
-        # While filling up the pipeline in the start
-        if Pipeline_units[2].current_instr_line - base_instr_line_PC < 0 \
-                or len(Pipeline_units[2].data) < 1:
-            pass_to_nextHW(2)
-            print("Pass EX")
-        else:
 
-            (instr_word, instr_line) = Pipeline_units[2].data[0]
-            Pipeline_units[2].data.pop(0)
-            (result_ALU, instr_line) = simu.execute_ALU(instr_word, instr_line)
+        (instr_word, instr_line) = Pipeline_units[2].data[0]
+        Pipeline_units[2].data.pop(0)
+        (result_ALU, instr_line) = simu.execute_ALU(instr_word, instr_line)
 
-            # Returns a single result everytime along with disassembled instr.
-            # Eg- sum for add/sub, memory address with offset for lw/sw
+        # Returns a single result everytime along with disassembled instr.
+        # Eg- sum for add/sub, memory address with offset for lw/sw
 
-            Pipeline_units[2].current_instr_line += 1
+        Pipeline_units[2].current_instr_line += 1
 
-            # Moving data to next unit
-            Pipeline_units[3].data.append((instr_word, instr_line, result_ALU))
+        # Moving data to next unit
+        Pipeline_units[3].data.append((instr_word, instr_line, result_ALU))
 
-            print("Executed EX on line ", instr_word, instr_line)
+        print("Executed EX on line ", instr_word, instr_line)
 
     # ......................................................................................................
     # ID/RF
-    if (Pipeline_units[1].stalls_left
-            # or Pipeline_units[0].stalls_left
-    ) or Pipeline_units[1].current_instr_line >= simu.REGISTERS["ra"]:
-        # CLOCK_OF_GOD += 1
-        for i in range(1):
-            Pipeline_units[i].stalls_left += 0
-        print("Execute nop in ID/RF")
+    is_stall_checked = 0
+    if len(Pipeline_units[1].data) < 1 or Pipeline_units[1].stalls_left:
+        pass_to_nextHW(1)
+        print("Pass ID/RF")
     else:
-        # While filling up the pipeline in the start
-        if Pipeline_units[1].current_instr_line - base_instr_line_PC < 0 or len(Pipeline_units[1].data) < 1:
-            pass_to_nextHW(1)
-            print("Pass ID/RF")
-        else:
 
+        # ======Stall checking=======
+        nop = ["nop", [0, 0]]
+        Pipeline_units[1].stalls_left += Pipeline_units[1].check_for_stall(1, current_instr_line=Pipeline_units[
+                                                                                                     0].current_instr_line - 1)
+
+        if Pipeline_units[1].stalls_left and instr_word != 'nop':
+
+            for i in range(Pipeline_units[1].stalls_left):
+                Pipeline_units[2].data.insert(0, nop)
+                # Pipeline_units[1].data.insert(0, "nop")
+
+            Pipeline_units[0].stalls_left = Pipeline_units[1].stalls_left
+            # Pipeline_units[1].data.pop(0)
+            fetch_line = nop
+
+        else:
             fetch_line = Pipeline_units[1].data[0]
             Pipeline_units[1].data.pop(0)
             (instr_word, instr_line) = simu.find_instr_type(fetch_line)
+
             # Moving data to next unit
             Pipeline_units[2].data.append((instr_word, instr_line))
 
-            # ======Stall checking=======
-            Pipeline_units[1].stalls_left += Pipeline_units[1].check_for_stall(1, current_instr_line=Pipeline_units[
-                1].current_instr_line)
-            if Pipeline_units[1].stalls_left:
-                nop = ["nop", [0, 0]]
+            if instr_word in ("bne", "beq", "j"):
 
+                # Checking branch instructions and using only IF and ID/RF stages for it
+                if instr_word == "bne":
+                    return_bne_line = simu.bne_instr(instr_line, Pipeline_units[0].current_instr_line - 1)
+                    if return_bne_line != Pipeline_units[0].current_instr_line:
+                        for i in range(5):
+                            Pipeline_units[i].current_instr_line = return_bne_line - i
+                        if len(Pipeline_units[1].data):
+                            Pipeline_units[1].data.pop(len(Pipeline_units[1].data) - 1)
+                        STALL_OF_GOD += 1
+                elif instr_word == "beq":
+                    return_bne_line = simu.beq_instr(instr_line, Pipeline_units[0].current_instr_line - 1)
+                    if return_bne_line != Pipeline_units[0].current_instr_line:
+                        for i in range(5):
+                            Pipeline_units[i].current_instr_line = return_bne_line - i
+                        if len(Pipeline_units[1].data):
+                            Pipeline_units[1].data.pop(len(Pipeline_units[1].data) - 1)
+                        STALL_OF_GOD += 1
+                elif instr_word == "j":
+                    return_bne_line = simu.j_instr(instr_line)
+                    if return_bne_line != Pipeline_units[0].current_instr_line:
+                        for i in range(5):
+                            Pipeline_units[i].current_instr_line = return_bne_line - i
+                        if len(Pipeline_units[1].data):
+                            Pipeline_units[1].data.pop(len(Pipeline_units[1].data) - 1)
+                        STALL_OF_GOD += 1
 
-                for i in range(Pipeline_units[1].stalls_left-1):
-                    Pipeline_units[2].data.insert(0, nop)
-                    # Pipeline_units[0].current_instr_line -= 1  # If stall is there repeat IF too.
+        # else:
 
-                    Pipeline_units[2].current_instr_line -= 1  # If stall is there repeat IF too.
-                    # Pipeline_units[3].current_instr_line -= 1  # If stall is there repeat IF too.
-                    # Pipeline_units[4].current_instr_line -= 1  # If stall is there repeat IF too.
+        Pipeline_units[1].current_instr_line += 1
 
-                    Pipeline_units[0].stalls_left += 1
-                Pipeline_units[0].stalls_left += 1
-
-                # Pipeline_units[0].current_instr_line += 1  # If stall is there repeat IF too.
-
-                # Pipeline_units[2].stalls_left += 2
-                # Pipeline_units[3].stalls_left += 2
-                # Pipeline_units[4].stalls_left += 2
-            else:
-
-                if instr_word in ("bne", "beq", "j"):
-
-                    # Checking branch instructions and using only IF and ID/RF stages for it
-                    if instr_word == "bne":
-                        return_bne_line = simu.bne_instr(instr_line, Pipeline_units[0].current_instr_line - 1)
-                        if return_bne_line != Pipeline_units[0].current_instr_line:
-                            for i in range(5):
-                                Pipeline_units[i].current_instr_line = return_bne_line - i
-                            if len(Pipeline_units[1].data):
-                                Pipeline_units[1].data.pop(len(Pipeline_units[1].data) - 1)
-                            STALL_OF_GOD += 1
-                    elif instr_word == "beq":
-                        return_bne_line = simu.beq_instr(instr_line, Pipeline_units[0].current_instr_line - 1)
-                        if return_bne_line != Pipeline_units[0].current_instr_line:
-                            for i in range(5):
-                                Pipeline_units[i].current_instr_line = return_bne_line - i
-                            if len(Pipeline_units[1].data):
-                                Pipeline_units[1].data.pop(len(Pipeline_units[1].data) - 1)
-                            STALL_OF_GOD += 1
-                    elif instr_word == "j":
-                        return_bne_line = simu.j_instr(instr_line)
-                        if return_bne_line != Pipeline_units[0].current_instr_line:
-                            for i in range(5):
-                                Pipeline_units[i].current_instr_line = return_bne_line - i
-                            if len(Pipeline_units[1].data):
-                                Pipeline_units[1].data.pop(len(Pipeline_units[1].data) - 1)
-                            STALL_OF_GOD += 1
-
-            # else:
-
-            Pipeline_units[1].current_instr_line += 1
-
-            print("Executed ID/RF on line ", fetch_line)
+        print("Executed ID/RF on line ", fetch_line)
 
     # .......................................................................................................
     # If Stall came, percolate it downwards.
@@ -555,6 +517,7 @@ while not is_Program_Done:
         # While filling up the pipeline in the start
         if Pipeline_units[0].current_instr_line - base_instr_line_PC < 0:
             pass_to_nextHW(0)
+            print("Pass IF")
         else:
             fetch_line = instruction_fetch()
             # Moving data to next unit
@@ -567,12 +530,8 @@ while not is_Program_Done:
         simu.syscall_array.pop(0)
 
     # Check if WB has reached last stage
-    # if Pipeline_units[4].current_instr_line >= simu.REGISTERS["ra"] \
-    #         and (len(Pipeline_units[2].data) == 0):
-        # and len(Pipeline_units[2].data) == 0 \
-        # and len(Pipeline_units[3].data) == 0
-        # and len(Pipeline_units[4].data) == 0 :
-    if CLOCK_OF_GOD == 14:
+    if (len(Pipeline_units[2].data) == 0) and (len(Pipeline_units[2].data) == 0) and (len(
+            Pipeline_units[3].data) == 0) and (len(Pipeline_units[4].data) == 0) and Pipeline_units[0].current_instr_line >= simu.REGISTERS["ra"]:
         is_Program_Done = True
 
 # Console Prints
@@ -583,4 +542,5 @@ print("Register values: \n", simu.REGISTERS)
 print("=" * 100)
 print("Total Clock Cycles: ", CLOCK_OF_GOD)
 print("Total Stalls: ", STALL_OF_GOD)
-print("CPI: ", CLOCK_OF_GOD / (STALL_OF_GOD + 1))
+# print("CPI: ", CLOCK_OF_GOD / (STALL_OF_GOD + 1))
+print("IPC: ", (CLOCK_OF_GOD / (STALL_OF_GOD + 1))**-1)
