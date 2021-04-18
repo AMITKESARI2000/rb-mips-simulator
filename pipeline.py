@@ -346,7 +346,6 @@ Pipeline_units = [
     HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[], frwd=forward_enable)]  # WB
 
 
-
 def pass_to_nextHW(index_of_HWunit):
     # If stage is not being used no stalls are there and data is forwarded to next stage
     Pipeline_units[index_of_HWunit].current_instr_line += 1
@@ -357,6 +356,7 @@ def instruction_fetch():
     Pipeline_units[0].current_instr_line += 1
     # fetch_line is instr_word + instr_line
     return fetch_line
+
 
 last_checked_stall_line = 0
 while not is_Program_Done:
@@ -441,12 +441,12 @@ while not is_Program_Done:
 
         # ======Stall checking=======
         nop = ["nop", [0, 0]]
-        if(last_checked_stall_line != Pipeline_units[0].current_instr_line-1):
+        if (last_checked_stall_line != Pipeline_units[0].current_instr_line - 1):
             Pipeline_units[1].stalls_left += Pipeline_units[1].check_for_stall(1, current_instr_line=Pipeline_units[
-                                                                                                     0].current_instr_line - 1)
+                                                                                                         0].current_instr_line - 1)
 
         if Pipeline_units[1].stalls_left and instr_word != 'nop':
-            last_checked_stall_line = Pipeline_units[0].current_instr_line-1
+            last_checked_stall_line = Pipeline_units[0].current_instr_line - 1
             for i in range(Pipeline_units[1].stalls_left):
                 Pipeline_units[2].data.insert(0, nop)
                 # Pipeline_units[1].data.insert(0, "nop")
@@ -523,7 +523,8 @@ while not is_Program_Done:
 
     # Check if WB has reached last stage
     if (len(Pipeline_units[2].data) == 0) and (len(Pipeline_units[2].data) == 0) and (len(
-            Pipeline_units[3].data) == 0) and (len(Pipeline_units[4].data) == 0) and Pipeline_units[0].current_instr_line >= simu.REGISTERS["ra"]:
+            Pipeline_units[3].data) == 0) and (len(Pipeline_units[4].data) == 0) and Pipeline_units[
+        0].current_instr_line >= simu.REGISTERS["ra"]:
         is_Program_Done = True
 
 # Console Prints
@@ -535,4 +536,4 @@ print("=" * 100)
 print("Total Clock Cycles: ", CLOCK_OF_GOD)
 print("Total Stalls: ", STALL_OF_GOD)
 # print("CPI: ", CLOCK_OF_GOD / (STALL_OF_GOD + 1))
-print("IPC: ", (CLOCK_OF_GOD / (STALL_OF_GOD + 1))**-1)
+print("IPC: ", (CLOCK_OF_GOD / (STALL_OF_GOD + 1)) ** -1)

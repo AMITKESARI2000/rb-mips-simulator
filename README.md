@@ -29,7 +29,7 @@ the contents of the registers, and the memory.
 ---
 
 ### PHASE 2:
-In phase 2 we are implementing pipeline so that the throughput can be increased.
+In phase 2, we are implementing pipeline so that the throughput can be increased.
 
 * The main file is **pipeline.py**
 * All 5 stages (IF, ID/RF, EX, MEM, WB) have been modularised.
@@ -41,3 +41,13 @@ In phase 2 we are implementing pipeline so that the throughput can be increased.
 * Enabling/Disabling of data forwarding is implemented which will be asked before running the program.
 * Work for GUI for this simulator is just started.
 
+### PHASE 3:
+In phase 3, we are introducing Cache
+
+* A memory access will now first search for the address in the two caches. On a miss, the data
+will be fetched from the main memory.
+* This simulator simulating 2 levels of cache, with LRU replacement policy.
+* This effectively means that the memory instructions (load and stores) will not be completed
+in one cycle.
+* Loads and Stores will have variable latency, and hence the penalty (stalls) due to the memory
+access is variable.
