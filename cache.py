@@ -8,9 +8,13 @@ latency2 = 20
 stalls1 = 8
 stalls2 = 16
 
-associativity = 2
+assoc1 = 1
+assoc2 = 2
 
 RAM = []
+
+cache1 = int(cache1_size/(block1_size*assoc1))
+cache2 = int(cache2_size/(block2_size*assoc2))
 
 global counter
 counter = 0
@@ -24,16 +28,16 @@ class CacheHit:
     cache2 = []
 
     for _ in range(cache1_size):
-        cache1.append([[-1, -1, -1]] * associativity)
+        cache1.append([[-1, -1, -1]] * assoc1)
 
     for _ in range(cache2_size):
-        cache1.append([[-1, -1, -1]] * associativity)
+        cache1.append([[-1, -1, -1]] * assoc2)
 
     # Cache 1. Checking if the data is present or not
     def cache_hit_1(self, adrs):
         cachehit1 = False
-        for i in range(cache1_size):
-            for j in range(associativity):
+        for i in range(cache1):
+            for j in range(assoc1):
                 if adrs == cache1[i][j][0]:
                     cachehit1 = True
                     cache1[i][j][2] = counter
@@ -47,8 +51,8 @@ class CacheHit:
     # Cache 2. Checking if the data is present or not if it is not present in Cache 1
     def cache_hit_2(self, adrs):
         cachehit2 = False
-        for i in range(cache2_size):
-            for j in range(associativity):
+        for i in range(cache2):
+            for j in range(assoc2):
                 if adrs == cache2[i][j][0]:
                     cachehit2 = True
                     cache2[i][j][2] += counter
@@ -66,9 +70,9 @@ class CacheHit:
     # Inserting Data in Cache1 if not present
     def insert_cache1(self, adrs):
         cache1inserted = False
-        for i in range(cache1_size):
-            for j in range(associativity):
-                if cache1[i][j][0] != 0:
+        for i in range(cache1):
+            for j in range(assoc1):
+                if cache1[i][j][0] == -1:
                     cache1[i][j] = [adrs, RAM[adrs], counter]
                     counter += 1
                     cache1inserted = True
@@ -78,9 +82,9 @@ class CacheHit:
     # Inserting Data in Cache2 if not present
     def insert_cache2(self, adrs):
         cache2inserted = False
-        for i in range(cache2_size):
-            for j in range(associativity):
-                if cache2[i][j][0] != 0:
+        for i in range(cache2):
+            for j in range(assoc2):
+                if cache2[i][j][0] == -1:
                     cache2[i][j] = [adrs, RAM[adrs], counter]
                     counter += 1
                     cache2inserted = True
@@ -91,8 +95,8 @@ class CacheHit:
     def replace_in_cache1(self, adrs):
         ilru = 0
         jlru = 0
-        for i in range(cache1_size):
-            for j in range(associativity):
+        for i in range(cache1):
+            for j in range(assoc1):
                 if cache1[i][j][3] < cache1[ilru][jlru][3]:
                     ilru = i
                     jlru = j
@@ -102,8 +106,8 @@ class CacheHit:
     def replace_in_cache2(self, adrs):
         ilru = 0
         jlru = 0
-        for i in range(cache2_size):
-            for j in range(associativity):
+        for i in range(cache2):
+            for j in range(assoc2):
                 if cache2[i][j][3] < cache2[ilru][jlru][3]:
                     ilru = i
                     jlru = j
