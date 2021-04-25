@@ -1,7 +1,7 @@
 import re
 import cache
 
-file = open("./testingbubblesort.asm", "r")
+file = open("./testingswap.asm", "r")
 
 
 lines = file.readlines()
@@ -172,13 +172,14 @@ def memory_op(instr_word, instr_line, adv):
         # To load register from memory
         # result_MEM = RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv]
 
-        result_MEM = cache.CacheHit.cache_hit_1(int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
+        result_MEM = cache.CacheOP.cache_hit_1(int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
 
     elif instr_word == "sw":
         # To store register into memory
         # result_MEM = RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv] = int(REGISTERS[instr_line[0]])
 
-        result_MEM = cache.CacheHit.insert_cache1(int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
+        cache.CacheOP.insert_cache1(int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
+        result_MEM = (0, 0)
 
     return result_MEM
 

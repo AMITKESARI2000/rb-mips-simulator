@@ -401,9 +401,30 @@ while not is_Program_Done:
         (instr_word, instr_line, result_ALU) = Pipeline_units[3].data[0]
         Pipeline_units[3].data.pop(0)
         if instr_word in ("lw", "sw"):
-            result_MEM = simu.memory_op(instr_word, instr_line, result_ALU)
-            Pipeline_units[3].current_instr_line += 1
+
+            # ======Stall checking=======
+            result_MEM, stalls_MEM = simu.memory_op(instr_word, instr_line, result_ALU)
+            if(instr_word == "lw"):
+                nop = ["nop", [0, 0]]
+
+                if (last_stall_line_MEM != Pipeline_units[0].current_instr_line - 1):
+
+                    Pipeline_units[3].stalls_left += stalls_MEM
+
+                if Pipeline_units[3].stalls_left and instr_word != 'nop':
+                    last_stall_line_MEM = Pipeline_units[0].current_instr_line - 1
+                    for i in range(Pipeline_units[3].stalls_left):
+                        Pipeline_units[4].data.insert(0, nop)
+                        # Pipeline_units[1].data.insert(0, "nop")
+
+                    Pipeline_units[0].stalls_left = Pipeline_units[3].stalls_left
+                    Pipeline_units[1].stalls_left = Pipeline_units[3].stalls_left
+                    Pipeline_units[2].stalls_left = Pipeline_units[3].stalls_left
+                    # Pipeline_units[1].data.pop(0)
+                    fetch_line = nop
+
             Pipeline_units[4].data.append((instr_word, instr_line, result_MEM))
+            Pipeline_units[3].current_instr_line += 1
         else:
             pass_to_nextHW(3)
             Pipeline_units[4].data.append((instr_word, instr_line, result_ALU))
