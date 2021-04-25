@@ -1,5 +1,6 @@
   .data
-arr: .word 10, 60, 40, 70, 20, 30, 90, 100, 0, 80, 50
+   arr: .word 10, 60, 40, 70, 20, 30, 90, 100, 0, 80, 50
+#arr: .word 10, 60, 40
   space: .asciiz " "
   .text
   .globl main
@@ -10,6 +11,9 @@ main:
   li $t1, 0                         #j = 0
   li $s1, 11                        #n = 11
   li $s2, 11                        #n-i for inner loop
+#li $s1, 3                        #n = 3
+#li $s2, 3                        #n-i for inner loop
+
   add $t2, $zero, $s0               #for iterating addr by i
   add $t3, $zero, $s0               #for iterating addr by j
 

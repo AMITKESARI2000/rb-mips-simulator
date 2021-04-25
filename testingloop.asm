@@ -1,5 +1,6 @@
   .data
-  N: .word 5, 6, 4, 3
+  N: .word 3, 3, 3, 3
+  # search 3 at even indices
   Tir: .asciiz "Tirutsava 2020 is lub\n"
   Val: .asciiz "Value of i is: "
 
@@ -7,11 +8,13 @@
   .globl main
 
 main:
-  li $t0, 3            #k = 3
-  li $t1, 0            #i = 0
 
   la $s0, N                     #load addr of N array
   lw $s1, 0($s0)                #store element in register
+
+  li $t0, 3            #k = 3
+  li $t1, 0            #i = 0
+
   j cond
 
 loop:
@@ -25,7 +28,7 @@ loop:
   lw $s1, 0($s2)                #load particluar index value in register
 
   cond:
-    bne $s1, $t0, loop      #save[i] != 4
+    bne $s1, $t0, loop      #save[i] != 3
 
 print:
   li $v0, 4

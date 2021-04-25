@@ -1,6 +1,7 @@
 import re
+import cache
 
-file = open("./testingswap.asm", "r")
+file = open("./testingbubblesort.asm", "r")
 
 
 lines = file.readlines()
@@ -37,7 +38,7 @@ REGISTERS = {'zero': 0, 'ra': 0, 'at': 0, 'v0': 0, 'v1': 0, 'a0': 0, 'a1': 0, 'a
              't0': 0, 't1': 0, 't2': 0, 't3': 0, 't4': 0, 't5': 0, 't6': 0, 't7': 0, 't8': 0, 't9': 0,
              'r': 0, 'k0': 0, 'k1': 0, 'sp': '0x20000'}  # 32
 
-BaseAdr = "0x1000"
+BaseAdr = "0x1001"
 
 is_program_done = False
 
@@ -165,13 +166,19 @@ def main_once():
 
 
 def memory_op(instr_word, instr_line, adv):
+
+
     if instr_word == "lw":
         # To load register from memory
-        result_MEM = RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv]
+        # result_MEM = RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv]
+
+        result_MEM = cache.CacheHit.cache_hit_1(int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
 
     elif instr_word == "sw":
         # To store register into memory
-        result_MEM = RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv] = int(REGISTERS[instr_line[0]])
+        # result_MEM = RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv] = int(REGISTERS[instr_line[0]])
+
+        result_MEM = cache.CacheHit.insert_cache1(int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
 
     return result_MEM
 
@@ -365,8 +372,10 @@ def la_instr(instr_line):
 def slt_instr(instr_line):
     # slt $t4, $s3, $s4               #set $t4 = 1 if $s3 < $s4
     instr_line = instr_line.split(",")
+
     for l in range(len(instr_line)):
         instr_line[l] = str(instr_line[l].strip()[1:])
+    # print("sltsltsltsltsltsltsltslt=> ", instr_line[1], instr_line[2], REGISTERS[instr_line[1]], REGISTERS[instr_line[2]])
     result_ALU = int(int(REGISTERS[instr_line[1]]) < int(REGISTERS[instr_line[2]]))
 
     return result_ALU, instr_line
