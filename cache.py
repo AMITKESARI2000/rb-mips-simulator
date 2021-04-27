@@ -7,11 +7,12 @@ block2_size = 4
 # latency1 = 10
 # latency2 = 20
 
-stalls1 = 2
-stalls2 = 4
-stalls3 = 16  # for memory penalty
+# to be changed later...
+stalls1 = 1
+stalls2 = 2
+stalls3 = 4  # for memory penalty
 
-assoc1 = 1
+assoc1 = 2
 assoc2 = 2
 
 set1 = int(cache1_size / (block1_size * assoc1))
