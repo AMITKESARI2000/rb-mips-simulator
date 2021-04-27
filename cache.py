@@ -7,11 +7,12 @@ block2_size = 4
 # latency1 = 10
 # latency2 = 20
 
-stalls1 = 2
-stalls2 = 4
-stalls3 = 16  # for memory penalty
+# to be changed later...
+stalls1 = 1
+stalls2 = 2
+stalls3 = 4  # for memory penalty
 
-assoc1 = 1
+assoc1 = 2
 assoc2 = 2
 
 set1 = int(cache1_size / (block1_size * assoc1))
@@ -51,7 +52,7 @@ class CacheHit:
                 if adrs == cache1[i][j][0]:
                     cachehit1 = True
                     global counter1
-                    cache1[i][j][2] = counter1
+                    cache1[i][j] = [adrs, simu.RAM[adrs], counter1]
                     counter1 += 1
                     print(1111, cache1)
                     return cache1[i][j][1], stalls1
@@ -71,7 +72,7 @@ class CacheHit:
                 if adrs == cache2[i][j][0]:
                     cachehit2 = True
                     global counter2
-                    cache2[i][j][2] += counter2
+                    cache2[i][j] = [adrs, simu.RAM[adrs], counter2]
                     counter2 += 1
                     print(2222, cache2)
                     return cache2[i][j][1], stalls1 + stalls2

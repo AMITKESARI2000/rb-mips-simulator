@@ -410,10 +410,11 @@ while not is_Program_Done:
 
                 if last_stall_line_MEM != Pipeline_units[0].current_instr_line - 1:
                     Pipeline_units[3].stalls_left += stalls_MEM
+                    STALL_OF_GOD += stalls_MEM
 
                 if Pipeline_units[3].stalls_left and instr_word != 'nop':
                     last_stall_line_MEM = Pipeline_units[0].current_instr_line - 1
-                    for i in range(Pipeline_units[3].stalls_left):
+                    for i in range(Pipeline_units[3].stalls_left - 1):
                         Pipeline_units[4].data.insert(0, nop)
                         # Pipeline_units[1].data.insert(0, "nop")
 
@@ -433,7 +434,7 @@ while not is_Program_Done:
 
     # ..............................................................................................................
     # EX
-    if len(Pipeline_units[2].data) < 1:
+    if len(Pipeline_units[2].data) < 1 or Pipeline_units[2].stalls_left:
         pass_to_nextHW(2)
         print("Pass EX")
     else:
@@ -496,14 +497,13 @@ while not is_Program_Done:
                         Pipeline_units[0].current_instr_line = return_bne_line
                         STALL_OF_GOD += 1
                         Pipeline_units[0].stalls_left += 1
-                # elif instr_word == "beq":
-                #     return_bne_line = simu.beq_instr(instr_line, Pipeline_units[0].current_instr_line - 1)
-                #     if return_bne_line != Pipeline_units[0].current_instr_line:
-                #         for i in range(5):
-                #             Pipeline_units[i].current_instr_line = return_bne_line - i
-                #         if len(Pipeline_units[1].data):
-                #             Pipeline_units[1].data.pop(len(Pipeline_units[1].data) - 1)
-                #         STALL_OF_GOD += 1
+                elif instr_word == "beq":
+                    return_bne_line = simu.beq_instr(instr_line, Pipeline_units[0].current_instr_line - 1)
+                    if return_bne_line != Pipeline_units[0].current_instr_line:
+                        Pipeline_units[0].current_instr_line = return_bne_line
+                        STALL_OF_GOD += 1
+                        Pipeline_units[0].stalls_left += 1
+
                 elif instr_word == "j":
                     return_bne_line = simu.j_instr(instr_line)
                     Pipeline_units[0].current_instr_line = return_bne_line

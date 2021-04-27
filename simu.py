@@ -1,7 +1,8 @@
 import re
 import cache
 
-file = open("./testingloop.asm", "r")
+file = open("./testingbubblesort.asm", "r")
+
 
 lines = file.readlines()
 file.close()
@@ -178,8 +179,10 @@ def memory_op(instr_word, instr_line, adv):
         # result_MEM = RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv] = int(REGISTERS[instr_line[0]])
 
         RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv] = int(REGISTERS[instr_line[0]])
-        cache.CacheOP.insert_cache1(int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
-        cache.CacheOP.insert_cache2(int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
+
+        cache.CacheOP.cache_hit_1(int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
+        cache.CacheOP.cache_hit_2(int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
+
         result_MEM = 0
         stalls_MEM = 0
 
