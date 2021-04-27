@@ -3,7 +3,6 @@ import cache
 
 file = open("./testingswap.asm", "r")
 
-
 lines = file.readlines()
 file.close()
 
@@ -148,6 +147,7 @@ def pre_data_process():
         i += 1
     REGISTERS["ra"] = len(lines)
 
+
 def main():
     pre_data_process()
     while PC < len(lines):
@@ -166,22 +166,23 @@ def main_once():
 
 
 def memory_op(instr_word, instr_line, adv):
-
-
     if instr_word == "lw":
         # To load register from memory
         # result_MEM = RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv]
 
-        result_MEM = cache.CacheOP.cache_hit_1(int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
+        result_MEM, stalls_MEM = cache.CacheOP.cache_hit_1(int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
 
     elif instr_word == "sw":
         # To store register into memory
         # result_MEM = RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv] = int(REGISTERS[instr_line[0]])
 
+        RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv] = int(REGISTERS[instr_line[0]])
         cache.CacheOP.insert_cache1(int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
-        result_MEM = (0, 0)
+        cache.CacheOP.insert_cache1(int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
+        result_MEM = 0
+        stalls_MEM = 0
 
-    return result_MEM
+    return result_MEM, stalls_MEM
 
 
 def write_back_op(instr_line, result_MEM_ALU):
@@ -325,7 +326,6 @@ def addi_instr(instr_line):
         return result_ALU, instr_line
 
 
-
 def li_instr(instr_line):
     instr_line = instr_line.split(",")
     for l in range(len(instr_line) - 1):
@@ -414,7 +414,7 @@ def syscall_instr(index_pc):
         if int(l_type[2]) == 1:
             # Print register value
             cnsl.append(REGISTERS[l_print[1]])
-            print("From syscall console: ",REGISTERS[l_print[1]])
+            print("From syscall console: ", REGISTERS[l_print[1]])
 
         elif int(l_type[2]) == 4:
             # Print asciiz text
@@ -486,8 +486,8 @@ def execute_ALU(instr_word, instr_line):
     elif instr_word == 'syscall':
         return syscall_instr()
 
-    elif instr_word=='nop':
-        return 0,0
+    elif instr_word == 'nop':
+        return 0, 0
     else:
         print("Invalid Instruction Set ", instr_word, " !!! Aborting...")
         Throw_error_instr.error_occurred(PC)

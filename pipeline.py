@@ -359,6 +359,7 @@ def instruction_fetch():
 
 
 last_checked_stall_line = 0
+last_stall_line_MEM = 0
 while not is_Program_Done:
     for i in range(5):        Pipeline_units[i].stalls_left = max(0, Pipeline_units[i].stalls_left - 1)
     CLOCK_OF_GOD += 1
@@ -404,11 +405,10 @@ while not is_Program_Done:
 
             # ======Stall checking=======
             result_MEM, stalls_MEM = simu.memory_op(instr_word, instr_line, result_ALU)
-            if(instr_word == "lw"):
-                nop = ["nop", [0, 0]]
+            if instr_word == "lw":
+                nop = ["nop", [0, 0], 0]
 
-                if (last_stall_line_MEM != Pipeline_units[0].current_instr_line - 1):
-
+                if last_stall_line_MEM != Pipeline_units[0].current_instr_line - 1:
                     Pipeline_units[3].stalls_left += stalls_MEM
 
                 if Pipeline_units[3].stalls_left and instr_word != 'nop':
@@ -464,7 +464,7 @@ while not is_Program_Done:
         nop = ["nop", [0, 0]]
         fetch_line = Pipeline_units[1].data[0]
         (instr_word, instr_line) = simu.find_instr_type(fetch_line)
-        if (last_checked_stall_line != Pipeline_units[0].current_instr_line - 1):
+        if last_checked_stall_line != Pipeline_units[0].current_instr_line - 1:
             # and (instr_word not in ("j", "bne")):
             Pipeline_units[1].stalls_left += \
                 Pipeline_units[1].check_for_stall(1, current_instr_line=Pipeline_units[0].current_instr_line - 1)
