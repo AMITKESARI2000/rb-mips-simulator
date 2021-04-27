@@ -1,7 +1,7 @@
 import re
 import cache
 
-file = open("./testingswap.asm", "r")
+file = open("./testingloop.asm", "r")
 
 lines = file.readlines()
 file.close()
@@ -166,19 +166,20 @@ def main_once():
 
 
 def memory_op(instr_word, instr_line, adv):
-    if instr_word == "lw":
+    if instr_word == "lw":                      # mem to reg
         # To load register from memory
         # result_MEM = RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv]
 
+        print(111, int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
         result_MEM, stalls_MEM = cache.CacheOP.cache_hit_1(int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
 
-    elif instr_word == "sw":
+    elif instr_word == "sw":                    # reg to mem
         # To store register into memory
         # result_MEM = RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv] = int(REGISTERS[instr_line[0]])
 
         RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv] = int(REGISTERS[instr_line[0]])
         cache.CacheOP.insert_cache1(int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
-        cache.CacheOP.insert_cache1(int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
+        cache.CacheOP.insert_cache2(int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
         result_MEM = 0
         stalls_MEM = 0
 

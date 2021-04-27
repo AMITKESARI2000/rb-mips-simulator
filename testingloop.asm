@@ -1,5 +1,5 @@
   .data
-  N: .word 3, 3, 3, 3
+  N: .word 4, 3, 3, 3
   # search 3 at even indices
   Tir: .asciiz "Tirutsava 2020 is lub\n"
   Val: .asciiz "Value of i is: "
