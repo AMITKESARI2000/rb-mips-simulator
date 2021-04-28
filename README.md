@@ -33,20 +33,27 @@ In phase 2, we are implementing pipeline so that the throughput can be increased
 
 * The main file is **pipeline.py**
 * All 5 stages (IF, ID/RF, EX, MEM, WB) have been modularised.
-* Stalls have been added according to data dependencies only
+* Stalls (*nop*) have been added according to data dependencies only.
+* *nop* instructions are pushed into the next Harware Unit whenever stalls are found.
+* Stalls are found on the basis of last three instructions performed.
 * Structural hazards have been removed assuming writing in 1st half of the cycle and reading in 2nd half of the cycle.
 
 * We tried implementing all the 5 HW units as objects and tried to find and accumulate the stalls based on the data dependency between the instructions.
 * We tried to compare and jump to that instruction point in the ID/RF stage itself.
 * Enabling/Disabling of data forwarding is implemented which will be asked before running the program.
+* Data forwarding is done by updating EX_REGISTERS whenever execute operation is performed and used only when the data in it is different from original REGISTERS.
 * Work for GUI for this simulator is just started.
 
-### PHASE 3:
-In phase 3, we are introducing Cache
+---
 
+### PHASE 3:
+In phase 3, we are introducing L1 L2 levels of Cache
+
+* The main file is **pipeline.py**
+* File **cache.py** contains all the functions required for cache hits, replacements and stall returning.
 * A memory access will now first search for the address in the two caches. On a miss, the data
 will be fetched from the main memory.
-* This simulator simulating 2 levels of cache, with LRU replacement policy.
+* This simulator simulating 2 levels of cache, with LRU replacement policy and Cache inclusion policy is implemented.
 * This effectively means that the memory instructions (load and stores) will not be completed
 in one cycle.
 * Loads and Stores will have variable latency, and hence the penalty (stalls) due to the memory

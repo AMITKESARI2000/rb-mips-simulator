@@ -16,13 +16,13 @@ assoc1 = 1
 assoc2 = 2
 
 set1 = int(cache1_size / (block1_size * assoc1))
-print(set1)
+set2 = int(cache2_size / (block2_size * assoc2))
 
 # no_of_blocks_in_cache1 = cache1_size/block1_size
 # no_of_sets = no_of_blocks_in_cache1/assoc1
 
-set2 = int(cache2_size / (block2_size * assoc2))
-print(set2)
+
+
 
 global counter1
 global counter2
@@ -52,6 +52,7 @@ class CacheHit:
     def cache_hit_1(self, adrs):
         global cachehit1
         cachehit1 = False
+
         set_id = adrs % set1
         for j in range(assoc1):
             if adrs == cache1[set_id][j][0]:
@@ -72,6 +73,7 @@ class CacheHit:
     def cache_hit_2(self, adrs):
         global cachehit2
         cachehit2 = False
+
         set_id = adrs % set2
         for j in range(assoc2):
             if adrs == cache2[set_id][j][0]:
@@ -90,6 +92,7 @@ class CacheHit:
 
     # Checking in memory if the data is not present in both the Caches
     def memory_operation(self, adrs):
+        print("Cache Miss!")
         return simu.RAM[adrs], stalls1 + stalls2 + stalls3
 
     # Inserting Data in Cache1 if not present

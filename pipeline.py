@@ -404,7 +404,7 @@ while not is_Program_Done:
         if instr_word in ("lw", "sw"):
 
             # ======Stall checking=======
-            result_MEM, stalls_MEM = simu.memory_op(instr_word, instr_line, result_ALU)
+            result_MEM, stalls_MEM = simu.memory_op(instr_word, instr_line, result_ALU, forward_enable)
             if instr_word == "lw":
                 nop = ["nop", [0, 0], 0]
 
@@ -413,6 +413,7 @@ while not is_Program_Done:
                     STALL_OF_GOD += stalls_MEM
 
                 if Pipeline_units[3].stalls_left and instr_word != 'nop':
+                    print("Mem Operation taking ", stalls_MEM, " cycles")
                     last_stall_line_MEM = Pipeline_units[0].current_instr_line - 1
                     for i in range(Pipeline_units[3].stalls_left - 1):
                         Pipeline_units[4].data.insert(0, nop)
@@ -444,7 +445,7 @@ while not is_Program_Done:
 
         (instr_word, instr_line) = Pipeline_units[2].data[0]
         Pipeline_units[2].data.pop(0)
-        (result_ALU, instr_line) = simu.execute_ALU(instr_word, instr_line)
+        (result_ALU, instr_line) = simu.execute_ALU(instr_word, instr_line, forward_enable)
 
         # Returns a single result everytime along with disassembled instr.
         # Eg- sum for add/sub, memory address with offset for lw/sw
@@ -453,6 +454,10 @@ while not is_Program_Done:
 
         # Moving data to next unit
         Pipeline_units[3].data.append((instr_word, instr_line, result_ALU))
+
+        # SIMPLE FIX
+        # if (instr_word in ("add", "sub", "lui", "addi", "li", "sll", "srl", "slt")) and forward_enable:
+        #     successful_write = simu.write_back_op(instr_line, result_ALU)
 
         print("Executed EX on line ", instr_word, instr_line)
 
@@ -495,13 +500,13 @@ while not is_Program_Done:
 
                 # Checking branch instructions and using only IF and ID/RF stages for it
                 if instr_word == "bne":
-                    return_bne_line = simu.bne_instr(instr_line, Pipeline_units[0].current_instr_line - 1)
+                    return_bne_line = simu.bne_instr(instr_line, Pipeline_units[0].current_instr_line - 1, forward_enable)
                     if return_bne_line != Pipeline_units[0].current_instr_line:
                         Pipeline_units[0].current_instr_line = return_bne_line
                         STALL_OF_GOD += 1
                         Pipeline_units[0].stalls_left += 1
                 elif instr_word == "beq":
-                    return_bne_line = simu.beq_instr(instr_line, Pipeline_units[0].current_instr_line - 1)
+                    return_bne_line = simu.beq_instr(instr_line, Pipeline_units[0].current_instr_line - 1, forward_enable)
                     if return_bne_line != Pipeline_units[0].current_instr_line:
                         Pipeline_units[0].current_instr_line = return_bne_line
                         STALL_OF_GOD += 1
@@ -539,15 +544,23 @@ while not is_Program_Done:
             print("Executed IF on line ", fetch_line)
 
     # Call syscalls
-    if len(simu.syscall_array) and Pipeline_units[0].current_instr_line - 1 == simu.syscall_array[0]:
-        simu.syscall_instr(simu.syscall_array[0])
-        simu.syscall_array.pop(0)
+    # if len(simu.syscall_array) and Pipeline_units[0].current_instr_line - 1 == simu.syscall_array[0]:
+    #     simu.syscall_instr(simu.syscall_array[0])
+    #     simu.syscall_array.pop(0)
 
     # Check if WB has reached last stage
     if (len(Pipeline_units[2].data) == 0) and (len(Pipeline_units[2].data) == 0) and (len(
             Pipeline_units[3].data) == 0) and (len(Pipeline_units[4].data) == 0) and Pipeline_units[
         0].current_instr_line >= simu.REGISTERS["ra"]:
         is_Program_Done = True
+
+# Call syscalls at the end
+print()
+print("*" * 20, "CONSOLE", "*" * 20)
+while len(simu.syscall_array):
+    simu.syscall_instr(simu.syscall_array[0])
+    simu.syscall_array.pop(0)
+print("*" * 20, "CONSOLE", "*" * 20, "\n")
 
 # Console Prints
 # CLOCK_OF_GOD -= 1

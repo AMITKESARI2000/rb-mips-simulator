@@ -428,6 +428,9 @@ while not is_Program_Done:
 
         # Moving data to next unit
         Pipeline_units[3].data.append((instr_word, instr_line, result_ALU))
+        # SIMPLE FIX
+        if (instr_word in ("add", "sub", "lui", "addi", "li", "sll", "srl", "slt")) and forward_enable:
+            successful_write = simu.write_back_op(instr_line, result_ALU)
 
         print("Executed EX on line ", instr_word, instr_line)
 
@@ -475,14 +478,12 @@ while not is_Program_Done:
                         Pipeline_units[0].current_instr_line = return_bne_line
                         STALL_OF_GOD += 1
                         Pipeline_units[0].stalls_left += 1
-                # elif instr_word == "beq":
-                #     return_bne_line = simu.beq_instr(instr_line, Pipeline_units[0].current_instr_line - 1)
-                #     if return_bne_line != Pipeline_units[0].current_instr_line:
-                #         for i in range(5):
-                #             Pipeline_units[i].current_instr_line = return_bne_line - i
-                #         if len(Pipeline_units[1].data):
-                #             Pipeline_units[1].data.pop(len(Pipeline_units[1].data) - 1)
-                #         STALL_OF_GOD += 1
+                elif instr_word == "beq":
+                    return_bne_line = simu.beq_instr(instr_line, Pipeline_units[0].current_instr_line - 1)
+                    if return_bne_line != Pipeline_units[0].current_instr_line:
+                        Pipeline_units[0].current_instr_line = return_bne_line
+                        STALL_OF_GOD += 1
+                        Pipeline_units[0].stalls_left += 1
                 elif instr_word == "j":
                     return_bne_line = simu.j_instr(instr_line)
                     Pipeline_units[0].current_instr_line = return_bne_line
