@@ -452,6 +452,9 @@ while not is_Program_Done:
         # Moving data to next unit
         Pipeline_units[3].data.append((instr_word, instr_line, result_ALU))
 
+        if (instr_word in ("add", "sub", "lui", "addi", "li", "sll", "srl", "slt")) and forward_enable:
+            successful_write = simu.write_back_op(instr_line, result_ALU)
+
         print("Executed EX on line ", instr_word, instr_line)
 
     # ......................................................................................................
