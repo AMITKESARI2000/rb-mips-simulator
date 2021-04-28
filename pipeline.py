@@ -404,7 +404,7 @@ while not is_Program_Done:
         if instr_word in ("lw", "sw"):
 
             # ======Stall checking=======
-            result_MEM, stalls_MEM = simu.memory_op(instr_word, instr_line, result_ALU)
+            result_MEM, stalls_MEM = simu.memory_op(instr_word, instr_line, result_ALU, forward_enable)
             if instr_word == "lw":
                 nop = ["nop", [0, 0], 0]
 
@@ -442,7 +442,7 @@ while not is_Program_Done:
 
         (instr_word, instr_line) = Pipeline_units[2].data[0]
         Pipeline_units[2].data.pop(0)
-        (result_ALU, instr_line) = simu.execute_ALU(instr_word, instr_line)
+        (result_ALU, instr_line) = simu.execute_ALU(instr_word, instr_line, forward_enable)
 
         # Returns a single result everytime along with disassembled instr.
         # Eg- sum for add/sub, memory address with offset for lw/sw
@@ -452,8 +452,9 @@ while not is_Program_Done:
         # Moving data to next unit
         Pipeline_units[3].data.append((instr_word, instr_line, result_ALU))
 
-        if (instr_word in ("add", "sub", "lui", "addi", "li", "sll", "srl", "slt")) and forward_enable:
-            successful_write = simu.write_back_op(instr_line, result_ALU)
+        # SIMPLE FIX
+        # if (instr_word in ("add", "sub", "lui", "addi", "li", "sll", "srl", "slt")) and forward_enable:
+        #     successful_write = simu.write_back_op(instr_line, result_ALU)
 
         print("Executed EX on line ", instr_word, instr_line)
 
@@ -496,13 +497,13 @@ while not is_Program_Done:
 
                 # Checking branch instructions and using only IF and ID/RF stages for it
                 if instr_word == "bne":
-                    return_bne_line = simu.bne_instr(instr_line, Pipeline_units[0].current_instr_line - 1)
+                    return_bne_line = simu.bne_instr(instr_line, Pipeline_units[0].current_instr_line - 1, forward_enable)
                     if return_bne_line != Pipeline_units[0].current_instr_line:
                         Pipeline_units[0].current_instr_line = return_bne_line
                         STALL_OF_GOD += 1
                         Pipeline_units[0].stalls_left += 1
                 elif instr_word == "beq":
-                    return_bne_line = simu.beq_instr(instr_line, Pipeline_units[0].current_instr_line - 1)
+                    return_bne_line = simu.beq_instr(instr_line, Pipeline_units[0].current_instr_line - 1, forward_enable)
                     if return_bne_line != Pipeline_units[0].current_instr_line:
                         Pipeline_units[0].current_instr_line = return_bne_line
                         STALL_OF_GOD += 1

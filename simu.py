@@ -1,8 +1,8 @@
 import re
 import cache
+import copy
 
-file = open("testingbubblesort.asm", "r")
-
+file = open("testingswap.asm", "r")
 
 lines = file.readlines()
 file.close()
@@ -10,6 +10,7 @@ file.close()
 # Global Storages
 global RAM, ram_iter, ram_label, instr_label, PC, i, cnsl
 RAM = []
+
 ram_iter = 0
 ram_label = {}
 instr_label = {}
@@ -37,6 +38,7 @@ REGISTERS = {'zero': 0, 'ra': 0, 'at': 0, 'v0': 0, 'v1': 0, 'a0': 0, 'a1': 0, 'a
              's0': "0x1001", 's1': 0, 's2': 0, 's3': 0, 's4': 0, 's5': 0, 's6': 0, 's7': 0, 's8': 0,
              't0': 0, 't1': 0, 't2': 0, 't3': 0, 't4': 0, 't5': 0, 't6': 0, 't7': 0, 't8': 0, 't9': 0,
              'r': 0, 'k0': 0, 'k1': 0, 'sp': '0x20000'}  # 32
+EX_REGISTERS = {}
 
 BaseAdr = "0x1001"
 
@@ -148,7 +150,7 @@ def pre_data_process():
         i += 1
     REGISTERS["ra"] = len(lines)
 
-
+EX_REGISTERS = copy.deepcopy(REGISTERS)
 def main():
     pre_data_process()
     while PC < len(lines):
@@ -166,85 +168,165 @@ def main_once():
     PC = find_instr_type(lines[PC])
 
 
-def memory_op(instr_word, instr_line, adv):
-    if instr_word == "lw":                      # mem to reg
-        # To load register from memory
-        # result_MEM = RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv]
+def memory_op(instr_word, instr_line, adv, forward_enable):
+    if forward_enable == False:
+        if instr_word == "lw":  # mem to reg
+            # To load register from memory
+            # result_MEM = RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv]
 
-        print(111, int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
-        result_MEM, stalls_MEM = cache.CacheOP.cache_hit_1(int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
+            print(111, int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
+            result_MEM, stalls_MEM = cache.CacheOP.cache_hit_1(int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
 
-    elif instr_word == "sw":                    # reg to mem
-        # To store register into memory
-        # result_MEM = RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv] = int(REGISTERS[instr_line[0]])
+        elif instr_word == "sw":  # reg to mem
+            # To store register into memory
+            # result_MEM = RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv] = int(REGISTERS[instr_line[0]])
 
-        RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv] = int(REGISTERS[instr_line[0]])
+            RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv] = int(REGISTERS[instr_line[0]])
 
-        cache.CacheOP.cache_hit_1(int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
-        cache.CacheOP.cache_hit_2(int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
+            cache.CacheOP.cache_hit_1(int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
+            cache.CacheOP.cache_hit_2(int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
 
-        result_MEM = 0
-        stalls_MEM = 0
+            result_MEM = 0
+            stalls_MEM = 0
+        return result_MEM, stalls_MEM
 
-    return result_MEM, stalls_MEM
+    elif forward_enable == True:
+        if instr_word == "lw":  # mem to reg
+            # To load register from memory
+            # result_MEM = RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv]
+
+            print(111, int(EX_REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
+            result_MEM, stalls_MEM = cache.CacheOP.cache_hit_1(
+                int(EX_REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
+            EX_REGISTERS[instr_line[0]] = result_MEM
+
+
+        elif instr_word == "sw":  # reg to mem
+            # To store register into memory
+            # result_MEM = RAM[int(EX_REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv] = int(EX_REGISTERS[instr_line[0]])
+
+            RAM[int(EX_REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv] = int(EX_REGISTERS[instr_line[0]])
+
+            cache.CacheOP.cache_hit_1(int(EX_REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
+            cache.CacheOP.cache_hit_2(int(EX_REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
+
+            result_MEM = 0
+            stalls_MEM = 0
+        return result_MEM, stalls_MEM
 
 
 def write_back_op(instr_line, result_MEM_ALU):
     try:
         REGISTERS[instr_line[0]] = result_MEM_ALU
+        EX_REGISTERS[instr_line[0]] = result_MEM_ALU
         return 1
     except:
         return -1
 
 
 # Define the functions for simulating
-def add_instr(instr_line):
+def add_instr(instr_line, forward_enable):
     instr_line = instr_line.split(",")
     for l in range(len(instr_line)):
         instr_line[l] = str(instr_line[l].strip()[1:])
 
-    # If address is stored add subtract only val/4 because of indexing
-    # add $t2, $zero, $s0
-    if isinstance(REGISTERS[instr_line[1]], str) and isinstance(REGISTERS[instr_line[2]], int):
-        result_ALU = int(REGISTERS[instr_line[1]][2:]) + int(REGISTERS[instr_line[2]]) // 4
-        result_ALU = "0x" + str(result_ALU)
-        return result_ALU, instr_line
-    elif isinstance(REGISTERS[instr_line[1]], int) and isinstance(REGISTERS[instr_line[2]], str):
-        result_ALU = int(REGISTERS[instr_line[1]]) // 4 + int(REGISTERS[instr_line[2]][2:])
-        result_ALU = "0x" + str(result_ALU)
-        return result_ALU, instr_line
+    if (forward_enable == False) or (forward_enable == True and REGISTERS == EX_REGISTERS):
+        # If address is stored add subtract only val/4 because of indexing
+        # add $t2, $zero, $s0
+        if isinstance(REGISTERS[instr_line[1]], str) and isinstance(REGISTERS[instr_line[2]], int):
+            result_ALU = int(REGISTERS[instr_line[1]][2:]) + int(REGISTERS[instr_line[2]]) // 4
+            result_ALU = "0x" + str(result_ALU)
+            EX_REGISTERS[instr_line[0]] = result_ALU
+            return result_ALU, instr_line
+        # Remeber to Write the ans to EX_REG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        elif isinstance(REGISTERS[instr_line[1]], int) and isinstance(REGISTERS[instr_line[2]], str):
+            result_ALU = int(REGISTERS[instr_line[1]]) // 4 + int(REGISTERS[instr_line[2]][2:])
+            result_ALU = "0x" + str(result_ALU)
+            EX_REGISTERS[instr_line[0]] = result_ALU
+            return result_ALU, instr_line
 
-    # Normal add instruction of register having two ints
-    # add $t2, $t1, $t0
-    elif isinstance(REGISTERS[instr_line[1]], int) and isinstance(REGISTERS[instr_line[2]], int):
-        result_ALU = int(REGISTERS[instr_line[1]]) + int(REGISTERS[instr_line[2]])
-        return result_ALU, instr_line
+        # Normal add instruction of register having two ints
+        # add $t2, $t1, $t0
+        elif isinstance(REGISTERS[instr_line[1]], int) and isinstance(REGISTERS[instr_line[2]], int):
+            result_ALU = int(REGISTERS[instr_line[1]]) + int(REGISTERS[instr_line[2]])
+            EX_REGISTERS[instr_line[0]] = result_ALU
+            return result_ALU, instr_line
 
-    else:
-        print("Invalid instruction format for add.")
-    return -1, instr_line
+        else:
+            print("Invalid instruction format for add.")
+            return -1, instr_line
+    elif forward_enable == True :
+        # If address is stored add subtract only val/4 because of indexing
+        # add $t2, $zero, $s0
+        if isinstance(EX_REGISTERS[instr_line[1]], str) and isinstance(EX_REGISTERS[instr_line[2]], int):
+            result_ALU = int(EX_REGISTERS[instr_line[1]][2:]) + int(EX_REGISTERS[instr_line[2]]) // 4
+            result_ALU = "0x" + str(result_ALU)
+            EX_REGISTERS[instr_line[0]] = result_ALU
+            return result_ALU, instr_line
+        elif isinstance(EX_REGISTERS[instr_line[1]], int) and isinstance(EX_REGISTERS[instr_line[2]], str):
+            result_ALU = int(EX_REGISTERS[instr_line[1]]) // 4 + int(EX_REGISTERS[instr_line[2]][2:])
+            result_ALU = "0x" + str(result_ALU)
+            EX_REGISTERS[instr_line[0]] = result_ALU
+            return result_ALU, instr_line
+
+        # Normal add instruction of register having two ints
+        # add $t2, $t1, $t0
+        elif isinstance(EX_REGISTERS[instr_line[1]], int) and isinstance(EX_REGISTERS[instr_line[2]], int):
+            result_ALU = int(EX_REGISTERS[instr_line[1]]) + int(EX_REGISTERS[instr_line[2]])
+            EX_REGISTERS[instr_line[0]] = result_ALU
+            return result_ALU, instr_line
+
+        else:
+            print("Invalid instruction format for add.")
+            return -1, instr_line
 
 
-def sub_instr(instr_line):
+def sub_instr(instr_line, forward_enable):
     instr_line = instr_line.split(",")
     for l in range(len(instr_line)):
         instr_line[l] = str(instr_line[l].strip()[1:])
-    if isinstance(REGISTERS[instr_line[1]], str) and isinstance(REGISTERS[instr_line[2]], int):
-        result_ALU = int(REGISTERS[instr_line[1]][2:]) - int(REGISTERS[instr_line[2]]) // 4
-        result_ALU = "0x" + str(result_ALU)
-        return result_ALU, instr_line
-    elif isinstance(REGISTERS[instr_line[1]], int) and isinstance(REGISTERS[instr_line[2]], str):
-        result_ALU = int(REGISTERS[instr_line[1]]) // 4 - int(REGISTERS[instr_line[2]][2:])
-        result_ALU = "0x" + str(result_ALU)
-        return result_ALU, instr_line
 
-    elif isinstance(REGISTERS[instr_line[1]], int) and isinstance(REGISTERS[instr_line[2]], int):
-        result_ALU = int(REGISTERS[instr_line[1]]) - int(REGISTERS[instr_line[2]])
-        return result_ALU, instr_line
+    if (forward_enable == False) or (forward_enable == True and REGISTERS == EX_REGISTERS):
+        if isinstance(REGISTERS[instr_line[1]], str) and isinstance(REGISTERS[instr_line[2]], int):
+            result_ALU = int(REGISTERS[instr_line[1]][2:]) - int(REGISTERS[instr_line[2]]) // 4
+            result_ALU = "0x" + str(result_ALU)
+            EX_REGISTERS[instr_line[0]] = result_ALU
+            return result_ALU, instr_line
+        elif isinstance(REGISTERS[instr_line[1]], int) and isinstance(REGISTERS[instr_line[2]], str):
+            result_ALU = int(REGISTERS[instr_line[1]]) // 4 - int(REGISTERS[instr_line[2]][2:])
+            result_ALU = "0x" + str(result_ALU)
+            EX_REGISTERS[instr_line[0]] = result_ALU
+            return result_ALU, instr_line
 
-    else:
-        print("Invalid instruction format for sub.")
-    return -1, instr_line
+        elif isinstance(REGISTERS[instr_line[1]], int) and isinstance(REGISTERS[instr_line[2]], int):
+            result_ALU = int(REGISTERS[instr_line[1]]) - int(REGISTERS[instr_line[2]])
+            EX_REGISTERS[instr_line[0]] = result_ALU
+            return result_ALU, instr_line
+
+        else:
+            print("Invalid instruction format for sub.")
+        return -1, instr_line
+
+    elif forward_enable == True:
+        if isinstance(EX_REGISTERS[instr_line[1]], str) and isinstance(EX_REGISTERS[instr_line[2]], int):
+            result_ALU = int(EX_REGISTERS[instr_line[1]][2:]) - int(EX_REGISTERS[instr_line[2]]) // 4
+            result_ALU = "0x" + str(result_ALU)
+            EX_REGISTERS[instr_line[0]] = result_ALU
+            return result_ALU, instr_line
+        elif isinstance(EX_REGISTERS[instr_line[1]], int) and isinstance(EX_REGISTERS[instr_line[2]], str):
+            result_ALU = int(EX_REGISTERS[instr_line[1]]) // 4 - int(EX_REGISTERS[instr_line[2]][2:])
+            result_ALU = "0x" + str(result_ALU)
+            EX_REGISTERS[instr_line[0]] = result_ALU
+            return result_ALU, instr_line
+
+        elif isinstance(EX_REGISTERS[instr_line[1]], int) and isinstance(EX_REGISTERS[instr_line[2]], int):
+            result_ALU = int(EX_REGISTERS[instr_line[1]]) - int(EX_REGISTERS[instr_line[2]])
+            EX_REGISTERS[instr_line[0]] = result_ALU
+            return result_ALU, instr_line
+
+        else:
+            print("Invalid instruction format for sub.")
+        return -1, instr_line
 
 
 def lw_instr(instr_line):
@@ -275,26 +357,35 @@ def sw_instr(instr_line):
     return result_ALU, instr_line
 
 
-def bne_instr(instr_line, index_pc):
+def bne_instr(instr_line, index_pc, forward_enable):
     #  bne $t1, $s2, loop
     instr_line = instr_line.split(",")
     for l in range(len(instr_line) - 1):
         instr_line[l] = str(instr_line[l].strip()[1:])
     instr_line[2] = instr_line[2].strip()
-    if REGISTERS[instr_line[0]] == REGISTERS[instr_line[1]]:
-        return index_pc + 1
+    if (forward_enable == False) or (forward_enable == True and REGISTERS == EX_REGISTERS):
+        if REGISTERS[instr_line[0]] == REGISTERS[instr_line[1]]:
+            return index_pc + 1
+    elif forward_enable == True:
+        if EX_REGISTERS[instr_line[0]] == EX_REGISTERS[instr_line[1]]:
+            return index_pc + 1
+
 
     return int(instr_label[instr_line[2]])
 
 
-def beq_instr(instr_line, index_pc):
+def beq_instr(instr_line, index_pc, forward_enable):
     #  beq $t1, $s2, loop
     instr_line = instr_line.split(",")
     for l in range(len(instr_line) - 1):
         instr_line[l] = str(instr_line[l].strip()[1:])
     instr_line[2] = instr_line[2].strip()
-    if REGISTERS[instr_line[0]] != REGISTERS[instr_line[1]]:
-        return index_pc + 1
+    if (forward_enable == False) or (forward_enable == True and REGISTERS == EX_REGISTERS):
+        if REGISTERS[instr_line[0]] != REGISTERS[instr_line[1]]:
+            return index_pc + 1
+    elif forward_enable == True:
+        if EX_REGISTERS[instr_line[0]] != EX_REGISTERS[instr_line[1]]:
+            return index_pc + 1
 
     return int(instr_label[instr_line[2]])
 
@@ -303,64 +394,94 @@ def j_instr(instr_line):
     return instr_label[instr_line]
 
 
-def lui_instr(instr_line):
+def lui_instr(instr_line, forward_enable):
     # lui $s0, 0x1001
     instr_line = instr_line.split(",")
     instr_line[0] = instr_line[0].strip()[1:]
     instr_line[1] = instr_line[1].strip()
+
     result_ALU = instr_line[1]
+    if forward_enable == True:
+        EX_REGISTERS[instr_line[0]] = result_ALU
     global BaseAdr
     BaseAdr = str(instr_line[1])
     return result_ALU, instr_line
 
 
-def addi_instr(instr_line):
+def addi_instr(instr_line, forward_enable):
     # addi $s2, $s2, -1
     instr_line = instr_line.split(",")
     for l in range(len(instr_line) - 1):
         instr_line[l] = str(instr_line[l].strip()[1:])
     instr_line[2] = instr_line[2].strip()
 
-    if isinstance(REGISTERS[instr_line[1]], str):
-        result_ALU = int(REGISTERS[instr_line[1]][2:]) + int(instr_line[2]) // 4
-        result_ALU = "0x" + str(result_ALU)
-        return result_ALU, instr_line
-    else:
-        result_ALU = int(REGISTERS[instr_line[1]]) + int(instr_line[2])
-        return result_ALU, instr_line
+    if (forward_enable == False) or (forward_enable == True and REGISTERS == EX_REGISTERS):
+        if isinstance(REGISTERS[instr_line[1]], str):
+            result_ALU = int(REGISTERS[instr_line[1]][2:]) + int(instr_line[2]) // 4
+            result_ALU = "0x" + str(result_ALU)
+            EX_REGISTERS[instr_line[0]] = result_ALU
+            return result_ALU, instr_line
+        else:
+            result_ALU = int(REGISTERS[instr_line[1]]) + int(instr_line[2])
+            EX_REGISTERS[instr_line[0]] = result_ALU
+            return result_ALU, instr_line
+    elif forward_enable == True:
+        if isinstance(EX_REGISTERS[instr_line[1]], str):
+            result_ALU = int(EX_REGISTERS[instr_line[1]][2:]) + int(instr_line[2]) // 4
+            result_ALU = "0x" + str(result_ALU)
+            EX_REGISTERS[instr_line[0]] = result_ALU
+            return result_ALU, instr_line
+        else:
+            result_ALU = int(EX_REGISTERS[instr_line[1]]) + int(instr_line[2])
+            EX_REGISTERS[instr_line[0]] = result_ALU
+            return result_ALU, instr_line
 
 
-def li_instr(instr_line):
+def li_instr(instr_line, forward_enable):
     instr_line = instr_line.split(",")
     for l in range(len(instr_line) - 1):
         instr_line[l] = str(instr_line[l].strip()[1:])
     instr_line[1] = instr_line[1].strip()
     result_ALU = int(instr_line[1])
 
+    if forward_enable == True:
+        EX_REGISTERS[instr_line[0]] = result_ALU
+
     return result_ALU, instr_line
 
 
-def sll_instr(instr_line):
+def sll_instr(instr_line, forward_enable):
     instr_line = instr_line.split(",")
     for l in range(len(instr_line) - 1):
         instr_line[l] = str(instr_line[l].strip()[1:])
 
-    result_ALU = int(REGISTERS[instr_line[1]]) * pow(2, int(instr_line[2]))
+    if (forward_enable == False) or (forward_enable == True and REGISTERS == EX_REGISTERS):
+        result_ALU = int(REGISTERS[instr_line[1]]) * pow(2, int(instr_line[2]))
+        EX_REGISTERS[instr_line[0]] = result_ALU
+    elif forward_enable == True:
+        result_ALU = int(EX_REGISTERS[instr_line[1]]) * pow(2, int(instr_line[2]))
+        EX_REGISTERS[instr_line[0]] = result_ALU
 
     return result_ALU, instr_line
 
 
-def srl_instr(instr_line):
+def srl_instr(instr_line, forward_enable):
     instr_line = instr_line.split(",")
     for l in range(len(instr_line) - 1):
         instr_line[l] = str(instr_line[l].strip()[1:])
 
-    result_ALU = int(REGISTERS[instr_line[1]]) // pow(2, int(instr_line[2]))
+    if (forward_enable == False) or (forward_enable == True and REGISTERS == EX_REGISTERS):
+        result_ALU = int(REGISTERS[instr_line[1]]) // pow(2, int(instr_line[2]))
+        EX_REGISTERS[instr_line[0]] = result_ALU
+
+    elif forward_enable == True:
+        result_ALU = int(EX_REGISTERS[instr_line[1]]) // pow(2, int(instr_line[2]))
+        EX_REGISTERS[instr_line[0]] = result_ALU
 
     return result_ALU, instr_line
 
 
-def la_instr(instr_line):
+def la_instr(instr_line, forward_enable):
     # la $a0, space
     instr_line = instr_line.split(",")
     instr_line[0] = str(instr_line[0].strip()[1:])
@@ -371,17 +492,27 @@ def la_instr(instr_line):
     result_ALU = int(BaseAdr[2:]) + ram_label[instr_line[1]]
     result_ALU = "0x" + str(result_ALU)
 
+    if forward_enable == True:
+        EX_REGISTERS[instr_line[0]] = result_ALU
+
     return result_ALU, instr_line
 
 
-def slt_instr(instr_line):
+def slt_instr(instr_line, forward_enable):
     # slt $t4, $s3, $s4               #set $t4 = 1 if $s3 < $s4
     instr_line = instr_line.split(",")
 
     for l in range(len(instr_line)):
         instr_line[l] = str(instr_line[l].strip()[1:])
     # print("sltsltsltsltsltsltsltslt=> ", instr_line[1], instr_line[2], REGISTERS[instr_line[1]], REGISTERS[instr_line[2]])
-    result_ALU = int(int(REGISTERS[instr_line[1]]) < int(REGISTERS[instr_line[2]]))
+
+    if (forward_enable == False) or (forward_enable == True and REGISTERS == EX_REGISTERS):
+        result_ALU = int(int(REGISTERS[instr_line[1]]) < int(REGISTERS[instr_line[2]]))
+        EX_REGISTERS[instr_line[0]] = result_ALU
+
+    elif forward_enable == True:
+        result_ALU = int(int(EX_REGISTERS[instr_line[1]]) < int(EX_REGISTERS[instr_line[2]]))
+        EX_REGISTERS[instr_line[0]] = result_ALU
 
     return result_ALU, instr_line
 
@@ -451,12 +582,12 @@ def find_instr_type(line):
     return instr_word, instr_line
 
 
-def execute_ALU(instr_word, instr_line):
+def execute_ALU(instr_word, instr_line, forward_enable):
     # Switching:
     if instr_word == 'add':
-        return add_instr(instr_line)
+        return add_instr(instr_line, forward_enable)
     elif instr_word == 'sub':
-        return sub_instr(instr_line)
+        return sub_instr(instr_line, forward_enable)
     # elif instr_word == 'bne':
     #     return bne_instr(instr_line)
     # elif instr_word == 'beq':
@@ -471,21 +602,21 @@ def execute_ALU(instr_word, instr_line):
     elif instr_word == 'sw':
         return sw_instr(instr_line)
     elif instr_word == 'lui':
-        return lui_instr(instr_line)
+        return lui_instr(instr_line, forward_enable)
     elif instr_word == 'addi':
-        return addi_instr(instr_line)
+        return addi_instr(instr_line, forward_enable)
     elif instr_word == 'sll':
-        return sll_instr(instr_line)
+        return sll_instr(instr_line, forward_enable)
     elif instr_word == 'srl':
-        return srl_instr(instr_line)
+        return srl_instr(instr_line, forward_enable)
     elif instr_word == 'jr':
         return REGISTERS["ra"], instr_line
     elif instr_word == 'li':
-        return li_instr(instr_line)
+        return li_instr(instr_line, forward_enable)
     elif instr_word == 'la':
-        return la_instr(instr_line)
+        return la_instr(instr_line, forward_enable)
     elif instr_word == 'slt':
-        return slt_instr(instr_line)
+        return slt_instr(instr_line, forward_enable)
 
     elif instr_word == 'syscall':
         return syscall_instr()
