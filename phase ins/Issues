@@ -1,6 +1,5 @@
 1)) if above line has 2 stalls and below has 1 stall, it should merge
 2) syscall printing at end or push in WB data
-3) sw repetition
 4) no of blocks - sets
 
 

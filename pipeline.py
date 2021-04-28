@@ -430,6 +430,9 @@ while not is_Program_Done:
             pass_to_nextHW(3)
             Pipeline_units[4].data.append((instr_word, instr_line, result_ALU))
 
+        if forward_enable:
+            simu.write_back_op(instr_line, result_ALU)
+
         print("Executed MEM on line ", instr_word, instr_line)
 
     # ..............................................................................................................
