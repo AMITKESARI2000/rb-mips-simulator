@@ -37,7 +37,7 @@ REGISTERS = {'zero': 0, 'ra': 0, 'at': 0, 'v0': 0, 'v1': 0, 'a0': 0, 'a1': 0, 'a
              't0': 0, 't1': 0, 't2': 0, 't3': 0, 't4': 0, 't5': 0, 't6': 0, 't7': 0, 't8': 0, 't9': 0,
              'r': 0, 'k0': 0, 'k1': 0, 'sp': '0x20000'}  # 32
 
-BaseAdr = "0x1000"
+BaseAdr = "0x1001"
 
 is_program_done = False
 
@@ -475,6 +475,9 @@ def execute_ALU(instr_word, instr_line):
 
     elif instr_word == 'syscall':
         return syscall_instr()
+
+    elif instr_word == 'nop':
+        return 0, 0
     else:
         print("Invalid Instruction Set ", instr_word, " !!! Aborting...")
         Throw_error_instr.error_occurred(PC)

@@ -1,7 +1,7 @@
 import re
 import cache
 
-file = open("./testingbubblesort.asm", "r")
+file = open("testingloop.asm", "r")
 
 
 lines = file.readlines()

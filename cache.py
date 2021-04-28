@@ -55,6 +55,7 @@ class CacheHit:
                     cache1[i][j] = [adrs, simu.RAM[adrs], counter1]
                     counter1 += 1
                     print(1111, cache1)
+                    print("Cache Hit in L1!")
                     return cache1[i][j][1], stalls1
 
         if not cachehit1:
@@ -75,6 +76,7 @@ class CacheHit:
                     cache2[i][j] = [adrs, simu.RAM[adrs], counter2]
                     counter2 += 1
                     print(2222, cache2)
+                    print("Cache Hit in L2!")
                     return cache2[i][j][1], stalls1 + stalls2
 
         if not cachehit2:
@@ -85,6 +87,7 @@ class CacheHit:
 
     # Checking in memory if the data is not present in both the Caches
     def memory_operation(self, adrs):
+        print("Cache Miss!")
         return simu.RAM[adrs], stalls1 + stalls2 + stalls3
 
     # Inserting Data in Cache1 if not present

@@ -413,6 +413,7 @@ while not is_Program_Done:
                     STALL_OF_GOD += stalls_MEM
 
                 if Pipeline_units[3].stalls_left and instr_word != 'nop':
+                    print("Mem Operation taking ", stalls_MEM, " cycles")
                     last_stall_line_MEM = Pipeline_units[0].current_instr_line - 1
                     for i in range(Pipeline_units[3].stalls_left - 1):
                         Pipeline_units[4].data.insert(0, nop)
@@ -536,15 +537,23 @@ while not is_Program_Done:
             print("Executed IF on line ", fetch_line)
 
     # Call syscalls
-    if len(simu.syscall_array) and Pipeline_units[0].current_instr_line - 1 == simu.syscall_array[0]:
-        simu.syscall_instr(simu.syscall_array[0])
-        simu.syscall_array.pop(0)
+    # if len(simu.syscall_array) and Pipeline_units[0].current_instr_line - 1 == simu.syscall_array[0]:
+    #     simu.syscall_instr(simu.syscall_array[0])
+    #     simu.syscall_array.pop(0)
 
     # Check if WB has reached last stage
     if (len(Pipeline_units[2].data) == 0) and (len(Pipeline_units[2].data) == 0) and (len(
             Pipeline_units[3].data) == 0) and (len(Pipeline_units[4].data) == 0) and Pipeline_units[
         0].current_instr_line >= simu.REGISTERS["ra"]:
         is_Program_Done = True
+
+# Call syscalls at the end
+print()
+print("*" * 20, "CONSOLE", "*" * 20)
+while len(simu.syscall_array):
+    simu.syscall_instr(simu.syscall_array[0])
+    simu.syscall_array.pop(0)
+print("*" * 20, "CONSOLE", "*" * 20, "\n")
 
 # Console Prints
 # CLOCK_OF_GOD -= 1

@@ -41,12 +41,15 @@ In phase 2, we are implementing pipeline so that the throughput can be increased
 * Enabling/Disabling of data forwarding is implemented which will be asked before running the program.
 * Work for GUI for this simulator is just started.
 
-### PHASE 3:
-In phase 3, we are introducing Cache
+---
 
+### PHASE 3:
+In phase 3, we are introducing L1 L2 levels of Cache
+
+* The main file is **pipeline.py**
 * A memory access will now first search for the address in the two caches. On a miss, the data
 will be fetched from the main memory.
-* This simulator simulating 2 levels of cache, with LRU replacement policy.
+* This simulator simulating 2 levels of cache, with LRU replacement policy and Cache inclusion policy is implemented.
 * This effectively means that the memory instructions (load and stores) will not be completed
 in one cycle.
 * Loads and Stores will have variable latency, and hence the penalty (stalls) due to the memory
