@@ -10,21 +10,35 @@ block2_size = 4
 # latency1 = 10
 # latency2 = 20
 
+assoc1 = 1
+assoc2 = 2
+
 # to be changed later...
 stalls1 = 2
 stalls2 = 4
 stalls3 = 10  # for memory penalty
 
-assoc1 = 1
-assoc2 = 2
-
 set1 = int(cache1_size / (block1_size * assoc1))
 set2 = int(cache2_size / (block2_size * assoc2))
+
 
 # no_of_blocks_in_cache1 = cache1_size/block1_size
 # no_of_sets = no_of_blocks_in_cache1/assoc1
 
-
+def update_settings(cache1, cache2, block1, block2, assco1, assco2, stall1, stall2, stall3):
+    global cache1_size, cache2_size, block1_size, block2_size, assoc1, assoc2, stalls1, stalls2, stalls3
+    print("Updating", cache1, cache2, block1, block2, assco1, assco2, stall1, stall2, stall3)
+    cache1_size = int(cache1 or cache1_size)
+    cache2_size = int(cache2 or cache2_size)
+    block1_size = int(block1 or block1_size)
+    block2_size = int(block2 or block2_size)
+    assoc1 = int(assco1 or assoc1)
+    assoc2 = int(assco2 or assoc2)
+    stalls1 = int(stall1 or stalls1)
+    stalls2 = int(stall2 or stalls2)
+    stalls3 = int(stall3 or stalls3)
+    print("Updated", cache1_size, cache2_size, block1_size, block2_size, assoc1, assoc2, stalls1, stalls2, stalls3)
+    CacheHit.change_caches()
 
 
 global counter1
@@ -47,10 +61,31 @@ class CacheHit:
     for _ in range(set2):
         cache2.append([[-1, -1, counter2]] * assoc2)
         # indices -> tag, data, counter(for LRU)
-    print("="*100)
+    print("=" * 100)
     print(cache1)
     print(cache2)
     print("=" * 100)
+
+    def change_caches():
+        global cache1
+        global cache2
+
+        cache1 = []
+        cache2 = []
+
+        for _ in range(set1):
+            cache1.append([[-1, -1, counter1]] * assoc1)
+            # indices -> tag, data, counter(for LRU)
+
+        for _ in range(set2):
+            cache2.append([[-1, -1, counter2]] * assoc2)
+            # indices -> tag, data, counter(for LRU)
+        print("=" * 100)
+        print(cache1)
+        print(cache2)
+        print("=" * 100)
+
+
     # Cache 1. Checking if the data is present or not
     def cache_hit_1(self, adrs):
         global cachehit1

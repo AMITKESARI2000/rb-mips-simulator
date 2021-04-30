@@ -340,8 +340,7 @@ def program_execution():
     global base_instr_line_PC
     base_instr_line_PC = simu.PC
 
-    if input("Data Forwarding is disabled by default. Want to enable?(y): ").lower() == "y":
-        forward_enable = True
+    if forward_enable:
         print("Data Forwarding Enabled")
     else:
         print("Data Forwarding Disabled")

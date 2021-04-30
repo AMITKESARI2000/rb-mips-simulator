@@ -10,7 +10,11 @@ import pipeline
 def UploadAction():
     filename = filedialog.askopenfilename()
     print('Selected:', filename)
+    msg = Tk()
+    msgs = Message(msg, text="Selected File: " + filename)
+    msgs.pack()
     simu.file_add(filename)
+    msg.mainloop()
 
 
 root = Tk()
@@ -41,6 +45,13 @@ once_exe = Button(menu_panel, text="At Once Execution", bg="#2f6fca", fg="#efefe
 space2 = Button(menu_panel, text="      ", bg="white", state=DISABLED).pack(side=LEFT)
 upload_file = Button(menu_panel, text="Upload a File", bg="#f79400", fg="#efefef",
                      command=lambda: UploadAction()).pack(side=LEFT)
+space3 = Button(menu_panel, text="      ", bg="white", state=DISABLED).pack(side=LEFT)
+settings = Button(menu_panel, text="Settings", bg="blue", fg="#efefef",
+                  command=lambda: change_settings()).pack(side=LEFT)
+space4 = Button(menu_panel, text="      ", bg="white", state=DISABLED).pack(side=LEFT)
+forwarding = Checkbutton(menu_panel, text="forwarding", bg='green', fg='#e5e5e5', command=lambda: forWarding(),
+                         variable=pipeline.forward_enable, onvalue=True, offvalue=False)
+forwarding.pack(side=LEFT)
 
 # Body Panel
 body_panel = PanedWindow(simu_1lator_body, orient=HORIZONTAL, bd=1, relief="raised", bg="black", height=400)
@@ -237,6 +248,65 @@ def modify_gui_data_once():
 
     else:
         run_gui_data()
+
+
+def change_settings():
+    settings = Tk()
+    settings.title("SETTINGS")
+    cache1_size = Label(settings, text="Size of Cache 1: ").grid(row=0, column=0)
+    cache1Size = Entry(settings, bd=5)
+    cache1Size.grid(row=0, column=1)
+    cache2_size = Label(settings, text="Size of Cache 2: ").grid(row=1, column=0)
+    cache2Size = Entry(settings, bd=5)
+    cache2Size.grid(row=1, column=1)
+    block1_size = Label(settings, text="Size of Block 1: ").grid(row=2, column=0)
+    block1Size = Entry(settings, bd=5)
+    block1Size.grid(row=2, column=1)
+    block2_size = Label(settings, text="Size of Block 2: ").grid(row=3, column=0)
+    block2Size = Entry(settings, bd=5)
+    block2Size.grid(row=3, column=1)
+    assco1 = Label(settings, text="Associativity of Cache 1: ").grid(row=4, column=0)
+    assc1 = Entry(settings, bd=5)
+    assc1.grid(row=4, column=1)
+    assco2 = Label(settings, text="Associativity of Cache 2: ").grid(row=5, column=0)
+    assc2 = Entry(settings, bd=5)
+    assc2.grid(row=5, column=1)
+    stalls1 = Label(settings, text="Stall of Cache 1: ").grid(row=6, column=0)
+    stall1 = Entry(settings, bd=5)
+    stall1.grid(row=6, column=1)
+    stalls2 = Label(settings, text="Stall of Cache 2: ").grid(row=7, column=0)
+    stall2 = Entry(settings, bd=5)
+    stall2.grid(row=7, column=1)
+    stalls3 = Label(settings, text="Stall of Memory: ").grid(row=8, column=0)
+    stall3 = Entry(settings, bd=5)
+    stall3.grid(row=8, column=1)
+    update = Button(settings, text="Update", command=lambda: cache.update_settings(
+        cache1=cache1Size.get(), cache2=cache2Size.get(), block1=block1Size.get(), block2=block2Size.get(),
+        assco1=assc1.get(), assco2=assc2.get(), stall1=stall1.get(), stall2=stall2.get(), stall3=stall3.get()
+    ) and cancel_settings()).grid(row=9, column=0)
+    cancel = Button(settings, text="Cancel", command=lambda: cancel_settings()).grid(row=9, column=1)
+
+    settings.mainloop()
+
+
+def cancel_settings():
+    settings.mainloop()
+    pass
+
+
+def forWarding():
+    msg = Tk()
+    if not pipeline.forward_enable:
+        pipeline.forward_enable = True
+        msgs = Message(msg, text="Data Forwarding Enabled")
+        msgs.pack()
+        print("Data Forwarding Enabled")
+    else:
+        pipeline.forward_enable = False
+        msgs = Message(msg, text="Data Forwarding Disabled")
+        msgs.pack()
+        print("Data Forwarding Disabled")
+    msg.mainloop()
 
 
 run_gui_data()
