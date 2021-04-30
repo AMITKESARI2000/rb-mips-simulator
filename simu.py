@@ -2,13 +2,13 @@ import re
 import cache
 import copy
 
-file = open("testingbubblesort.asm", "r")
-
-lines = file.readlines()
-file.close()
+# file = open("testingbubblesort.asm", "r")
+#
+# lines = file.readlines()
+# file.close()
 
 # Global Storages
-global RAM, ram_iter, ram_label, instr_label, PC, i, cnsl
+global RAM, ram_iter, ram_label, instr_label, PC, i, cnsl, lines
 RAM = []
 
 ram_iter = 0
@@ -17,6 +17,16 @@ instr_label = {}
 PC = 0
 cnsl = []
 syscall_array = []
+lines = ""
+
+
+def file_add(filename):
+    file = open(filename, "r")
+    # print(filename)
+    global lines
+    lines = file.readlines()
+    # print(lines)
+    file.close()
 
 
 class InstrSyntaxError:
@@ -150,7 +160,10 @@ def pre_data_process():
         i += 1
     REGISTERS["ra"] = len(lines)
 
+
 EX_REGISTERS = copy.deepcopy(REGISTERS)
+
+
 def main():
     pre_data_process()
     while PC < len(lines):
@@ -169,13 +182,14 @@ def main_once():
 
 
 def memory_op(instr_word, instr_line, adv, forward_enable):
-    if forward_enable == False:
+    if not forward_enable:
         if instr_word == "lw":  # mem to reg
             # To load register from memory
             # result_MEM = RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv]
 
             print(111, int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
-            result_MEM, stalls_MEM = cache.CacheOP.cache_hit_1(int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
+            result_MEM, stalls_MEM = cache.CacheOP.cache_hit_1(
+                int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv)
 
         elif instr_word == "sw":  # reg to mem
             # To store register into memory
@@ -190,7 +204,7 @@ def memory_op(instr_word, instr_line, adv, forward_enable):
             stalls_MEM = 0
         return result_MEM, stalls_MEM
 
-    elif forward_enable == True:
+    elif forward_enable:
         if instr_word == "lw":  # mem to reg
             # To load register from memory
             # result_MEM = RAM[int(REGISTERS[instr_line[1]][2:]) - int(BaseAdr[2:]) + adv]
@@ -255,7 +269,7 @@ def add_instr(instr_line, forward_enable):
         else:
             print("Invalid instruction format for add.")
             return -1, instr_line
-    elif forward_enable == True :
+    elif forward_enable == True:
         # If address is stored add subtract only val/4 because of indexing
         # add $t2, $zero, $s0
         if isinstance(EX_REGISTERS[instr_line[1]], str) and isinstance(EX_REGISTERS[instr_line[2]], int):
@@ -370,7 +384,6 @@ def bne_instr(instr_line, index_pc, forward_enable):
         if EX_REGISTERS[instr_line[0]] == EX_REGISTERS[instr_line[1]]:
             return index_pc + 1
 
-
     return int(instr_label[instr_line[2]])
 
 
@@ -474,7 +487,7 @@ def srl_instr(instr_line, forward_enable):
         result_ALU = int(REGISTERS[instr_line[1]]) // pow(2, int(instr_line[2]))
         EX_REGISTERS[instr_line[0]] = result_ALU
 
-    elif forward_enable == True:
+    elif forward_enable:
         result_ALU = int(EX_REGISTERS[instr_line[1]]) // pow(2, int(instr_line[2]))
         EX_REGISTERS[instr_line[0]] = result_ALU
 
@@ -492,7 +505,7 @@ def la_instr(instr_line, forward_enable):
     result_ALU = int(BaseAdr[2:]) + ram_label[instr_line[1]]
     result_ALU = "0x" + str(result_ALU)
 
-    if forward_enable == True:
+    if forward_enable:
         EX_REGISTERS[instr_line[0]] = result_ALU
 
     return result_ALU, instr_line
@@ -510,7 +523,7 @@ def slt_instr(instr_line, forward_enable):
         result_ALU = int(int(REGISTERS[instr_line[1]]) < int(REGISTERS[instr_line[2]]))
         EX_REGISTERS[instr_line[0]] = result_ALU
 
-    elif forward_enable == True:
+    elif forward_enable:
         result_ALU = int(int(EX_REGISTERS[instr_line[1]]) < int(EX_REGISTERS[instr_line[2]]))
         EX_REGISTERS[instr_line[0]] = result_ALU
 

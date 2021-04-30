@@ -1,5 +1,8 @@
 import simu
 
+global CACHE_MISS
+CACHE_MISS = 0
+
 cache1_size = 8
 cache2_size = 16
 block1_size = 4
@@ -8,9 +11,9 @@ block2_size = 4
 # latency2 = 20
 
 # to be changed later...
-stalls1 = 8
-stalls2 = 16
-stalls3 = 100  # for memory penalty
+stalls1 = 2
+stalls2 = 4
+stalls3 = 10  # for memory penalty
 
 assoc1 = 1
 assoc2 = 2
@@ -93,6 +96,8 @@ class CacheHit:
     # Checking in memory if the data is not present in both the Caches
     def memory_operation(self, adrs):
         print("Cache Miss!")
+        global CACHE_MISS
+        CACHE_MISS += 1
         return simu.RAM[adrs], stalls1 + stalls2 + stalls3
 
     # Inserting Data in Cache1 if not present
