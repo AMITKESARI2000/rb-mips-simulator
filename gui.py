@@ -18,19 +18,18 @@ def UploadAction():
 
 
 root = Tk()
-
 # root.resizable(width=False, height=False) #Restricting Resizable
-root.title("RB Mips simu_1lator 😎")
+root.title("RB Mips simulator 😎")
 
 # Panel
-simu_1lator_body = PanedWindow(orient=VERTICAL, width=1000, height=600, bg="black")
+simu_1lator_body = PanedWindow(orient=VERTICAL, width=1024, height=640, bg="black")
 simu_1lator_body.pack(fill=BOTH, expand=1)
 
 # Head Panel
 head_panel = PanedWindow(simu_1lator_body, bd=1, relief="raised", bg="black")
 simu_1lator_body.add(head_panel)
 
-head = Label(head_panel, text="simu_1LATOR", font=("Arial", 14))
+head = Label(head_panel, text="SIMULATOR", font=("Arial", 14))
 head_panel.add(head)
 
 # Menu Panel
@@ -49,8 +48,8 @@ space3 = Button(menu_panel, text="      ", bg="white", state=DISABLED).pack(side
 settings = Button(menu_panel, text="Settings", bg="blue", fg="#efefef",
                   command=lambda: change_settings()).pack(side=LEFT)
 space4 = Button(menu_panel, text="      ", bg="white", state=DISABLED).pack(side=LEFT)
-forwarding = Checkbutton(menu_panel, text="forwarding", bg='green', fg='#e5e5e5', command=lambda: forWarding(),
-                         variable=pipeline.forward_enable, onvalue=True, offvalue=False)
+forwarding = Checkbutton(menu_panel, text="forwarding", bg='green', fg='#e5e5e5',
+                         variable=pipeline.forward_enable, onvalue=True, offvalue=False, selectcolor="black")
 forwarding.pack(side=LEFT)
 
 # Body Panel
@@ -114,7 +113,7 @@ console_panel.add(console)
 t_console = Text(console, height=20, width=70, bg="#0e141e", wrap=NONE, font=("Roboto", 9), fg="#00ea64")
 
 # Extra info panel
-info_panel = PanedWindow(simu_1lator_body, relief="raised", bd=1, bg="black", width=1300)
+info_panel = PanedWindow(simu_1lator_body, relief="raised", bd=1, bg="black", width=1300, orient=VERTICAL)
 simu_1lator_body.add(info_panel)
 
 # info_head = Label(info_panel, text="INFO", relief="raised", height=1, font=("Arial", 10), width=1300)
@@ -123,8 +122,26 @@ simu_1lator_body.add(info_panel)
 info = Label(info_panel, bg="white", font=("Arial", 13), fg="black")
 info_panel.add(info)
 
-t_info = Text(info, height=50, width=70, bg="#0e141e", wrap=NONE, font=("Roboto", 9), fg="#00ea64")
+t_info = Text(info, height=7, width=70, bg="#0e141e", wrap=NONE, font=("Roboto", 9), fg="#00ea64")
 
+# Default Cache Information
+cache_panel = PanedWindow(info_panel, relief="raised", bd=1, bg="white", width=1300, height=10)
+info_panel.add(cache_panel)
+
+cache_info = Label(cache_panel, bg="white", fg="black")
+cache_panel.add(cache_info)
+
+t_cache = Text(cache_info, wrap=NONE, font=("Roboto", 9), fg="black")
+t_cache.insert(END, "Size of Cache 1: " + str(cache.cache1_size) + " || ")
+t_cache.insert(END, "Size of Cache 2: " + str(cache.cache2_size) + " || ")
+t_cache.insert(END, "Size of Block 1: " + str(cache.block1_size) + " || ")
+t_cache.insert(END, "Size of Block 2: " + str(cache.block2_size) + " || ")
+t_cache.insert(END, "Associativity of Cache 1: " + str(cache.assoc1) + " || ")
+t_cache.insert(END, "Associativity of Cache 2: " + str(cache.assoc2) + "\n\n")
+t_cache.insert(END, "Stalls of Cache1: " + str(cache.stalls1) + " || ")
+t_cache.insert(END, "Stalls of Cache2: " + str(cache.stalls2) + " || ")
+t_cache.insert(END, "Stalls of Memory: " + str(cache.stalls3))
+t_cache.pack(side=TOP, fill=X)
 
 def run_gui_data():
     t_reg.configure(state='normal')
@@ -251,6 +268,7 @@ def modify_gui_data_once():
 
 
 def change_settings():
+    global settings
     settings = Tk()
     settings.title("SETTINGS")
     cache1_size = Label(settings, text="Size of Cache 1: ").grid(row=0, column=0)
@@ -280,33 +298,48 @@ def change_settings():
     stalls3 = Label(settings, text="Stall of Memory: ").grid(row=8, column=0)
     stall3 = Entry(settings, bd=5)
     stall3.grid(row=8, column=1)
-    update = Button(settings, text="Update", command=lambda: cache.update_settings(
+    update = Button(settings, text="Update", command=lambda: [cache.update_settings(
         cache1=cache1Size.get(), cache2=cache2Size.get(), block1=block1Size.get(), block2=block2Size.get(),
         assco1=assc1.get(), assco2=assc2.get(), stall1=stall1.get(), stall2=stall2.get(), stall3=stall3.get()
-    ) and cancel_settings()).grid(row=9, column=0)
+    ), cancel_settings()]).grid(row=9, column=0)
     cancel = Button(settings, text="Cancel", command=lambda: cancel_settings()).grid(row=9, column=1)
 
     settings.mainloop()
 
 
 def cancel_settings():
-    settings.mainloop()
+    # Data in Cache Info
+    t_cache.configure(state='normal')
+    t_cache.delete("1.0", "end")
+    t_cache.insert(END, "Size of Cache 1: " + str(cache.cache1_size) + " || ")
+    t_cache.insert(END, "Size of Cache 2: " + str(cache.cache2_size) + " || ")
+    t_cache.insert(END, "Size of Block 1: " + str(cache.block1_size) + " || ")
+    t_cache.insert(END, "Size of Block 2: " + str(cache.block2_size) + " || ")
+    t_cache.insert(END, "Associativity of Cache 1: " + str(cache.assoc1) + " || ")
+    t_cache.insert(END, "Associativity of Cache 2: " + str(cache.assoc2) + "\n\n")
+    t_cache.insert(END, "Stalls of Cache1: " + str(cache.stalls1) + " || ")
+    t_cache.insert(END, "Stalls of Cache2: " + str(cache.stalls2) + " || ")
+    t_cache.insert(END, "Stalls of Memory: " + str(cache.stalls3) + " || ")
+    t_cache.pack(side=TOP, fill=X)
+    t_cache.configure(state='disabled')
+    global settings
+    settings.destroy()
     pass
 
 
-def forWarding():
-    msg = Tk()
-    if not pipeline.forward_enable:
-        pipeline.forward_enable = True
-        msgs = Message(msg, text="Data Forwarding Enabled")
-        msgs.pack()
-        print("Data Forwarding Enabled")
-    else:
-        pipeline.forward_enable = False
-        msgs = Message(msg, text="Data Forwarding Disabled")
-        msgs.pack()
-        print("Data Forwarding Disabled")
-    msg.mainloop()
+# def forWarding():
+#     msg = Tk()
+#     if not pipeline.forward_enable:
+#         pipeline.forward_enable = True
+#         msgs = Message(msg, text="Data Forwarding Enabled")
+#         msgs.pack()
+#         print("Data Forwarding Enabled")
+#     else:
+#         pipeline.forward_enable = False
+#         msgs = Message(msg, text="Data Forwarding Disabled")
+#         msgs.pack()
+#         print("Data Forwarding Disabled")
+#     msg.mainloop()
 
 
 run_gui_data()
