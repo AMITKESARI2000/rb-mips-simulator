@@ -2,9 +2,10 @@ import simu
 import re
 import cache
 
-global CLOCK_OF_GOD, STALL_OF_GOD
+global CLOCK_OF_GOD, STALL_OF_GOD, prev_stall
 CLOCK_OF_GOD = 0
 STALL_OF_GOD = 0
+prev_stall = 0
 
 
 class HWUnits:
@@ -36,7 +37,7 @@ class HWUnits:
 
         if existence_of_instr_line is None:
             existence_of_instr_line = [0, 0, 0]
-        global STALL_OF_GOD
+        global STALL_OF_GOD, prev_stall
         # Checking existence of instructions
         # print("++++++++++++++++++++++++++++++")
         s = 0
@@ -84,7 +85,11 @@ class HWUnits:
 
             for k in range(1, t + 1):
 
-                if Pipeline_units[1].disassembled_instr[0] in ("bne", "beq"):
+                # global prev_stall
+                if prev_stall == 2 and k == 2:
+                    break
+
+                elif Pipeline_units[1].disassembled_instr[0] in ("bne", "beq"):
                     self.stalls_left += 1
                     STALL_OF_GOD += 1
                     print("stall: " + str(self.stalls_left), "in ", Pipeline_units[1].disassembled_instr)
@@ -131,7 +136,11 @@ class HWUnits:
             for k in range(1, t + 1):
                 s = 0
 
-                if Pipeline_units[1].disassembled_instr[0] in ("bne", "beq"):
+                # global prev_stall
+                if prev_stall == 2 and k == 2:
+                    break
+
+                elif Pipeline_units[1].disassembled_instr[0] in ("bne", "beq"):
                     self.stalls_left += 1
                     print("stall: " + str(self.stalls_left), "in ", Pipeline_units[1].disassembled_instr)
                     STALL_OF_GOD += 1
@@ -169,6 +178,10 @@ class HWUnits:
 
             for k in range(1, t + 1):
                 s = 0
+
+                # global prev_stall
+                if prev_stall == 2 and k == 2:
+                    break
 
                 if Pipeline_units[1].disassembled_instr[0] in ("bne", "beq"):
                     self.stalls_left += 1
@@ -208,6 +221,10 @@ class HWUnits:
             for k in range(1, t + 1):
                 s = 0
 
+                # global prev_stall
+                if prev_stall == 2 and k == 2:
+                    break
+
                 if Pipeline_units[1].disassembled_instr[0] in ("bne", "beq"):
                     self.stalls_left += 1
                     STALL_OF_GOD += 1
@@ -246,6 +263,10 @@ class HWUnits:
             for k in range(1, t + 1):
                 s = 0
 
+                # global prev_stall
+                if prev_stall == 2 and k == 2:
+                    break
+
                 if Pipeline_units[1].disassembled_instr[0] in ("bne", "beq"):
                     self.stalls_left += 1
                     STALL_OF_GOD += 1
@@ -260,6 +281,10 @@ class HWUnits:
         elif Pipeline_units[0].disassembled_instr[0] in ("bne", "beq"):
             for k in range(1, t + 1):
                 s = 0
+
+                # global prev_stall
+                if prev_stall == 2 and k == 2:
+                    break
 
                 if Pipeline_units[1].disassembled_instr[0] in ("bne", "beq"):
                     self.stalls_left += 1
@@ -301,6 +326,8 @@ class HWUnits:
 
                 if s:
                     break
+        # global prev_stall
+        prev_stall = s
         return s
 
     @staticmethod

@@ -22,19 +22,19 @@ root = Tk()
 root.title("RB Mips simulator 😎")
 
 # Panel
-simu_1lator_body = PanedWindow(orient=VERTICAL, width=1024, height=640, bg="black")
-simu_1lator_body.pack(fill=BOTH, expand=1)
+simulator_body = PanedWindow(orient=VERTICAL, width=1024, height=640, bg="black")
+simulator_body.pack(fill=BOTH, expand=1)
 
 # Head Panel
-head_panel = PanedWindow(simu_1lator_body, bd=1, relief="raised", bg="black")
-simu_1lator_body.add(head_panel)
+head_panel = PanedWindow(simulator_body, bd=1, relief="raised", bg="black")
+simulator_body.add(head_panel)
 
 head = Label(head_panel, text="SIMULATOR", font=("Arial", 14))
 head_panel.add(head)
 
 # Menu Panel
-menu_panel = PanedWindow(simu_1lator_body, orient=HORIZONTAL, bd=1, relief="raised", bg="white")
-simu_1lator_body.add(menu_panel)
+menu_panel = PanedWindow(simulator_body, orient=HORIZONTAL, bd=1, relief="raised", bg="white")
+simulator_body.add(menu_panel)
 
 step_exe = Button(menu_panel, text="Step By Step Execution", bg="#f94b5d", fg="#efefef",
                   command=lambda: modify_gui_data_once()).pack(side=LEFT)
@@ -53,8 +53,8 @@ forwarding = Checkbutton(menu_panel, text="forwarding", bg='green', fg='#e5e5e5'
 forwarding.pack(side=LEFT)
 
 # Body Panel
-body_panel = PanedWindow(simu_1lator_body, orient=HORIZONTAL, bd=1, relief="raised", bg="black", height=400)
-simu_1lator_body.add(body_panel)
+body_panel = PanedWindow(simulator_body, orient=HORIZONTAL, bd=1, relief="raised", bg="black", height=400)
+simulator_body.add(body_panel)
 
 # Register Panel
 reg_panel = PanedWindow(body_panel, orient=VERTICAL, bd=1, relief="raised", bg="black", width=200, height=400)
@@ -113,8 +113,8 @@ console_panel.add(console)
 t_console = Text(console, height=20, width=70, bg="#0e141e", wrap=NONE, font=("Roboto", 9), fg="#00ea64")
 
 # Extra info panel
-info_panel = PanedWindow(simu_1lator_body, relief="raised", bd=1, bg="black", width=1300, orient=VERTICAL)
-simu_1lator_body.add(info_panel)
+info_panel = PanedWindow(simulator_body, relief="raised", bd=1, bg="black", width=1300, orient=VERTICAL)
+simulator_body.add(info_panel)
 
 # info_head = Label(info_panel, text="INFO", relief="raised", height=1, font=("Arial", 10), width=1300)
 # info_panel.add(info_head)
@@ -138,10 +138,11 @@ t_cache.insert(END, "Size of Block 1: " + str(cache.block1_size) + " || ")
 t_cache.insert(END, "Size of Block 2: " + str(cache.block2_size) + " || ")
 t_cache.insert(END, "Associativity of Cache 1: " + str(cache.assoc1) + " || ")
 t_cache.insert(END, "Associativity of Cache 2: " + str(cache.assoc2) + "\n\n")
-t_cache.insert(END, "Stalls of Cache1: " + str(cache.stalls1) + " || ")
-t_cache.insert(END, "Stalls of Cache2: " + str(cache.stalls2) + " || ")
+t_cache.insert(END, "Stalls of Cache 1: " + str(cache.stalls1) + " || ")
+t_cache.insert(END, "Stalls of Cache 2: " + str(cache.stalls2) + " || ")
 t_cache.insert(END, "Stalls of Memory: " + str(cache.stalls3))
 t_cache.pack(side=TOP, fill=X)
+
 
 def run_gui_data():
     t_reg.configure(state='normal')

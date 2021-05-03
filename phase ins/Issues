@@ -4,7 +4,7 @@
 
 
 
-3) error is comming as lui has not written 0x1001 in s0 but lw s1, 0(s0) is accesing it first and not finding the addr.
+3) error is coming as lui has not written 0x1001 in s0 but lw s1, 0(s0) is accessing it first and not finding the address.
 4) bne stalls always 1
 
 
