@@ -1,21 +1,13 @@
-1)) if above line has 2 stalls and below has 1 stall, it should merge
-2) syscall printing at end or push in WB data
+
+2) syscall put in array for gui
 4) no of blocks - sets
+5) Pipeline units
+6) Cache block data
+7) Filename
 
 
 
-3) error is coming as lui has not written 0x1001 in s0 but lw s1, 0(s0) is accessing it first and not finding the address.
-4) bne stalls always 1
 
 
 
-Rules:
-    Without Data Forwarding:
-        Stall will come after dependency, and instr will resume after WB
-        3 stalls will come in case of dependency.
 
-    With Data Forwarding:
-        Stall will come but we can data forward in EXE-MEM for add, sub, etc....and in MEM-WB for lw, sw, etc...
-        0-1 stall will come in case of dependency
-
-    In a clock cycle, after stall, there will always a stall.

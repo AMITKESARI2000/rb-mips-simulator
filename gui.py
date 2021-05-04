@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import filedialog
+from tkinter import ttk
 from tkinter.messagebox import showinfo, askyesno
 
 import cache
@@ -14,6 +15,7 @@ def UploadAction():
     msgs = Message(msg, text="Selected File: " + filename)
     msgs.pack()
     simu.file_add(filename)
+    run_gui_data()
     msg.mainloop()
 
 
@@ -21,8 +23,21 @@ root = Tk()
 # root.resizable(width=False, height=False) #Restricting Resizable
 root.title("RB Mips simulator 😎")
 
+notebook = ttk.Notebook(root)
+notebook.pack(expand=True)
+
+frame1 = ttk.Frame(notebook, width=1024, height=640)
+frame2 = ttk.Frame(notebook, width=1024, height=640)
+
+frame1.pack(fill='both', expand=True)
+frame2.pack(fill='both', expand=True)
+
+notebook.add(frame1, text='General Info')
+notebook.add(frame2, text='Pipeline Details')
+
+# =====================================FRAME 1==================================================
 # Panel
-simulator_body = PanedWindow(orient=VERTICAL, width=1024, height=640, bg="black")
+simulator_body = PanedWindow(frame1, orient=VERTICAL, width=1024, height=640, bg="black")
 simulator_body.pack(fill=BOTH, expand=1)
 
 # Head Panel
@@ -132,16 +147,20 @@ cache_info = Label(cache_panel, bg="white", fg="black")
 cache_panel.add(cache_info)
 
 t_cache = Text(cache_info, wrap=NONE, font=("Roboto", 9), fg="black")
-t_cache.insert(END, "Size of Cache 1: " + str(cache.cache1_size) + " || ")
-t_cache.insert(END, "Size of Cache 2: " + str(cache.cache2_size) + " || ")
-t_cache.insert(END, "Size of Block 1: " + str(cache.block1_size) + " || ")
-t_cache.insert(END, "Size of Block 2: " + str(cache.block2_size) + " || ")
+t_cache.insert(END, "Size of Cache 1 (in B): " + str(cache.cache1_size) + " || ")
+t_cache.insert(END, "Size of Cache 2 (in B): " + str(cache.cache2_size) + " || ")
+t_cache.insert(END, "Size of Block 1 (in B): " + str(cache.block1_size) + " || ")
+t_cache.insert(END, "Size of Block 2 (in B): " + str(cache.block2_size) + " || ")
 t_cache.insert(END, "Associativity of Cache 1: " + str(cache.assoc1) + " || ")
 t_cache.insert(END, "Associativity of Cache 2: " + str(cache.assoc2) + "\n\n")
 t_cache.insert(END, "Stalls of Cache 1: " + str(cache.stalls1) + " || ")
 t_cache.insert(END, "Stalls of Cache 2: " + str(cache.stalls2) + " || ")
 t_cache.insert(END, "Stalls of Memory: " + str(cache.stalls3))
 t_cache.pack(side=TOP, fill=X)
+
+current_instr_label = Text(menu_panel, height=1, width=10, font=("Roboto", 12), fg="#484767")
+
+# =====================================FRAME 2==================================================
 
 
 def run_gui_data():
@@ -155,6 +174,7 @@ def run_gui_data():
     t_mem.delete("1.0", "end")
     t_user.delete("1.0", "end")
     t_info.delete("1.0", "end")
+    current_instr_label.delete("1.0", "end")
 
     # Data in Register Panel
     t_reg.insert(END, "PC = 0\n")
@@ -206,8 +226,7 @@ def run_gui_data():
     t_info.configure(state='disabled')
 
     # Current Execution line
-    current_instr_label = Text(menu_panel, height=1, width=10, font=("Roboto", 12), fg="#484767")
-    current_instr_label.insert(END, "On Line: " + str(simu.PC + 1))
+    current_instr_label.insert(END, "On Line: " + str(pipeline.Pipeline_units[0].current_instr_line + 1))
     current_instr_label.pack()
 
 

@@ -98,11 +98,9 @@ class CacheHit:
                 global counter1
                 cache1[set_id][j] = [adrs, simu.RAM[adrs], counter1]
                 counter1 += 1
-                print(1111, cache1)
                 return cache1[set_id][j][1], stalls1
 
         if not cachehit1:
-            print(1111, cache1)
             temp1 = self.cache_hit_2(adrs)
             self.insert_cache1(adrs)
             return temp1
@@ -123,7 +121,6 @@ class CacheHit:
                 return cache2[set_id][j][1], stalls1 + stalls2
 
         if not cachehit2:
-            print(2222, cache2)
             temp2 = self.memory_operation(adrs)
             self.insert_cache2(adrs)
             return temp2
