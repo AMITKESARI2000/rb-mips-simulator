@@ -425,13 +425,13 @@ def pipelining():
                     result_ALU = result_ALU_MEM
                     successful_write = simu.write_back_op(instr_line, result_ALU)
 
-                    # Console Printing
+                # Console Printing of syscall
                 for s in simu.syscall_array:
                     sl = s[1].strip()
                     sl = sl.split(sep=" ")
                     sl[0] = sl[0].strip()
                     sl[1] = sl[1].strip()[1:-1]
-                    sl[2] = sl[2].strip()
+                    # sl[2] = sl[2].strip()
 
                     if (sl[0] == instr_word) and (sl[1] == instr_line[0]):
                         simu.syscall_instr(s[0])
@@ -606,17 +606,15 @@ def pipelining():
             is_Program_Done = True
 
 
-# Call syscalls at the end
 def print_info():
-    print()
-    print("*" * 20, "CONSOLE", "*" * 20)
-    while len(simu.syscall_array):
-        simu.syscall_instr(simu.syscall_array[0])
-        simu.syscall_array.pop(0)
-    print("*" * 20, "CONSOLE", "*" * 20, "\n")
-
+    # print()
+    # print("*" * 20, "CONSOLE", "*" * 20)
+    # while len(simu.syscall_array):
+    #     simu.syscall_instr(simu.syscall_array[0])
+    #     simu.syscall_array.pop(0)
+    # print("*" * 20, "CONSOLE", "*" * 20, "\n")
     # Console Prints
-    # CLOCK_OF_GOD -= 1
+
     print("Final Memory state: \n", simu.RAM)
     print("=" * 100)
     print("Register values: \n", simu.REGISTERS)
@@ -626,3 +624,4 @@ def print_info():
     print("Total Cache Miss: ", cache.CACHE_MISS)
     # print("CPI: ", CLOCK_OF_GOD / (STALL_OF_GOD + 1))
     print("IPC: ", (CLOCK_OF_GOD / (STALL_OF_GOD + 1)) ** -1)
+    print(forward_enable)

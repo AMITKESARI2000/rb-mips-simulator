@@ -38,14 +38,12 @@ In phase 2, we are implementing pipeline so that the throughput can be increased
 * Stalls are found on the basis of last three instructions performed.
 * Structural hazards have been removed assuming writing in 1st half of the cycle and reading in 2nd half of the cycle.
 * Without Data Forwarding:
-        Stall will come after dependency, and instr will resume after WB
+    * Stall will come after dependency, and instr will resume on same cycle after executing WB
         2 stalls will come in case of dependency.
-
-    With Data Forwarding:
+    * With Data Forwarding:
         Stall will come but we can data forward in EXE-MEM for add, sub, etc....and in MEM-WB for lw, sw, etc...
-        0-1 stall will come in case of dependency
+        0-1 stall will come in case of dependency.
 
-    In a clock cycle, after stall, there will always a stall.
 * We tried implementing all the 5 HW units as objects and tried to find and accumulate the stalls based on the data dependency between the instructions.
 * We tried to compare and jump to that instruction point in the ID/RF stage itself.
 * Enabling/Disabling of data forwarding is implemented which will be asked before running the program.
@@ -66,3 +64,4 @@ will be fetched from the main memory.
 in one cycle.
 * Loads and Stores will have variable latency, and hence the penalty (stalls) due to the memory
 access is variable.
+* Cache size, Associativity, No. of stalls and penalty can all be changed and simulated.
