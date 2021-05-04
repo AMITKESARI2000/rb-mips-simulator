@@ -425,6 +425,17 @@ def pipelining():
                     result_ALU = result_ALU_MEM
                     successful_write = simu.write_back_op(instr_line, result_ALU)
 
+                    # Console Printing
+                for s in simu.syscall_array:
+                    sl = s[1].strip()
+                    sl = sl.split(sep=" ")
+                    sl[0] = sl[0].strip()
+                    sl[1] = sl[1].strip()[1:-1]
+                    sl[2] = sl[2].strip()
+
+                    if (sl[0] == instr_word) and (sl[1] == instr_line[0]):
+                        simu.syscall_instr(s[0])
+
                 if successful_write == -1:
                     # print("Error in Write Back stage. Aborting...")
                     is_Program_Done = True
