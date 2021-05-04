@@ -8,17 +8,6 @@ import simu
 import pipeline
 
 
-def UploadAction():
-    filename = filedialog.askopenfilename()
-    print('Selected:', filename)
-    msg = Tk()
-    msgs = Message(msg, text="Selected File: " + filename)
-    msgs.pack()
-    simu.file_add(filename)
-    run_gui_data()
-    msg.mainloop()
-
-
 root = Tk()
 # root.resizable(width=False, height=False) #Restricting Resizable
 root.title("RB Mips simulator 😎")
@@ -361,6 +350,20 @@ def forWarding():
         print("Data Forwarding Disabled")
     msg.mainloop()
 
+def UploadAction():
+    filename = filedialog.askopenfilename()
+    print('Selected:', filename)
+    # msg = Tk()
+    # msgs = Message(msg, text="Selected File: " + filename)
+    # msgs.pack()
+
+    tmp = StringVar()
+    tmp.set(filename.split("/")[-1])
+    file_label = Label(user_head, textvariable=tmp, height=1, font=("Arial", 10), fg="#f5468c").grid(row=0, column=1)
+
+    simu.file_add(filename)
+    run_gui_data()
+    # msg.mainloop()
 
 run_gui_data()
 root.mainloop()
