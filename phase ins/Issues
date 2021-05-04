@@ -11,11 +11,13 @@
 
 Rules:
     Without Data Forwarding:
-        Stall will come after dependency, and instr will resume after WB
-        3 stalls will come in case of dependency.
+        Stall will come after dependency, and instr will resume in the sam cycle as WB
+        because we are trying to resolve structural hazard by assuming write operations in first half cycle and
+        read operations in second half.
+        1-2 stalls will come in case of data dependency.
 
     With Data Forwarding:
         Stall will come but we can data forward in EXE-MEM for add, sub, etc....and in MEM-WB for lw, sw, etc...
         0-1 stall will come in case of dependency
 
-    In a clock cycle, after stall, there will always a stall.
+    Stalls are mimicked using the nop operation.

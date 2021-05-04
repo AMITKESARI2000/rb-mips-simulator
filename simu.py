@@ -16,8 +16,10 @@ ram_label = {}
 instr_label = {}
 PC = 0
 cnsl = []
-syscall_array = []
 lines = ""
+
+syscall_array = []
+console_syscall_print = []
 
 
 def file_add(filename):
@@ -154,7 +156,7 @@ def pre_data_process():
     i = PC
     while i < len(lines):
         if re.findall(r"^syscall", lines[i]):
-            syscall_array.append(i - 1)
+            syscall_array.append([i - 1, lines[i - 1]])
             lines.remove(lines[i])
 
         i += 1
