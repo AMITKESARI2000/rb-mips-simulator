@@ -2,20 +2,23 @@ import simu
 import re
 import cache
 
-global CLOCK_OF_GOD, STALL_OF_GOD, prev_stall
+global CLOCK_OF_GOD, STALL_OF_GOD, prev_stall, PIPELINE_DETAILS, temp_pipeline
 CLOCK_OF_GOD = 0
 STALL_OF_GOD = 0
 prev_stall = 0
+PIPELINE_DETAILS = []
+temp_pipeline = []
 
 
 class HWUnits:
-    def __init__(self, current_instr_line, stalls_left, disassembled_instr, frwd):
+    def __init__(self, current_instr_line, stalls_left, disassembled_instr):
+        global forward_enable
         self.current_instr_line = current_instr_line
         self.stalls_left = stalls_left
         self.disassembled_instr = []
         # if current_instr_line - base_instr_line_PC >= 0:
         #     self.instr_breakdown(current_instr_line)
-        self.frwd = frwd
+        self.frwd = forward_enable
         self.data = []
 
     @staticmethod
@@ -99,9 +102,9 @@ class HWUnits:
                         "add", "sub", "slt"):  # Check crnt instr dep on prev instr like add
 
                     if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[1]:
-                        s = self.is_stall(k, self.frwd)
+                        s = self.is_stall(k, forward_enable)
                     elif Pipeline_units[0].disassembled_instr[3] == Pipeline_units[k].disassembled_instr[1]:
-                        s = self.is_stall(k, self.frwd)
+                        s = self.is_stall(k, forward_enable)
 
                 elif Pipeline_units[k].disassembled_instr[0] in "sw":  # Check crnt instr dep on prev instr like sw
 
@@ -118,13 +121,13 @@ class HWUnits:
 
                 elif Pipeline_units[k].disassembled_instr[0] in ("addi", "sll", "srl"):
                     if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[1]:
-                        s = self.is_stall(k, self.frwd)
+                        s = self.is_stall(k, forward_enable)
                     elif Pipeline_units[0].disassembled_instr[3] == Pipeline_units[k].disassembled_instr[1]:
-                        s = self.is_stall(k, self.frwd)
+                        s = self.is_stall(k, forward_enable)
 
                 elif Pipeline_units[k].disassembled_instr[0] in ("lui", "li", "la"):
                     if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[1]:
-                        s = self.is_stall(k, self.frwd)
+                        s = self.is_stall(k, forward_enable)
 
                 if s:
                     break
@@ -150,7 +153,7 @@ class HWUnits:
                         "add", "sub"):  # Check crnt instr dep on prev instr like add
 
                     if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[1]:
-                        s = self.is_stall(k, self.frwd)
+                        s = self.is_stall(k, forward_enable)
 
                 elif Pipeline_units[k].disassembled_instr[0] in "sw":  # Check crnt instr dep on prev instr like sw
 
@@ -163,11 +166,11 @@ class HWUnits:
 
                 elif Pipeline_units[k].disassembled_instr[0] in ("addi", "sll", "srl"):
                     if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[1]:
-                        s = self.is_stall(k, self.frwd)
+                        s = self.is_stall(k, forward_enable)
 
                 elif Pipeline_units[k].disassembled_instr[0] in ("lui", "li", "la"):
                     if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[1]:
-                        s = self.is_stall(k, self.frwd)
+                        s = self.is_stall(k, forward_enable)
 
                 if s:
                     break
@@ -193,7 +196,7 @@ class HWUnits:
                         "add", "sub"):  # Check crnt instr dep on prev instr like add
 
                     if Pipeline_units[0].disassembled_instr[1] == Pipeline_units[k].disassembled_instr[1]:
-                        s = self.is_stall(k, self.frwd)
+                        s = self.is_stall(k, forward_enable)
 
                 elif Pipeline_units[k].disassembled_instr[0] in "sw":  # Check crnt instr dep on prev instr like sw
                     if Pipeline_units[0].disassembled_instr[1] == Pipeline_units[k].disassembled_instr[2]:
@@ -205,11 +208,11 @@ class HWUnits:
 
                 elif Pipeline_units[k].disassembled_instr[0] in ("addi", "sll", "srl"):
                     if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[1]:
-                        s = self.is_stall(k, self.frwd)
+                        s = self.is_stall(k, forward_enable)
 
                 elif Pipeline_units[k].disassembled_instr[0] in ("lui", "li", "la"):
                     if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[1]:
-                        s = self.is_stall(k, self.frwd)
+                        s = self.is_stall(k, forward_enable)
 
                 if s:
                     break
@@ -235,7 +238,7 @@ class HWUnits:
                         "add", "sub"):  # Check crnt instr dep on prev instr like add
 
                     if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[1]:
-                        s = self.is_stall(k, self.frwd)
+                        s = self.is_stall(k, forward_enable)
 
                 elif Pipeline_units[k].disassembled_instr[0] in "sw":  # Check crnt instr dep on prev instr like sw
                     if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[2]:
@@ -247,11 +250,11 @@ class HWUnits:
 
                 elif Pipeline_units[k].disassembled_instr[0] in ("addi", "sll", "srl"):
                     if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[1]:
-                        s = self.is_stall(k, self.frwd)
+                        s = self.is_stall(k, forward_enable)
 
                 elif Pipeline_units[k].disassembled_instr[0] in ("lui", "li", "la"):
                     if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[1]:
-                        s = self.is_stall(k, self.frwd)
+                        s = self.is_stall(k, forward_enable)
 
                 if s:
                     break
@@ -295,9 +298,9 @@ class HWUnits:
                 elif Pipeline_units[k].disassembled_instr[0] in (
                         "add", "sub", "slt"):  # Check crnt instr dep on prev instr like add
                     if Pipeline_units[0].disassembled_instr[1] == Pipeline_units[k].disassembled_instr[1]:
-                        s = self.is_stall(k, self.frwd)
+                        s = self.is_stall(k, forward_enable)
                     elif Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[1]:
-                        s = self.is_stall(k, self.frwd)
+                        s = self.is_stall(k, forward_enable)
 
                 elif Pipeline_units[k].disassembled_instr[0] in "sw":  # Check crnt instr dep on prev instr like sw
 
@@ -314,15 +317,15 @@ class HWUnits:
 
                 elif Pipeline_units[k].disassembled_instr[0] in ("addi", "sll", "srl"):
                     if Pipeline_units[0].disassembled_instr[1] == Pipeline_units[k].disassembled_instr[1]:
-                        s = self.is_stall(k, self.frwd)
+                        s = self.is_stall(k, forward_enable)
                     elif Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[1]:
-                        s = self.is_stall(k, self.frwd)
+                        s = self.is_stall(k, forward_enable)
 
                 elif Pipeline_units[k].disassembled_instr[0] in ("lui", "li", "la"):
                     if Pipeline_units[0].disassembled_instr[1] == Pipeline_units[k].disassembled_instr[1]:
-                        s = self.is_stall(k, self.frwd)
+                        s = self.is_stall(k, forward_enable)
                     if Pipeline_units[0].disassembled_instr[2] == Pipeline_units[k].disassembled_instr[1]:
-                        s = self.is_stall(k, self.frwd)
+                        s = self.is_stall(k, forward_enable)
 
                 if s:
                     break
@@ -332,7 +335,6 @@ class HWUnits:
 
     @staticmethod
     def is_stall(dep_instr, frwd):
-
         stall = 0
         if dep_instr == 1 and frwd is False:
             stall += 2
@@ -374,11 +376,11 @@ def program_execution():
 
 
 Pipeline_units = [
-    HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[], frwd=forward_enable),  # IF
-    HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[], frwd=forward_enable),  # ID
-    HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[], frwd=forward_enable),  # EX
-    HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[], frwd=forward_enable),  # MEM
-    HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[], frwd=forward_enable)]  # WB
+    HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[]),  # IF
+    HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[]),  # ID
+    HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[]),  # EX
+    HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[]),  # MEM
+    HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[])]  # WB
 
 
 def pass_to_nextHW(index_of_HWunit):
@@ -394,6 +396,7 @@ def instruction_fetch():
 
 
 def pipelining():
+    global temp_pipeline, PIPELINE_DETAILS
     last_checked_stall_line = 0
     last_stall_line_MEM = 0
     global is_Program_Done, CLOCK_OF_GOD, STALL_OF_GOD
@@ -401,14 +404,18 @@ def pipelining():
         for i in range(5):
             Pipeline_units[i].stalls_left = max(0, Pipeline_units[i].stalls_left - 1)
         CLOCK_OF_GOD += 1
+        PIPELINE_DETAILS.append(temp_pipeline)
+        temp_pipeline = []
         print("." * 100)
-        print("In Clock Cycle ", CLOCK_OF_GOD)
+        print("In Clock Cycle: ", CLOCK_OF_GOD)
+        temp_pipeline.append("In Clock Cycle: " + str(CLOCK_OF_GOD))
 
         # ....................................................................................................
         # WB
         if len(Pipeline_units[4].data) < 1:
             pass_to_nextHW(4)
             print("Pass WB")
+            temp_pipeline.append("Pass WB")
         else:
             (instr_word, instr_line, result_ALU_MEM) = Pipeline_units[4].data[0]
             Pipeline_units[4].data.pop(0)
@@ -441,12 +448,14 @@ def pipelining():
                     is_Program_Done = True
 
             print("Executed WB on line ", instr_word, instr_line)
+            temp_pipeline.append("Executed WB on line " + str(instr_word) + str(instr_line))
 
         # .......................................................................................................
         # MEM
         if len(Pipeline_units[3].data) < 1:
             pass_to_nextHW(3)
             print("Pass MEM")
+            temp_pipeline.append("Pass MEM")
         else:
             (instr_word, instr_line, result_ALU) = Pipeline_units[3].data[0]
             Pipeline_units[3].data.pop(0)
@@ -484,12 +493,14 @@ def pipelining():
                 simu.write_back_op(instr_line, result_ALU)
 
             print("Executed MEM on line ", instr_word, instr_line)
+            temp_pipeline.append("Executed MEM on line " + str(instr_word) + str(instr_line))
 
         # ..............................................................................................................
         # EX
         if len(Pipeline_units[2].data) < 1 or Pipeline_units[2].stalls_left:
             pass_to_nextHW(2)
             print("Pass EX")
+            temp_pipeline.append("Pass EX")
         else:
 
             (instr_word, instr_line) = Pipeline_units[2].data[0]
@@ -509,6 +520,7 @@ def pipelining():
             #     successful_write = simu.write_back_op(instr_line, result_ALU)
 
             print("Executed EX on line ", instr_word, instr_line)
+            temp_pipeline.append("Executed EX on line " + str(instr_word) + str(instr_line))
 
         # ......................................................................................................
         # ID/RF
@@ -516,6 +528,7 @@ def pipelining():
         if len(Pipeline_units[1].data) < 1 or Pipeline_units[1].stalls_left:
             pass_to_nextHW(1)
             print("Pass ID/RF")
+            temp_pipeline.append("Pass ID/RF")
         else:
 
             # ======Stall checking=======
@@ -574,6 +587,7 @@ def pipelining():
             Pipeline_units[1].current_instr_line += 1
 
             print("Executed ID/RF on line ", fetch_line)
+            temp_pipeline.append("Executed ID/RF on line " + str(fetch_line))
 
         # .......................................................................................................
         # If Stall came, percolate it downwards.
@@ -582,17 +596,20 @@ def pipelining():
             # If stall is there OR the stage has executed all the instructions and is sitting idle.
             CLOCK_OF_GOD += 0
             print("Execute nop in IF")
+            temp_pipeline.append("Execute nop in IF")
 
         else:
             # While filling up the pipeline in the start
             if Pipeline_units[0].current_instr_line - base_instr_line_PC < 0:
                 pass_to_nextHW(0)
                 print("Pass IF")
+                temp_pipeline.append("Pass IF")
             else:
                 fetch_line = instruction_fetch()
                 # Moving data to next unit
                 Pipeline_units[1].data.append(fetch_line)
                 print("Executed IF on line ", fetch_line)
+                temp_pipeline.append("Executed IF on line " + str(fetch_line))
 
         # Call syscalls
         # if len(simu.syscall_array) and Pipeline_units[0].current_instr_line - 1 == simu.syscall_array[0]:
@@ -600,13 +617,15 @@ def pipelining():
         #     simu.syscall_array.pop(0)
 
         # Check if WB has reached last stage
-        if (len(Pipeline_units[2].data) == 0) and (len(Pipeline_units[2].data) == 0) and (len(
-                Pipeline_units[3].data) == 0) and (len(Pipeline_units[4].data) == 0) and Pipeline_units[
-            0].current_instr_line >= simu.REGISTERS["ra"]:
+        if (len(Pipeline_units[2].data) == 0) and (len(Pipeline_units[2].data) == 0) and \
+                (len(Pipeline_units[3].data) == 0) and (len(Pipeline_units[4].data) == 0) and \
+                Pipeline_units[0].current_instr_line >= simu.REGISTERS["ra"]:
             is_Program_Done = True
+            PIPELINE_DETAILS.append(temp_pipeline)
 
 
 def print_info():
+    global temp_pipeline, PIPELINE_DETAILS
     # print()
     # print("*" * 20, "CONSOLE", "*" * 20)
     # while len(simu.syscall_array):

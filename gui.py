@@ -11,12 +11,13 @@ import pipeline
 def UploadAction():
     filename = filedialog.askopenfilename()
     print('Selected:', filename)
-    msg = Tk()
-    msgs = Message(msg, text="Selected File: " + filename)
-    msgs.pack()
+    # msg = Tk()
+    # msgs = Message(msg, text="Selected File: " + filename)
+    # msgs.pack()
     simu.file_add(filename)
     run_gui_data()
-    msg.mainloop()
+    root.title(filename)
+    # msg.mainloop()
 
 
 root = Tk()
@@ -26,8 +27,8 @@ root.title("RB Mips simulator 😎")
 notebook = ttk.Notebook(root)
 notebook.pack(expand=True)
 
-frame1 = ttk.Frame(notebook, width=1024, height=640)
-frame2 = ttk.Frame(notebook, width=1024, height=640)
+frame1 = ttk.Frame(notebook)
+frame2 = ttk.Frame(notebook)
 
 frame1.pack(fill='both', expand=True)
 frame2.pack(fill='both', expand=True)
@@ -63,8 +64,8 @@ space3 = Button(menu_panel, text="   ", bg="white", state=DISABLED).pack(side=LE
 settings = Button(menu_panel, text="Cache Settings", bg="#2f6fca", fg="#efefef",
                   command=lambda: change_settings()).pack(side=LEFT)
 space4 = Button(menu_panel, text="   ", bg="white", state=DISABLED).pack(side=LEFT)
-forwarding = Checkbutton(menu_panel, text="Forwarding", bg='#2f6fca', fg='#e5e5e5',
-                         variable=pipeline.forward_enable, onvalue=True, offvalue=False, selectcolor="black", relief = "raised")
+forwarding = Checkbutton(menu_panel, text="Forwarding", variable=pipeline.forward_enable, onvalue=True, offvalue=False,
+                         command=lambda: forWarding(), bg='#2f6fca', fg='#e5e5e5', selectcolor="black", relief="raised")
 forwarding.pack(side=LEFT)
 
 # Body Panel
@@ -161,6 +162,37 @@ t_cache.pack(side=TOP, fill=X)
 current_instr_label = Text(menu_panel, height=1, width=10, font=("Roboto", 12), fg="#484767")
 
 # =====================================FRAME 2==================================================
+# Panel
+simulator2_body = PanedWindow(frame2, orient=VERTICAL, width=1024, height=640, bg="black")
+simulator2_body.pack(fill=BOTH, expand=1)
+
+# Head Panel
+head2_panel = PanedWindow(simulator2_body, bd=1, relief="raised", bg="black")
+simulator2_body.add(head2_panel)
+
+head2 = Label(head2_panel, text="SIMULATOR", font=("Arial", 14))
+head2_panel.add(head2)
+
+# Body Panel
+body2_panel = PanedWindow(simulator2_body, bd=1, relief="raised", bg="black", orient=VERTICAL)
+simulator2_body.add(body2_panel)
+
+# Body head
+body2_head = Label(body2_panel, text="Visualisation of Pipelining", font=("Arial", 14))
+body2_panel.add(body2_head)
+
+# Body body
+body2_body = PanedWindow(body2_panel, bd=1, relief="raised", bg="black")
+body2_panel.add(body2_body)
+
+# Pipeline Details
+pipe_detail = Label(body2_body, bg="white", fg="black", height=600)
+body2_body.add(pipe_detail)
+
+scroll_pipe = Scrollbar(pipe_detail, orient="vertical")
+scroll_pipe.pack(side=RIGHT, fill=Y)
+
+t_pipe = Text(pipe_detail, wrap=NONE, font=("Roboto", 9), fg="black", height=600, yscrollcommand=scroll_pipe.set)
 
 
 def run_gui_data():
@@ -169,12 +201,15 @@ def run_gui_data():
     t_user.configure(state='normal')
     t_console.configure(state='normal')
     t_info.configure(state='normal')
+    current_instr_label.configure(state='normal')
+    t_pipe.configure(state='normal')
 
     t_reg.delete("1.0", "end")
     t_mem.delete("1.0", "end")
     t_user.delete("1.0", "end")
     t_info.delete("1.0", "end")
     current_instr_label.delete("1.0", "end")
+    t_pipe.delete("1.0", "end")
 
     # Data in Register Panel
     t_reg.insert(END, "PC = 0\n")
@@ -219,15 +254,25 @@ def run_gui_data():
     t_info.insert(END, "IPC: " + str(ipc) + "\n")
     t_info.pack(side=TOP, fill=X)
 
+    # Current Execution line
+    current_instr_label.insert(END, "On Line: " + str(pipeline.Pipeline_units[0].current_instr_line + 1))
+    current_instr_label.pack()
+
+    # Pipeline Details
+    for i in pipeline.PIPELINE_DETAILS:
+        for j in i:
+            t_pipe.insert(END, str(j) + "\n")
+        t_pipe.insert(END, "." * 100 + "\n")
+    t_pipe.pack(side=TOP, fill=X)
+    scroll_pipe.config(command=t_pipe.yview)
+
     t_reg.configure(state='disabled')
     t_mem.configure(state='disabled')
     t_user.configure(state='disabled')
     t_console.configure(state='disabled')
     t_info.configure(state='disabled')
-
-    # Current Execution line
-    current_instr_label.insert(END, "On Line: " + str(pipeline.Pipeline_units[0].current_instr_line + 1))
-    current_instr_label.pack()
+    current_instr_label.configure(state='disabled')
+    t_pipe.configure(state='disabled')
 
 
 def modify_gui_data():
@@ -348,18 +393,12 @@ def cancel_settings():
 
 
 def forWarding():
-    msg = Tk()
     if not pipeline.forward_enable:
         pipeline.forward_enable = True
-        msgs = Message(msg, text="Data Forwarding Enabled")
-        msgs.pack()
         print("Data Forwarding Enabled")
     else:
         pipeline.forward_enable = False
-        msgs = Message(msg, text="Data Forwarding Disabled")
-        msgs.pack()
         print("Data Forwarding Disabled")
-    msg.mainloop()
 
 
 run_gui_data()
