@@ -643,4 +643,3 @@ def print_info():
     print("Total Cache Miss: ", cache.CACHE_MISS)
     # print("CPI: ", CLOCK_OF_GOD / (STALL_OF_GOD + 1))
     print("IPC: ", (CLOCK_OF_GOD / (STALL_OF_GOD + 1)) ** -1)
-    print(forward_enable)
