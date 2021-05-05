@@ -26,7 +26,7 @@ set2 = int(cache2_size / (block2_size * assoc2))
 # no_of_sets = no_of_blocks_in_cache1/assoc1
 
 def update_settings(cache1, cache2, block1, block2, assco1, assco2, stall1, stall2, stall3):
-    global cache1_size, cache2_size, block1_size, block2_size, assoc1, assoc2, stalls1, stalls2, stalls3
+    global cache1_size, cache2_size, block1_size, block2_size, assoc1, assoc2, stalls1, stalls2, stalls3, set1, set2
     print("Updating", cache1, cache2, block1, block2, assco1, assco2, stall1, stall2, stall3)
     cache1_size = int(cache1 or cache1_size)
     cache2_size = int(cache2 or cache2_size)
@@ -37,6 +37,9 @@ def update_settings(cache1, cache2, block1, block2, assco1, assco2, stall1, stal
     stalls1 = int(stall1 or stalls1)
     stalls2 = int(stall2 or stalls2)
     stalls3 = int(stall3 or stalls3)
+    set1 = int(cache1_size / (block1_size * assoc1))
+    set2 = int(cache2_size / (block2_size * assoc2))
+
     print("Updated", cache1_size, cache2_size, block1_size, block2_size, assoc1, assoc2, stalls1, stalls2, stalls3)
     CacheHit.change_caches()
 
@@ -84,7 +87,6 @@ class CacheHit:
         print(cache1)
         print(cache2)
         print("=" * 100)
-
 
     # Cache 1. Checking if the data is present or not
     def cache_hit_1(self, adrs):
@@ -172,6 +174,7 @@ class CacheHit:
                 jlru = j
         global counter1
         cache1[ilru][jlru] = [adrs, simu.RAM[adrs], counter1]
+        counter1+=1
 
     # If Cache2 is full, then replacing the existing data with new one acc to LRU policy
     def replace_in_cache2(self, adrs):
@@ -184,6 +187,7 @@ class CacheHit:
                 jlru = j
         global counter2
         cache2[ilru][jlru] = [adrs, simu.RAM[adrs], counter2]
+        counter2+=1
 
 
 CacheOP = CacheHit()

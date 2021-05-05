@@ -161,16 +161,20 @@ head2 = Label(head2_panel, text="SIMULATOR", font=("Arial", 14))
 head2_panel.add(head2)
 
 # Body Panel
-body2_panel = PanedWindow(simulator2_body, bd=1, relief="raised", bg="black", orient=VERTICAL)
+body2_panel = PanedWindow(simulator2_body, bd=1, relief="raised", bg="black", orient=HORIZONTAL)
 simulator2_body.add(body2_panel)
 
+# For 2 divisions
+pipeline_div = PanedWindow(body2_panel, bd=1, orient=VERTICAL)
+body2_panel.add(pipeline_div)
+
 # Body head
-body2_head = Label(body2_panel, text="Visualisation of Pipelining", font=("Arial", 14))
-body2_panel.add(body2_head)
+body2_head = Label(pipeline_div, text="Visualisation of Pipelining", font=("Arial", 14))
+pipeline_div.add(body2_head)
 
 # Body body
-body2_body = PanedWindow(body2_panel, bd=1, relief="raised", bg="black")
-body2_panel.add(body2_body)
+body2_body = PanedWindow(pipeline_div, bd=1, relief="raised", bg="black")
+pipeline_div.add(body2_body)
 
 # Pipeline Details
 pipe_detail = Label(body2_body, bg="white", fg="black", height=600)
@@ -181,6 +185,28 @@ scroll_pipe.pack(side=RIGHT, fill=Y)
 
 t_pipe = Text(pipe_detail, wrap=NONE, font=("Roboto", 9), fg="black", height=600, yscrollcommand=scroll_pipe.set)
 
+# Cache division
+cache_div = PanedWindow(body2_panel, bd=1, orient=VERTICAL)
+body2_panel.add(cache_div)
+
+# Cache head
+cache_head = Label(cache_div, text="Cache Data", font=("Arial", 14))
+cache_div.add(cache_head)
+
+# Cache body
+cache_body = PanedWindow(cache_div, bd=1, relief="raised", bg="black")
+cache_div.add(cache_body)
+
+# Cache Details
+cache_detail = Label(cache_body, bg="white", fg="black", height=600)
+cache_body.add(cache_detail)
+
+scroll_cache = Scrollbar(cache_detail, orient="vertical")
+scroll_cache.pack(side=RIGHT, fill=Y)
+
+t_cache_block = Text(cache_detail, wrap=NONE, font=("Roboto", 12), fg="black", height=600,
+                     yscrollcommand=scroll_cache.set)
+
 
 def run_gui_data():
     t_reg.configure(state='normal')
@@ -190,6 +216,7 @@ def run_gui_data():
     t_info.configure(state='normal')
     current_instr_label.configure(state='normal')
     t_pipe.configure(state='normal')
+    t_cache_block.configure(state='normal')
 
     t_reg.delete("1.0", "end")
     t_mem.delete("1.0", "end")
@@ -197,6 +224,7 @@ def run_gui_data():
     t_info.delete("1.0", "end")
     current_instr_label.delete("1.0", "end")
     t_pipe.delete("1.0", "end")
+    t_cache_block.delete("1.0", "end")
 
     # Data in Register Panel
     t_reg.insert(END, "PC = 0\n")
@@ -253,6 +281,21 @@ def run_gui_data():
     t_pipe.pack(side=TOP, fill=X)
     scroll_pipe.config(command=t_pipe.yview)
 
+    # Cache Details
+    t_cache_block.insert(END, "L1 Cache: \n")
+    t_cache_block.insert(END, " [ T  D  C] \n")
+    for block in cache.cache1:
+        t_cache_block.insert(END, str(block) + "\n")
+    t_cache_block.insert(END, "." * 100 + "\n")
+    t_cache_block.insert(END, "L2 Cache: \n")
+    t_cache_block.insert(END, " [ T  D  C] \n")
+    for block in cache.cache2:
+        t_cache_block.insert(END, str(block) + "\n")
+    t_cache_block.insert(END, "\n\nLegend: \nT -> tag \nD -> data \nC -> counter(for LRU) \n")
+
+    t_cache_block.pack(side=TOP, fill=X)
+    scroll_cache.config(command=t_cache_block.yview)
+
     t_reg.configure(state='disabled')
     t_mem.configure(state='disabled')
     t_user.configure(state='disabled')
@@ -260,6 +303,7 @@ def run_gui_data():
     t_info.configure(state='disabled')
     current_instr_label.configure(state='disabled')
     t_pipe.configure(state='disabled')
+    t_cache_block.configure(state='disabled')
 
 
 def modify_gui_data():
@@ -353,7 +397,7 @@ def change_settings():
     update = Button(settings, text="Update", command=lambda: [cache.update_settings(
         cache1=cache1Size.get(), cache2=cache2Size.get(), block1=block1Size.get(), block2=block2Size.get(),
         assco1=assc1.get(), assco2=assc2.get(), stall1=stall1.get(), stall2=stall2.get(), stall3=stall3.get()
-    ), cancel_settings()]).grid(row=9, column=0)
+    ), cancel_settings(), run_gui_data()]).grid(row=9, column=0)
     cancel = Button(settings, text="Cancel", command=lambda: cancel_settings()).grid(row=9, column=1)
 
     settings.mainloop()

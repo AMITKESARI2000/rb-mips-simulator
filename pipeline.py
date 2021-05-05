@@ -361,6 +361,12 @@ forward_enable = False
 is_Program_Done = False
 base_instr_line_PC = 0
 
+Pipeline_units = [
+        HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[]),  # IF
+        HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[]),  # ID
+        HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[]),  # EX
+        HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[]),  # MEM
+        HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[])]  # WB
 
 def program_execution():
     global forward_enable, is_Program_Done
@@ -374,13 +380,13 @@ def program_execution():
     else:
         print("Data Forwarding Disabled")
 
-
-Pipeline_units = [
-    HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[]),  # IF
-    HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[]),  # ID
-    HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[]),  # EX
-    HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[]),  # MEM
-    HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[])]  # WB
+    global Pipeline_units
+    Pipeline_units = [
+        HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[]),  # IF
+        HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[]),  # ID
+        HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[]),  # EX
+        HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[]),  # MEM
+        HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[])]  # WB
 
 
 def pass_to_nextHW(index_of_HWunit):
