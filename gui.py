@@ -1,3 +1,4 @@
+import copy
 from tkinter import *
 from tkinter import filedialog
 from tkinter import ttk
@@ -11,22 +12,26 @@ root = Tk()
 # root.resizable(width=False, height=False) #Restricting Resizable
 root.title("RB Mips simulator 😎")
 
-notebook = ttk.Notebook(root)
+note = PanedWindow(root, width=1024, height=675, bg="black")
+note.pack(fill=BOTH, expand=True)
+
+notebook = ttk.Notebook(note)
 notebook.pack(expand=True)
+note.add(notebook)
 
 frame1 = ttk.Frame(notebook)
 frame2 = ttk.Frame(notebook)
 
-frame1.pack(fill='both', expand=True)
-frame2.pack(fill='both', expand=True)
+frame1.pack(fill=BOTH, expand=True)
+frame2.pack(fill=BOTH, expand=True)
 
 notebook.add(frame1, text='General Info')
 notebook.add(frame2, text='Pipeline Details')
 
 # =====================================FRAME 1==================================================
 # Panel
-simulator_body = PanedWindow(frame1, orient=VERTICAL, width=1024, height=640, bg="black")
-simulator_body.pack(fill=BOTH, expand=1)
+simulator_body = PanedWindow(frame1, orient=VERTICAL, width=1024, height=675, bg="black")
+simulator_body.pack(fill=BOTH, expand=True)
 
 # Head Panel
 head_panel = PanedWindow(simulator_body, bd=1, relief="raised", bg="black")
@@ -57,18 +62,22 @@ forwarding.pack(side=LEFT)
 
 # Body Panel
 body_panel = PanedWindow(simulator_body, orient=HORIZONTAL, bd=1, relief="raised", bg="black", height=400)
+body_panel.pack(expand=True)
 simulator_body.add(body_panel)
 
 # Register Panel
 reg_panel = PanedWindow(body_panel, orient=VERTICAL, bd=1, relief="raised", bg="black", width=200, height=400)
+reg_panel.pack(expand=True)
 body_panel.add(reg_panel)
 
 # Memory Panel
 mem_panel = PanedWindow(body_panel, orient=VERTICAL, bd=1, relief="raised", bg="black", width=200, height=400)
+mem_panel.pack(expand=True)
 body_panel.add(mem_panel)
 
 # User Text Panel
 user_panel = PanedWindow(body_panel, orient=VERTICAL, bd=1, relief="raised", bg="black", width=900, height=400)
+user_panel.pack(expand=True)
 body_panel.add(user_panel)
 
 # Head Panel of Register and Memory and User
@@ -85,8 +94,16 @@ userHead = Label(user_head, text="USER TEXT", height=1, font=("Arial", 10)).grid
 
 # Body Panel of Register and Memory and User
 reg_body = PanedWindow(reg_panel, bg="white")
+reg_body.grid(sticky=W + E)
+reg_body.grid_rowconfigure(0, weight=10)
+
 mem_body = PanedWindow(mem_panel, bg="white")
+mem_body.grid(sticky=W + E)
+mem_body.grid_rowconfigure(0, weight=10)
+
 user_body = PanedWindow(user_panel, bg="white", height=50)
+user_body.grid(sticky=W + E)
+user_body.grid_rowconfigure(0, weight=10)
 
 reg_panel.add(reg_body)
 mem_panel.add(mem_body)
@@ -101,7 +118,7 @@ scroll_user.pack(side=RIGHT, fill=Y)
 
 t_reg = Text(reg_body, height=300, width=150, wrap=NONE, yscrollcommand=scroll_reg.set, font=("Roboto", 9))
 t_mem = Text(mem_body, height=300, width=150, wrap=NONE, yscrollcommand=scroll_mem.set, font=("Roboto", 9))
-t_user = Text(user_body, height=12, width=500, wrap=NONE, yscrollcommand=scroll_user.set, font=("Roboto", 9))
+t_user = Text(user_body, height=12, wrap=NONE, yscrollcommand=scroll_user.set, font=("Roboto", 9))
 
 # Console Panel
 console_panel = PanedWindow(user_panel, orient="vertical", relief="raised", bg="white", height=50)
@@ -113,10 +130,11 @@ console_panel.add(console_head)
 console = Label(console_panel, bg="black", font=("Arial", 13), fg="yellow")
 console_panel.add(console)
 
-t_console = Text(console, height=20, width=70, bg="#0e141e", wrap=NONE, font=("Roboto", 9), fg="#00ea64")
+t_console = Text(console, height=20, bg="#0e141e", wrap=NONE, font=("Roboto", 9), fg="#00ea64")
 
 # Extra info panel
-info_panel = PanedWindow(simulator_body, relief="raised", bd=1, bg="black", width=1300, orient=VERTICAL)
+info_panel = PanedWindow(simulator_body, relief="raised", bd=1, bg="black", orient=VERTICAL)
+info_panel.pack(expand=False)
 simulator_body.add(info_panel)
 
 # info_head = Label(info_panel, text="INFO", relief="raised", height=1, font=("Arial", 10), width=1300)
@@ -125,13 +143,15 @@ simulator_body.add(info_panel)
 info = Label(info_panel, bg="white", font=("Arial", 13), fg="black")
 info_panel.add(info)
 
-t_info = Text(info, height=7, width=70, bg="#0e141e", wrap=NONE, font=("Roboto", 9), fg="#00ea64")
+t_info = Text(info, height=7, bg="#0e141e", wrap=NONE, font=("Roboto", 9), fg="#00ea64")
 
 # Default Cache Information
 cache_panel = PanedWindow(info_panel, relief="raised", bd=1, bg="white", width=1300, height=10)
+cache_panel.pack(expand=False)
 info_panel.add(cache_panel)
 
 cache_info = Label(cache_panel, bg="white", fg="black")
+cache_info.pack(expand=False)
 cache_panel.add(cache_info)
 
 t_cache = Text(cache_info, wrap=NONE, font=("Roboto", 9), fg="black")
@@ -144,13 +164,13 @@ t_cache.insert(END, "Associativity of Cache 2: " + str(cache.assoc2) + "\n\n")
 t_cache.insert(END, "Stalls of Cache 1: " + str(cache.stalls1) + " || ")
 t_cache.insert(END, "Stalls of Cache 2: " + str(cache.stalls2) + " || ")
 t_cache.insert(END, "Stalls of Memory: " + str(cache.stalls3))
-t_cache.pack(side=TOP, fill=X)
+t_cache.pack(side=BOTTOM, fill=X)
 
 current_instr_label = Text(menu_panel, height=1, width=10, font=("Roboto", 12), fg="#484767")
 
 # =====================================FRAME 2==================================================
 # Panel
-simulator2_body = PanedWindow(frame2, orient=VERTICAL, width=1024, height=640, bg="black")
+simulator2_body = PanedWindow(frame2, orient=VERTICAL, width=1024, height=675, bg="black")
 simulator2_body.pack(fill=BOTH, expand=1)
 
 # Head Panel
@@ -221,6 +241,7 @@ def run_gui_data():
     t_reg.delete("1.0", "end")
     t_mem.delete("1.0", "end")
     t_user.delete("1.0", "end")
+    t_console.delete("1.0", "end")
     t_info.delete("1.0", "end")
     current_instr_label.delete("1.0", "end")
     t_pipe.delete("1.0", "end")
@@ -307,6 +328,7 @@ def run_gui_data():
 
 
 def modify_gui_data():
+    # restart()
     simu.main()
     if simu.Throw_error_instr.is_error_there:
         response = 0
@@ -433,6 +455,7 @@ def forWarding():
 
 
 def UploadAction():
+    restart()
     filename = filedialog.askopenfilename()
     print('Selected:', filename)
     # msg = Tk()
@@ -441,12 +464,52 @@ def UploadAction():
 
     tmp = StringVar()
     tmp.set(filename.split("/")[-1])
-    file_label = Label(user_head, textvariable=tmp, height=1, font=("Arial", 10), fg="#f5468c").grid(row=0, column=1)
+    file_label = Label(user_head, textvariable=tmp, font=("Arial", 9), fg="#f5468c").grid(row=0, column=0)
 
     simu.file_add(filename)
     root.title(filename)
-    run_gui_data()
+    # run_gui_data()
+    t_user.configure(state='normal')
+    t_user.delete("1.0", "end")
+    k = 1
+    for i in simu.lines:
+        t_user.insert(END, str(k) + " : " + str(i))
+        k += 1
+    t_user.pack(side=TOP, fill=X)
+    scroll_user.config(command=t_user.yview)
+    t_user.configure(state='disable')
+
     # msg.mainloop()
+
+
+def restart():
+    pipeline.CLOCK_OF_GOD = 0
+    pipeline.STALL_OF_GOD = 0
+    pipeline.prev_stall = 0
+    pipeline.PIPELINE_DETAILS = []
+    pipeline.temp_pipeline = []
+    pipeline.forward_enable = False
+    pipeline.is_Program_Done = False
+    pipeline.base_instr_line_PC = 0
+
+    simu.RAM = []
+    simu.ram_iter = 0
+    simu.ram_label = {}
+    simu.instr_label = {}
+    simu.PC = 0
+    simu.cnsl = []
+    # simu.lines = ""
+    simu.syscall_array = []
+    simu.console_syscall_print = []
+    simu.Throw_error_instr = simu.InstrSyntaxError(is_error_there=False, line_fault=0)
+    simu.REGISTERS = {'zero': 0, 'ra': 0, 'at': 0, 'v0': 0, 'v1': 0, 'a0': 0, 'a1': 0, 'a2': 0, 'a3': 0,
+                      's0': "0x1001", 's1': 0, 's2': 0, 's3': 0, 's4': 0, 's5': 0, 's6': 0, 's7': 0, 's8': 0,
+                      't0': 0, 't1': 0, 't2': 0, 't3': 0, 't4': 0, 't5': 0, 't6': 0, 't7': 0, 't8': 0, 't9': 0,
+                      'r': 0, 'k0': 0, 'k1': 0, 'sp': '0x20000'}  # 32
+    simu.EX_REGISTERS = {}
+    simu.BaseAdr = "0x1001"
+    simu.is_program_done = False
+    simu.EX_REGISTERS = copy.deepcopy(simu.REGISTERS)
 
 
 run_gui_data()

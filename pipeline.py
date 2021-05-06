@@ -12,7 +12,7 @@ temp_pipeline = []
 
 class HWUnits:
     def __init__(self, current_instr_line, stalls_left, disassembled_instr):
-        global forward_enable
+        global forward_enable, temp_pipeline
         self.current_instr_line = current_instr_line
         self.stalls_left = stalls_left
         self.disassembled_instr = []
@@ -96,6 +96,8 @@ class HWUnits:
                     self.stalls_left += 1
                     STALL_OF_GOD += 1
                     print("stall: " + str(self.stalls_left), "in ", Pipeline_units[1].disassembled_instr)
+                    temp_pipeline.append("stall: " + str(self.stalls_left) + "in " +
+                                         str(Pipeline_units[1].disassembled_instr))
                     s = 1
 
                 elif Pipeline_units[k].disassembled_instr[0] in (
@@ -146,6 +148,8 @@ class HWUnits:
                 elif Pipeline_units[1].disassembled_instr[0] in ("bne", "beq"):
                     self.stalls_left += 1
                     print("stall: " + str(self.stalls_left), "in ", Pipeline_units[1].disassembled_instr)
+                    temp_pipeline.append("stall: " + str(self.stalls_left) + "in " +
+                                         str(Pipeline_units[1].disassembled_instr))
                     STALL_OF_GOD += 1
                     s = 1
 
@@ -190,6 +194,8 @@ class HWUnits:
                     self.stalls_left += 1
                     STALL_OF_GOD += 1
                     print("stall: " + str(self.stalls_left), "in ", Pipeline_units[1].disassembled_instr)
+                    temp_pipeline.append("stall: " + str(self.stalls_left) + "in " +
+                                         str(Pipeline_units[1].disassembled_instr))
                     s = 1
 
                 elif Pipeline_units[k].disassembled_instr[0] in (
@@ -232,6 +238,8 @@ class HWUnits:
                     self.stalls_left += 1
                     STALL_OF_GOD += 1
                     print("stall: " + str(self.stalls_left), "in ", Pipeline_units[1].disassembled_instr)
+                    temp_pipeline.append("stall: " + str(self.stalls_left) + "in " +
+                                         str(Pipeline_units[1].disassembled_instr))
                     s = 1
 
                 elif Pipeline_units[k].disassembled_instr[0] in (
@@ -274,6 +282,8 @@ class HWUnits:
                     self.stalls_left += 1
                     STALL_OF_GOD += 1
                     print("stall: " + str(self.stalls_left), "in ", Pipeline_units[1].disassembled_instr)
+                    temp_pipeline.append("stall: " + str(self.stalls_left) + "in " +
+                                         str(Pipeline_units[1].disassembled_instr))
                     s = 1
 
                 if s:
@@ -293,6 +303,8 @@ class HWUnits:
                     self.stalls_left += 1
                     STALL_OF_GOD += 1
                     print("stall: " + str(self.stalls_left), "in ", Pipeline_units[1].disassembled_instr)
+                    temp_pipeline.append("stall: " + str(self.stalls_left) + "in " +
+                                         str(Pipeline_units[1].disassembled_instr))
                     s = 1
 
                 elif Pipeline_units[k].disassembled_instr[0] in (
@@ -335,6 +347,7 @@ class HWUnits:
 
     @staticmethod
     def is_stall(dep_instr, frwd):
+        global temp_pipeline
         stall = 0
         if dep_instr == 1 and frwd is False:
             stall += 2
@@ -349,6 +362,8 @@ class HWUnits:
             stall += 0
 
         print("Stall count return: " + str(stall), "for ", Pipeline_units[0].disassembled_instr)
+        temp_pipeline.append("stall: " + str(stall) + "in " +
+                             str(Pipeline_units[0].disassembled_instr))
         # self.stalls_left += stall
         global STALL_OF_GOD
         STALL_OF_GOD += stall
@@ -367,6 +382,7 @@ Pipeline_units = [
         HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[]),  # EX
         HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[]),  # MEM
         HWUnits(current_instr_line=simu.PC, stalls_left=0, disassembled_instr=[])]  # WB
+
 
 def program_execution():
     global forward_enable, is_Program_Done
