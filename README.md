@@ -25,7 +25,7 @@ the contents of the registers, and the memory.
 * The GUI for the simulator has been developed to be simplistic and functional using Tkinter. 
 * Tries to point out syntax errors and shows erroneous line. 
 
-  
+
 ---
 
 ### PHASE 2:
@@ -55,8 +55,10 @@ In phase 2, we are implementing pipeline so that the throughput can be increased
 ### PHASE 3:
 In phase 3, we are introducing L1 L2 levels of Cache
 
-* The main file is **pipeline.py**
+* The main file is **gui.py** which contains all the gui required for this project.
 * File **cache.py** contains all the functions required for cache hits, replacements and stall returning.
+* File **pipeline.py** contains all the functions required for pipelining.
+* File **simu.py** contains all the functions required for simulation i.e., all the instructions of programming.
 * A memory access will now first search for the address in the two caches. On a miss, the data
 will be fetched from the main memory.
 * This simulator simulating 2 levels of cache, with LRU replacement policy and Cache inclusion policy is implemented.
@@ -65,3 +67,42 @@ in one cycle.
 * Loads and Stores will have variable latency, and hence the penalty (stalls) due to the memory
 access is variable.
 * Cache size, Associativity, No. of stalls and penalty can all be changed and simulated.
+  
+### GUI Details:
+* **At Once Execution** button is for running the file.
+* **Upload a File** button is for uploading the file. It is multiple executable. For each execution, a file must be uploaded.
+* **Cache Settings** button is for changing the properties of the Cache. If not changed, it will remain default value. Default or updated values are shown in the bottom-most part of the gui.
+* **Forwarding** checkbutton is for enabling/disabling the forwarding.
+* **On Line** will show which line is being executed.
+* There are two frames for displaying information.
+    * ### General Information:
+        * **REGISTERS**: It shows the data stored in Registers.
+        * **MEMORY**: It shows the data stored in Memories.
+        * **USER TEXT**: It shows the text of the text file uploaded which is to be executed.
+        * **CONSOLE**: It shows the data printed in the console.
+        * **INFO**: It shows the details of "Total Clock Cycles", "Total Stalls", "Total Cache Miss" and "IPC".
+    * ### Pipeline Details:
+        * **Visualisation of Pipeling**: It shows the details i.e., work done by each virtual hardware in each clock cycle.
+        * **Cache Data**: It shows the data stored in the Cache.
+    
+### How to run?
+1) Run **gui.py**.
+2) Dialog box will open.
+3) Upload a file from **Upload a File** button.
+4) Enable forwarding if required form **Forwarding** checkbutton.
+5) Change Cache properties from **Cache Settings** button if required.
+6) Steps 3, 4 and 5 can be done in any manner. It is written in most suitable way.
+7) Run the program by clicking on **At Once Execution** button.
+8) To execute again, repeat the steps from step 3.
+
+---
+
+### Future Improvements
+* Step by Step Execution can be added.
+* GUI can be made more interactive.
+* Run time error detection can be added properly.
+
+<div align="right" ><b> - Work by Robotic Billa</b></div>
+    
+        
+

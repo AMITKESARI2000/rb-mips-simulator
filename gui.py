@@ -488,7 +488,7 @@ def restart():
     pipeline.prev_stall = 0
     pipeline.PIPELINE_DETAILS = []
     pipeline.temp_pipeline = []
-    pipeline.forward_enable = False
+    # pipeline.forward_enable = False
     pipeline.is_Program_Done = False
     pipeline.base_instr_line_PC = 0
 
