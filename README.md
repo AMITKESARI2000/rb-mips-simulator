@@ -11,7 +11,7 @@
 
 ![img_1.png](img_1.png)
 
-###PHASE 1:
+### PHASE 1:
 * Main starting file is **gui.py** located in phase 1 folder
 * The simulator supports the following MIPS instructions: 
   * add/sub
