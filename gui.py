@@ -185,7 +185,7 @@ body2_panel = PanedWindow(simulator2_body, bd=1, relief="raised", bg="black", or
 simulator2_body.add(body2_panel)
 
 # For 2 divisions
-pipeline_div = PanedWindow(body2_panel, bd=1, orient=VERTICAL)
+pipeline_div = PanedWindow(body2_panel, bd=1, orient=VERTICAL, width=500)
 body2_panel.add(pipeline_div)
 
 # Body head
@@ -206,19 +206,19 @@ scroll_pipe.pack(side=RIGHT, fill=Y)
 t_pipe = Text(pipe_detail, wrap=NONE, font=("Roboto", 9), fg="black", height=600, yscrollcommand=scroll_pipe.set)
 
 # Cache division
-cache_div = PanedWindow(body2_panel, bd=1, orient=VERTICAL)
+cache_div = PanedWindow(body2_panel, bd=1, orient=VERTICAL, width=600)
 body2_panel.add(cache_div)
 
 # Cache head
-cache_head = Label(cache_div, text="Cache Data", font=("Arial", 14))
+cache_head = Label(cache_div, text="Cache Data", font=("Arial", 14), width=600)
 cache_div.add(cache_head)
 
 # Cache body
-cache_body = PanedWindow(cache_div, bd=1, relief="raised", bg="black")
+cache_body = PanedWindow(cache_div, bd=1, relief="raised", bg="black", width=600)
 cache_div.add(cache_body)
 
 # Cache Details
-cache_detail = Label(cache_body, bg="white", fg="black", height=600)
+cache_detail = Label(cache_body, bg="white", fg="black", height=600, width=600)
 cache_body.add(cache_detail)
 
 scroll_cache = Scrollbar(cache_detail, orient="vertical")
@@ -305,13 +305,17 @@ def run_gui_data():
     # Cache Details
     t_cache_block.insert(END, "L1 Cache: \n")
     t_cache_block.insert(END, " [ T  D  C] \n")
-    for block in cache.cache1:
-        t_cache_block.insert(END, str(block) + "\n")
-    t_cache_block.insert(END, "." * 100 + "\n")
+    for set in cache.cache1:
+        for block in set:
+            t_cache_block.insert(END, str(block) + "\n")
+        t_cache_block.insert(END, "."*100 + "\n")
+    t_cache_block.insert(END, "-" * 100 + "\n\n")
     t_cache_block.insert(END, "L2 Cache: \n")
     t_cache_block.insert(END, " [ T  D  C] \n")
-    for block in cache.cache2:
-        t_cache_block.insert(END, str(block) + "\n")
+    for set in cache.cache2:
+        for block in set:
+            t_cache_block.insert(END, str(block) + "\n")
+        t_cache_block.insert(END, "."*100 + "\n")
     t_cache_block.insert(END, "\n\nLegend: \nT -> tag \nD -> data \nC -> counter(for LRU) \n")
 
     t_cache_block.pack(side=TOP, fill=X)
