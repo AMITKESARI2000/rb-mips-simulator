@@ -2,7 +2,7 @@ import re
 import cache
 import copy
 
-# file = open("testingbubblesort.asm", "r")
+# file = open("./test/testingbubblesort.asm", "r")
 #
 # lines = file.readlines()
 # file.close()

@@ -8,7 +8,7 @@ simu_1.rm_comments()
 root = Tk()
 
 # root.resizable(width=False, height=False) #Restricting Resizable
-root.title("RB Mips simu_1lator 😎")
+root.title("RB Mips simulator 😎")
 # Panel
 simu_1lator_body = PanedWindow(orient=VERTICAL, width=1300, height=600, bg="black")
 simu_1lator_body.pack(fill=BOTH, expand=1)
@@ -17,7 +17,7 @@ simu_1lator_body.pack(fill=BOTH, expand=1)
 head_panel = PanedWindow(simu_1lator_body, bd=1, relief="raised", bg="black")
 simu_1lator_body.add(head_panel)
 
-head = Label(head_panel, text="simu_1LATOR", font=("Arial", 14))
+head = Label(head_panel, text="SIMULATOR", font=("Arial", 14))
 head_panel.add(head)
 
 # Execution Panel

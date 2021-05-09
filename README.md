@@ -4,7 +4,13 @@
 * Amit Kesari (CS19B003)
 * Anu Anand Annu (CS19B044)
 
-### Simulate MIPS Architecture instruction sets
+### Simulate MIPS Instruction Set Architecture along with implemention of Pipeline and Cache 
+
+*ScreenShots*
+![img.png](img.png)
+
+![img_1.png](img_1.png)
+
 ###PHASE 1:
 * Main starting file is **gui.py** located in phase 1 folder
 * The simulator supports the following MIPS instructions: 
@@ -17,6 +23,8 @@
   * sll/srl
   * li/la
   * slt
+  * jr
+  * syscall
   
 * The simulator supports at least 4 KB of memory.
 * The simulator reads in an assembly file(.asm), executes the instructions, and in the end display
@@ -31,7 +39,7 @@ the contents of the registers, and the memory.
 ### PHASE 2:
 In phase 2, we are implementing pipeline so that the throughput can be increased.
 
-* The main file is **pipeline.py**
+* The main file is **pipeline.py** in phas2 directory.
 * All 5 stages (IF, ID/RF, EX, MEM, WB) have been modularised.
 * Stalls (*nop*) have been added according to data dependencies only.
 * *nop* instructions are pushed into the next Hardware Unit whenever stalls are found.
@@ -102,7 +110,7 @@ access is variable.
 * GUI can be made more interactive.
 * Run time error detection can be added properly.
 
-<div align="right" ><b> - Work by Robotic Billa</b></div>
+<div align="right" ><b> - Work by Team Robotic Billa</b></div>
     
         
 
